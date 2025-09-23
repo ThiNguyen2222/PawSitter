@@ -19,7 +19,7 @@ sudo apt install postgresql postgresql-contrib -y
 ```
 
 # Start PostgresSQL server
-** Run this command outside of venv if you're using it**
+**Run this command outside of venv if you're using it**
 ```bash
 sudo service postgresql start
 ```
