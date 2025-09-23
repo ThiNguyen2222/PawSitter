@@ -26,6 +26,7 @@ sudo service postgresql start
 Next activate your venv
 ```bash
 source venv/bin/activate
+pip install -r requirements.txt
 ```
 Run server
 ```bash
