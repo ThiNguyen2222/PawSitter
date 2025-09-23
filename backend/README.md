@@ -11,3 +11,23 @@ pip install -r requirements.txt
 ```bash
 python manage.py runserver
 ```
+
+## Install PostgreSQL (not in venv)
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib -y
+```
+
+# Start PostgresSQL server
+** Run this command outside of venv if you're using it**
+```bash
+sudo service postgresql start
+```
+Next activate your venv
+```bash
+source venv/bin/activate
+```
+Run server
+```bash
+python manage.py runserver
+```
