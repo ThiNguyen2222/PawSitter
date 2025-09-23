@@ -7,11 +7,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Run backend server
-```bash
-python manage.py runserver
-```
-
 ## Install PostgreSQL (not in venv)
 ```bash
 sudo apt update
