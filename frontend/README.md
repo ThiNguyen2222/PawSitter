@@ -1,7 +1,7 @@
 # Frontend Setup
 
 ## Versions
-NodeJS Version: v22.19.0 /n
+NodeJS Version: v22.19.0 <br>
 NPM Version: 10.9.3
 
 ## Installation
