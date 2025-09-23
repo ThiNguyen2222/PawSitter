@@ -18,7 +18,7 @@ sudo apt update
 sudo apt install postgresql postgresql-contrib -y
 ```
 
-# Start PostgresSQL server (haven't actually created the django files for this yet)
+## Start PostgresSQL server (haven't actually created the django files for this yet)
 **Run this command outside of venv**
 ```bash
 sudo service postgresql start
