@@ -7,6 +7,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## If you're not using a venv install these
+**These are the packages in the requirements.txt**
+```bash
+pip install django djangorestframework djangorestframework-simplejwt psycopg2-binary
+django-admin startproject config .
+```
+
 ## Run backend server
 ```bash
 python manage.py runserver
