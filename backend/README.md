@@ -13,7 +13,7 @@ sudo apt update
 sudo apt install postgresql postgresql-contrib -y
 ```
 
-## Start PostgresSQL server (haven't actually created the django files for this yet)
+## How to Test
 **Run this command outside of venv**
 ```bash
 sudo service postgresql start
@@ -23,7 +23,20 @@ Next activate your venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+Create a Database
+```bash
+sudo -u postgres psql
+CREATE DATABASE pawsitter_db;
+\q
+```
+Apply migrations
+```bash
+python3 manage.py makemigrations
+python3 manage.py migrate
+```
+
 Run server 
 ```bash
-python manage.py runserver
+python3 manage.py runserver
 ```
+
