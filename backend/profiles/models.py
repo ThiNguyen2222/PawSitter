@@ -1,3 +1,50 @@
 from django.db import models
+from django.conf import settings
 
-# Create your models here.
+class OwnerProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="owner_profile"
+    )
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    default_location = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.name} (Owner)"
+
+
+class Pet(models.Model):
+    owner = models.ForeignKey(
+        OwnerProfile,
+        on_delete=models.CASCADE,
+        related_name="pets"
+    )
+    name = models.CharField(max_length=100)
+    species = models.CharField(max_length=50)
+    breed = models.CharField(max_length=100, blank=True)
+    age = models.IntegerField()
+    notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.species})"
+
+
+class SitterProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sitter_profile"
+    )
+    display_name = models.CharField(max_length=100)
+    bio = models.TextField(blank=True)
+    rate_hourly = models.DecimalField(max_digits=6, decimal_places=2)
+    service_radius_km = models.IntegerField(default=5)
+    home_zip = models.CharField(max_length=20)
+    avg_rating = models.FloatField(default=0.0)
+    verification_status = models.CharField(max_length=20, default="PENDING")
+
+    def __str__(self):
+        return f"{self.display_name} (Sitter)"
