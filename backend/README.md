@@ -71,7 +71,7 @@ pip install -r requirements.txt
 ```
 3. **Create a Database**
 ```bash
-"C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -h localhost -p 5432 -c "CREATE DATABASE pawsitter;"
+"C:\Program Files\PostgreSQL\16\bin\psql.exe" -U postgres -h localhost -p 5432 -c "CREATE DATABASE pawsitter_db;"
 ```
 4. **Apply migrations**
 ```bash
