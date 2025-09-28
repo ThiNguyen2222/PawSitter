@@ -62,7 +62,7 @@ python3 manage.py runserver
 
 ### Windows(Command Prompt)
 
-1. **Start PostgreSQL**
+1. **Start PostgreSQL:**
 PostgreSQL runs automatically as a Windows service.
 2. **Activate your venv**
 ```bash
