@@ -22,14 +22,13 @@ sudo apt install postgresql postgresql-contrib -y
 ```
 
 **Windows**
-```bash
 - Download installer: [https://www.postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
 - During setup:
   - Keep default port `5432`
   - Set a password for the `postgres` superuser
   - Ensure **pgAdmin** is installed
 - PostgreSQL will run as a Windows service automatically.
-```
+
 
 ## How to Test
 **Run this command outside of venv**
