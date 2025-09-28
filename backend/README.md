@@ -6,6 +6,12 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+for windows
+```bash
+python3 -m venv venv
+venv/bin/activate
+pip install -r requirements.txt
+```
 
 ## Install PostgreSQL (not in venv)
 ```bash
