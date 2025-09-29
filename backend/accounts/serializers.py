@@ -9,6 +9,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "username", "email", "password", "role"]
 
+    def validate_role(self, value):
+        # Normalize to your model’s stored values "SITTER"/"OWNER"
+        v = str(value).strip().upper()
+        if v not in {"SITTER", "OWNER"}:  # adjust to match your model’s choices
+            raise serializers.ValidationError("Invalid role.")
+        return v
+
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data["username"],
