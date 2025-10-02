@@ -1,7 +1,7 @@
 import React from 'react';
 import {motion, AnimatePresence} from "framer-motion";
 
-const ResponsiveMenu = ({open}) => {
+const ResponsiveMenu = ({open, btnClass}) => {
   return(
     <AnimatePresence mode='wait'>
         {
@@ -21,6 +21,12 @@ const ResponsiveMenu = ({open}) => {
                             <li>Services</li>
                             <li>Information</li>
                             <li>About Us</li>
+                            <li>
+                                <button className={btnClass}>Login</button>                          
+                            </li>
+                            <li>
+                                <button className={btnClass}>Create Account</button>
+                            </li>
                         </ul>
                     </div>
                 </motion.div>

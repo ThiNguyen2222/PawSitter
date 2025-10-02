@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MdMenu } from 'react-icons/md';
 import { NavbarMenu } from '../constants/data';
 import ResponsiveMenu from './ResponsiveMenu';
@@ -7,6 +7,19 @@ import logo from "../assets/logo.png";
 
 const Navbar = () => {
     const [open, setOpen] = React.useState(false);
+    const btnClass = "hover:bg-primary text-primary font-semibold hover:text-white rounded-md border-2 border-primary px-6 py-2 duration-200";
+    const mobileBtnClass = "hover:bg-secondary text-white font-semibold hover:text-white rounded-md border-2 border-white px-6 py-2 duration-200";
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) {
+                setOpen(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     return (
     <>
         <nav>
@@ -19,7 +32,7 @@ const Navbar = () => {
 
                 </div>
                 {/* Menu Section */}
-                <div className="hidden md:block">
+                <div className="hidden lg:block">
                     <ul className="flex items-center gap-6 
                     text-gray-500">
                         {NavbarMenu.map((item) => {
@@ -28,37 +41,30 @@ const Navbar = () => {
                                         <a href={item.link} className="
                                         inline-block py-1 px-3 
                                         hover:text-primary font-semibold">
-                                            {item.title
-                                        }</a>
+                                            {item.title}
+                                        </a>
                                     </li>
                                 )
                             })}
                     </ul>
                 </div>
                 {/* Icons Section */}
-                <div className="hidden md:flex gap-4">
-                    <button className="hover:bg-primary 
-                                        text-primary font-semibold hover:text-white
-                                        rounded-md border-2 border-primary px-6 py-2
-                                        duration-200">
-                        Login
-                    </button>
-                    <button className="hover:bg-primary 
-                                        text-primary font-semibold hover:text-white
-                                        rounded-md border-2 border-primary px-6 py-2
-                                        duration-200">
-                        Create Account
-                    </button>
+                <div className="hidden lg:flex gap-4">
+                    <button className={btnClass}>Login</button>
+                    <button className={btnClass}>Create Account</button>
                 </div>
-                <div className="md:hidden" onClick={() =>
-                setOPen(!open)}>
+
+                {/* Hamburger Menu */}
+                <div className="lg:hidden cursor-pointer hover:bg-transparent" 
+                onClick={() => setOpen(!open)}
+                >
                     <MdMenu className="text-4xl" />
                 </div>
             </div>
         </nav>
 
         {/* Mobile Sidebar section */}
-        <ResponsiveMenu open={open}/>
+        <ResponsiveMenu open={open} btnClass={mobileBtnClass}/>
     </>
   )
 }
