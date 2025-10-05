@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "accounts",
     "profiles",
-    "availability"
+    "availability",
+    "booking"
 ]
 
 MIDDLEWARE = [
@@ -86,7 +87,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "pawsitter_db",
         "USER": "postgres",
-        "PASSWORD": "1234",
+        "PASSWORD": "password",
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -121,7 +122,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
