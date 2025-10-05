@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { MdMenu } from 'react-icons/md';
-import { NavbarMenu } from '../constants/data';
+import { NavbarMenu } from '../constants/index';
 import ResponsiveMenu from './ResponsiveMenu';
 import logo from "../assets/logo.png";
 
@@ -35,19 +35,19 @@ const Navbar = () => {
                 <div className="hidden lg:block">
                     <ul className="flex items-center gap-6 
                     text-gray-500">
-                        {NavbarMenu.map((item) => {
-                                return (
-                                    <li key={item.id}>
-                                        <a href={item.link} className="
-                                        inline-block py-1 px-3 
-                                        hover:text-primary font-semibold">
-                                            {item.title}
-                                        </a>
-                                    </li>
-                                )
-                            })}
+                        {NavbarMenu.map((item, index) => (
+                            <li key={index}>
+                                <a
+                                href={item.href}
+                                className="inline-block py-1 px-3 hover:text-primary font-semibold"
+                                >
+                                {item.label}
+                                </a>
+                            </li>
+                            ))}
                     </ul>
                 </div>
+                
                 {/* Icons Section */}
                 <div className="hidden lg:flex gap-4">
                     <button className={btnClass}>Login</button>

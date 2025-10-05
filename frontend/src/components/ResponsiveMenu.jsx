@@ -19,8 +19,8 @@ const ResponsiveMenu = ({open, btnClass}) => {
                         items-center gap-10">
                             <li>Home</li>
                             <li>Services</li>
-                            <li>Information</li>
                             <li>About Us</li>
+                            <li>Contact</li>
                             <li>
                                 <button className={btnClass}>Login</button>                          
                             </li>
