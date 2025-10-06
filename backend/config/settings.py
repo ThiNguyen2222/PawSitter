@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     "accounts",
     "profiles",
     "availability",
-    "booking"
+    "booking",
+    "messaging"
 ]
 
 MIDDLEWARE = [
@@ -87,7 +88,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "pawsitter_db",
         "USER": "postgres",
-        "PASSWORD": "password",
+        "PASSWORD": "1234",
         "HOST": "localhost",
         "PORT": "5432",
     }
