@@ -3,6 +3,7 @@ import { Cat } from "lucide-react";
 import { Rabbit } from "lucide-react";
 import { Fish } from "lucide-react";
 import { Bird } from "lucide-react";
+import { Turtle } from "lucide-react";
 
 // import user1 from "../assets/profile-pictures/user1.jpg";
 // import user2 from "../assets/profile-pictures/user2.jpg";
@@ -22,31 +23,53 @@ export const PetSelection = [
   {
     icon: <Dog />,
     text: "Dog",
-    // description:
-    //   "smth",
   },
     {
     icon: <Cat />,
     text: "Cat",
-    // description:
-    //   "smth",
   },
   {
     icon: <Rabbit />,
     text: "Rabbit",
-    // description:
-    //   "smth",
   },
   {
     icon: <Fish />,
     text: "Fish",
-    // description:
-    //   "smth",
   },
   {
     icon: <Bird />,
+    text: "Bird",
+  },
+    {
+    icon: <Turtle />,
     text: "And More",
-    // description:
-    //   "smth",
+  },
+];
+
+export const servicesList = [
+  {
+    title: "House Sitting",
+    description:
+      "Your sitter will provide an attentive in-home care while you're away and keep your pet comfortable in their familiar environment",
+  },
+  {
+    title: "Pet Boarding",
+    description:
+      "Your pet will stay overnight in your sitter's home where they will be treated like they're apart of a family.",
+  },
+  {
+    title: "In-Home Visit",
+    description:
+      "Your sitter will stop by your home for personalized check-ins for feeding, playtime, potty breaks, and lots of cuddles.",
+  },
+  {
+    title: "Pet Grooming",
+    description:
+      "Professional grooming to keep your pets looking and feeling their best--from baths, trims, nail care, and brushing.",
+  },
+  {
+    title: "Pet Walking",
+    description:
+      "Walks and exercise that match your pet's energy level, ensuring that they stay healthy, happy, and socialized.",
   },
 ];
