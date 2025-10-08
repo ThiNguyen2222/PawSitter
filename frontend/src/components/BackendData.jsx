@@ -12,7 +12,6 @@ const DataFromBackend = () => {
 
   return (
     <div>
-      <header>The Following Data Came from Django Backend at localhost 8000.</header>
       <hr />
       {details.map((output, id) => (
         <div key={id}>
