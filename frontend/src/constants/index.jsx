@@ -5,12 +5,9 @@ import { Fish } from "lucide-react";
 import { Bird } from "lucide-react";
 import { Turtle } from "lucide-react";
 
-// import user1 from "../assets/profile-pictures/user1.jpg";
-// import user2 from "../assets/profile-pictures/user2.jpg";
-// import user3 from "../assets/profile-pictures/user3.jpg";
-// import user4 from "../assets/profile-pictures/user4.jpg";
-// import user5 from "../assets/profile-pictures/user5.jpg";
-// import user6 from "../assets/profile-pictures/user6.jpg";
+import Testimony1 from "../assets/images/owner1.jpg";
+import Testimony2 from "../assets/images/owner2.jpg";
+import Testimony3 from "../assets/images/owner3.jpg";
 
 export const NavbarMenu = [
   { label: "Home", href: "#" },
@@ -71,5 +68,29 @@ export const servicesList = [
     title: "Pet Walking",
     description:
       "Walks and exercise that match your pet's energy level, ensuring that they stay healthy, happy, and socialized.",
+  },
+];
+
+export const testimonials = [
+  {
+    id: 1,
+    message:
+      "PawSitter made finding a trustworthy sitter so easy! I love this picture of my cat that the pet sitter took during the house sitting and I'm sure Noog had a blast as well.",
+    name: " - Hazel McNut",
+    image: Testimony1,
+  },
+  {
+    id: 2,
+    message:
+      "The fish and turtle got their food on time, the sitter did an amazing job!",
+    name: " - Emma Frost",
+    image: Testimony2,
+  },
+  {
+    id: 3,
+    message:
+      "The sitter kept me updated with photos every time I book a service on PawSitter. It feel reassuring to be updated when I'm away from home.",
+    name: " - Pinkity Drinkity",  
+    image: Testimony3,
   },
 ];
