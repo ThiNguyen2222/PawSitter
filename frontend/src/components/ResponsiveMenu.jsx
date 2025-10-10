@@ -1,5 +1,6 @@
 import React from 'react';
 import {motion, AnimatePresence} from "framer-motion";
+import { Link } from "react-router-dom";
 
 const ResponsiveMenu = ({open, btnClass}) => {
   return(
@@ -21,12 +22,13 @@ const ResponsiveMenu = ({open, btnClass}) => {
                             <li>Services</li>
                             <li>About Us</li>
                             <li>Contact</li>
-                            <li>
-                                <button className={btnClass}>Login</button>                          
-                            </li>
-                            <li>
-                                <button className={btnClass}>Create Account</button>
-                            </li>
+                            <Link to="/login" className={btnClass}>
+                                Login
+                            </Link>
+                            <Link to="/create-account" className={btnClass}>
+                                Create Account
+                            </Link>
+
                         </ul>
                     </div>
                 </motion.div>

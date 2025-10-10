@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from "react-router-dom";
 import { MdMenu } from 'react-icons/md';
 import { NavbarMenu } from '../constants/index';
 import ResponsiveMenu from './ResponsiveMenu';
@@ -50,8 +51,12 @@ const Navbar = () => {
                 
                 {/* Icons Section */}
                 <div className="hidden lg:flex gap-4">
-                    <button className={btnClass}>Login</button>
-                    <button className={btnClass}>Create Account</button>
+                <Link to="/login" className={btnClass}>
+                    Login
+                </Link>
+                <Link to="/create-account" className={btnClass}>
+                    Create Account
+                </Link>
                 </div>
 
                 {/* Hamburger Menu */}
