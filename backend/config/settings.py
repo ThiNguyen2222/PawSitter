@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
+    "profiles.apps.ProfilesConfig",
     "accounts",
     "profiles",
     "availability",
     "booking",
-    "messaging"
+    "messaging",
+    "review"
 ]
 
 MIDDLEWARE = [
@@ -88,7 +90,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "pawsitter_db",
         "USER": "postgres",
-        "PASSWORD": "1234",
+        "PASSWORD": "password",
         "HOST": "localhost",
         "PORT": "5432",
     }
