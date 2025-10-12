@@ -71,9 +71,6 @@ class OwnerProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-# Owner with embedded pets for detail pages
-# Get a nested list of the owner’s pets.
 class OwnerProfileWithPetsSerializer(OwnerProfileSerializer):
     pets = PetSerializer(many=True, read_only=True)
 
@@ -85,16 +82,13 @@ class OwnerProfileWithPetsSerializer(OwnerProfileSerializer):
 # Sitter Profile Serializer
 # -----------------------------
 class SitterProfileSerializer(serializers.ModelSerializer):
-    # Convenience read-only user context, Front-end convenience
     user_id = serializers.IntegerField(source="user.id", read_only=True)
     username = serializers.CharField(source="user.username", read_only=True)
     email = serializers.EmailField(source="user.email", read_only=True)
 
-    # system-managed in MVP
     avg_rating = serializers.FloatField(read_only=True)
     verification_status = serializers.CharField(read_only=True)
 
-    # match model field types
     rate_hourly = serializers.DecimalField(max_digits=6, decimal_places=2)
     service_radius_km = serializers.IntegerField()
 
@@ -129,7 +123,6 @@ class SitterProfileSerializer(serializers.ModelSerializer):
         if value < Decimal("0"):
             raise serializers.ValidationError(_("Hourly rate must be non-negative."))
         if value > Decimal("500"):
-            # sanity cap to catch input mistakes during MVP
             raise serializers.ValidationError(_("Hourly rate looks unusually high; please re-check."))
         return value
 
@@ -143,7 +136,6 @@ class SitterProfileSerializer(serializers.ModelSerializer):
         return value
 
     def validate_home_zip(self, value: str) -> str:
-        # you allow up to 20 chars; if you want strict US ZIP(+4), keep regex below
         import re
         if not value:
             return value
@@ -176,8 +168,6 @@ class SitterProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-# simple public card for searching/browsing sitters
 class PublicSitterCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = SitterProfile
