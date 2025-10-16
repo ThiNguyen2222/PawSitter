@@ -1,8 +1,10 @@
 # Create your views here.
-from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.db.models import Q
+from rest_framework import viewsets, filters, status
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.exceptions import PermissionDenied
-from .models import SitterProfile, OwnerProfile, Pet
+from .models import (SitterProfile, OwnerProfile, Pet, Tag)
+
 from .serializers import (
     PublicSitterCardSerializer,
     SitterProfileSerializer,
@@ -10,6 +12,20 @@ from .serializers import (
     OwnerProfileWithPetsSerializer,
     PetSerializer,
 )
+
+from .serializers import TagSerializer
+
+# -----------------------------
+# Tag ViewSet (simple browse/create)
+# -----------------------------
+class TagViewSet(viewsets.ModelViewSet):
+    """
+    List/create/update tags used by sitters.
+    Public can read; writes require auth (you can tighten to admin if you want).
+    """
+    queryset = Tag.objects.all().order_by("name")
+    serializer_class = TagSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 # -----------------------------
 # SitterProfile ViewSet
@@ -20,7 +36,7 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
     retrieve -> full detail serializer
     create/update/patch/delete -> full serializer (auth required)
     """
-    queryset = SitterProfile.objects.all().order_by("-avg_rating")
+    queryset = SitterProfile.objects.select_related("user").prefetch_related("tags").order_by("-avg_rating")
 
     # Use a light serializer for list; full for everything else (detail + writes)
     def get_serializer_class(self):
@@ -34,6 +50,45 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
 
     def get_queryset(self):
         qs = super().get_queryset()
+
+        # Parse query params
+        q = self.request.query_params
+
+        # Free-text search across name/bio
+        search = q.get("search")
+        if search:
+            qs = qs.filter(Q(display_name__icontains=search) | Q(bio__icontains=search))
+        
+        # Rating / price / location filters
+        min_rating = q.get("min_rating")
+        if min_rating is not None:
+            qs = qs.filter(avg_rating__gte=min_rating)
+
+        max_rate = q.get("max_rate")
+        if max_rate is not None:
+            qs = qs.filter(rate_hourly__lte=max_rate)
+
+        zip_code = q.get("zip")
+        if zip_code:
+            qs = qs.filter(home_zip=zip_code)
+        
+        # ---------- TAG FILTERS ----------
+        tags_any = q.get("tags_any")
+        if tags_any:
+            slugs = [s.strip() for s in tags_any.split(",") if s.strip()]
+            if slugs:
+                qs = qs.filter(tags__slug__in=slugs).distinct()
+        
+        # AND semantics: must include all provided tags
+        tags_all = q.get("tags_all")
+        if tags_all:
+            slugs = [s.strip() for s in tags_all.split(",") if s.strip()]
+            for slug in slugs:
+                qs = qs.filter(tags__slug=slug)
+            qs = qs.distinct()
+        # ---------- SPECIALTY FILTER (optional) ----------
+
+        """ (older version)
         if self.action == "list":
             # Keep list lean and fast
             qs = qs.only("id", "display_name", "rate_hourly", "avg_rating", "home_zip")
@@ -44,7 +99,7 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
             if "max_rate" in q:
                 qs = qs.filter(rate_hourly__lte=q["max_rate"])
             if "zip" in q:
-                qs = qs.filter(home_zip=q["zip"])
+                qs = qs.filter(home_zip=q["zip"])"""
         return qs
 
 
