@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.text import slugify
 
 class OwnerProfile(models.Model):
     user = models.OneToOneField(
@@ -31,6 +32,17 @@ class Pet(models.Model):
     def __str__(self):
         return f"{self.name} ({self.species})"
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=60, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 class SitterProfile(models.Model):
     user = models.OneToOneField(
@@ -45,6 +57,9 @@ class SitterProfile(models.Model):
     home_zip = models.CharField(max_length=20)
     avg_rating = models.FloatField(default=0.0)
     verification_status = models.CharField(max_length=20, default="PENDING")
+
+    # NEW field - connects sitter to tags 
+    tags = models.ManyToManyField(Tag, related_name="sitters", blank=True)
 
     def __str__(self):
         return f"{self.display_name} (Sitter)"
