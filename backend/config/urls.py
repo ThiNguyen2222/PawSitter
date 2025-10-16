@@ -18,8 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from . import views
 
 urlpatterns = [
+    path("", views.index, name="index"),
     path("admin/", admin.site.urls),
 
     # auth (JWT)
@@ -31,6 +33,7 @@ urlpatterns = [
     path("api/profiles/", include("profiles.urls")),   # sitters viewset/router
     path("api/availability/", include("availability.urls")),
     path("api/booking/", include("booking.urls")),
-    path("api/messaging/", include("messaging.urls"))
+    path("api/messaging/", include("messaging.urls")),
+    path("api/review/", include("review.urls"))
 
 ]
