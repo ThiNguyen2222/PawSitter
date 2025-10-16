@@ -86,7 +86,7 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ["id", "name", "category"]
         read_only_fields = fields
-        
+
 # -----------------------------
 # Specialty 
 # Core categories like species: “Dog”, “Cat”, “Bird”, "reptile", "rabbit"
@@ -115,16 +115,15 @@ class SitterProfileSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     specialties = SpecialtySerializer(many=True, read_only=True)
 
-    # Simple write inputs for frontend (lists of strings)
+    # Simple write inputs for frontend 
     # - tag_names: create/get Tags by name (case-insensitive)
-    # - specialty_slugs: attach existing Specialty rows by slug
     tag_names = serializers.ListField(
         child=serializers.CharField(trim_whitespace=True),
         write_only=True,
         required=False,
         help_text="List of tag names, e.g. ['overnight','medication','large dogs']",
     )
-
+    # - specialty_slugs: attach existing Specialty rows by slug
     specialty_slugs = serializers.ListField(
         child=serializers.CharField(trim_whitespace=True),
         write_only=True,

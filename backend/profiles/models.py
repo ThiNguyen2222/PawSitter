@@ -33,6 +33,11 @@ class Pet(models.Model):
         return f"{self.name} ({self.species})"
 
 class Tag(models.Model):
+    """
+    Represents flexible, user-defined keywords that describe
+    a sitter's experience, skills, or services.
+    Examples: "Overnight Care", "Medication-Trained", "Puppies", "Senior Pets"
+    """
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=60, unique=True, blank=True)
 
