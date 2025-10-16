@@ -1,10 +1,58 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PawAnimals from "../assets/images/paw-animals.png";
 import logo from "../assets/logo.png";
+import { registerUser } from "../api/api";
 
 function SignupForm() {
   const [isOwnerSignup, setIsOwnerSignup] = useState(true);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+
+  // Handle input changes
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Handle submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("Passwords do not match!");
+      return;
+    }
+
+    try {
+      // Role is based on toggle
+      const userData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: isOwnerSignup ? "OWNER" : "SITTER",
+      };
+
+      // Call backend
+      const response = await registerUser(userData);
+      console.log("Registration success:", response);
+
+      setMessage("Account created successfully!");
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (error) {
+      console.error("Registration error:", error.response?.data);
+      setMessage("Registration failed. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f0e6e4] to-white">
@@ -20,7 +68,6 @@ function SignupForm() {
       <div className="flex flex-1 justify-center items-center gap-12 px-8">
         {/* Signup Box */}
         <div className="w-[430px] bg-white p-8 rounded-2xl shadow-lg transform lg:-translate-x-10 -translate-y-7">
-          {/* Header Titles */}
           <div className="flex justify-center mb-4">
             <h2 className="text-3xl font-semibold text-center text-primary">
               {isOwnerSignup
@@ -32,6 +79,7 @@ function SignupForm() {
           {/* Toggle Buttons */}
           <div className="relative flex h-12 mb-6 border border-gray-300 rounded-full overflow-hidden">
             <button
+              type="button"
               className={`w-1/2 text-lg font-medium transition-all z-10 ${
                 isOwnerSignup ? "text-white" : "text-gray-700"
               }`}
@@ -40,6 +88,7 @@ function SignupForm() {
               Pet Owner
             </button>
             <button
+              type="button"
               className={`w-1/2 text-lg font-medium transition-all z-10 ${
                 !isOwnerSignup ? "text-white" : "text-gray-700"
               }`}
@@ -57,33 +106,44 @@ function SignupForm() {
           </div>
 
           {/* Signup Form */}
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
-              placeholder="Full Name"
+              name="username"
+              placeholder="Username"
               required
+              value={formData.username}
+              onChange={handleChange}
               className="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-secondary placeholder-gray-400"
             />
             <input
               type="email"
+              name="email"
               placeholder="Email Address"
               required
+              value={formData.email}
+              onChange={handleChange}
               className="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-secondary placeholder-gray-400"
             />
             <input
               type="password"
+              name="password"
               placeholder="Password"
               required
+              value={formData.password}
+              onChange={handleChange}
               className="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-secondary placeholder-gray-400"
             />
             <input
               type="password"
+              name="confirmPassword"
               placeholder="Confirm Password"
               required
+              value={formData.confirmPassword}
+              onChange={handleChange}
               className="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-secondary placeholder-gray-400"
             />
 
-            {/* Submit Button */}
             <button
               type="submit"
               className="w-full p-3 bg-secondary text-white rounded-full text-lg font-medium hover:opacity-90 transition"
@@ -93,6 +153,12 @@ function SignupForm() {
                 : "Sign Up as Pet Sitter"}
             </button>
           </form>
+
+          {message && (
+            <p className="text-center mt-3 text-gray-700 font-medium">
+              {message}
+            </p>
+          )}
 
           {/* Already Have Account */}
           <div className="text-center mt-4 text-gray-700">

@@ -1,10 +1,33 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../api/api";
 import PawAnimals from "../assets/images/paw-animals.png";
 import logo from "../assets/logo.png";
 
 function LoginForm() {
   const [isOwnerLogin, setIsOwnerLogin] = useState(true);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const data = await loginUser({ username, password });
+      localStorage.setItem("accessToken", data.access);
+      localStorage.setItem("refreshToken", data.refresh);
+      console.log("Login successful:", data);
+
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      setError("Invalid username or password. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f0e6e4] to-white">
@@ -31,6 +54,7 @@ function LoginForm() {
           {/* Toggle Buttons */}
           <div className="relative flex h-12 mb-6 border border-gray-300 rounded-full overflow-hidden">
             <button
+              type="button"
               className={`w-1/2 text-lg font-medium transition-all z-10 ${
                 isOwnerLogin ? "text-white" : "text-gray-700"
               }`}
@@ -39,6 +63,7 @@ function LoginForm() {
               Pet Owner
             </button>
             <button
+              type="button"
               className={`w-1/2 text-lg font-medium transition-all z-10 ${
                 !isOwnerLogin ? "text-white" : "text-gray-700"
               }`}
@@ -56,19 +81,28 @@ function LoginForm() {
           </div>
 
           {/* Login Form */}
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <input
-              type="email"
-              placeholder="Email Address"
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-secondary placeholder-gray-400"
             />
             <input
               type="password"
               placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full p-3 border-b-2 border-gray-300 outline-none focus:border-secondary placeholder-gray-400"
             />
+
+            {/* Error message */}
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
 
             {/* Forgot Password */}
             <div className="text-right">
@@ -90,7 +124,7 @@ function LoginForm() {
           <div className="text-center mt-4 text-gray-600">
             <span>Don’t have an account? </span>
             <Link
-              to="/create-account"
+              to="/signup"
               className="text-secondary font-medium hover:underline"
             >
               Sign up
