@@ -1,11 +1,11 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 from decimal import Decimal
 
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from .models import OwnerProfile, SitterProfile, Pet
+from .models import OwnerProfile, SitterProfile, Pet, Tag, Specialty
 
 
 # -----------------------------
@@ -77,6 +77,20 @@ class OwnerProfileWithPetsSerializer(OwnerProfileSerializer):
     class Meta(OwnerProfileSerializer.Meta):
         fields = OwnerProfileSerializer.Meta.fields + ["pets"]
 
+# -----------------------------
+# Tag & Specialty (read-only nested)
+# -----------------------------
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ["id", "name", "category"]
+        read_only_fields = fields
+
+class SpecialtySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Specialty
+        fields = ["id", "slug", "name"]
+        read_only_fields = fields
 
 # -----------------------------
 # Sitter Profile Serializer
@@ -92,6 +106,27 @@ class SitterProfileSerializer(serializers.ModelSerializer):
     rate_hourly = serializers.DecimalField(max_digits=6, decimal_places=2)
     service_radius_km = serializers.IntegerField()
 
+    # Read-only nested for frontend display
+    tags = TagSerializer(many=True, read_only=True)
+    specialties = SpecialtySerializer(many=True, read_only=True)
+
+    # Simple write inputs for frontend (lists of strings)
+    # - tag_names: create/get Tags by name (case-insensitive)
+    # - specialty_slugs: attach existing Specialty rows by slug
+    tag_names = serializers.ListField(
+        child=serializers.CharField(trim_whitespace=True),
+        write_only=True,
+        required=False,
+        help_text="List of tag names, e.g. ['overnight','medication','large dogs']",
+    )
+
+    specialty_slugs = serializers.ListField(
+        child=serializers.CharField(trim_whitespace=True),
+        write_only=True,
+        required=False,
+        help_text="List of specialty slugs, e.g. ['dog','cat','bird']",
+    )
+
     class Meta:
         model = SitterProfile
         fields = [
@@ -106,6 +141,8 @@ class SitterProfileSerializer(serializers.ModelSerializer):
             "home_zip",
             "avg_rating",
             "verification_status",
+            "tag_names",
+            "specialty_slugs",
         ]
         read_only_fields = (
             "id",
@@ -114,6 +151,8 @@ class SitterProfileSerializer(serializers.ModelSerializer):
             "email",
             "avg_rating",
             "verification_status",
+            "tags",
+            "specialties",
         )
 
     # ---- field-level validators ----
@@ -149,8 +188,42 @@ class SitterProfileSerializer(serializers.ModelSerializer):
                 "home_zip": _("Provide a home ZIP code when setting a service radius.")
             })
         return attrs
+    
+    def _apply_tags_and_specialties(self, sitter: SitterProfile, tag_names: List[str], specialty_slugs: List[str],) -> None:
+        # Tags: create or fetch by case-insensitive name
+        if tag_names is not None:
+            tag_objs = []
+            seen = set()
+            for raw in tag_names:
+                name = raw.strip()
+                if not name:
+                    continue
+                key = name.lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                tag_obj, _ = Tag.objects.get_or_create(name__iexact=name, defaults={"name": name})
+                # get_or_create with __iexact requires a tiny dance:
+                if isinstance(tag_obj, bool):  # safety: shouldn't happen
+                    continue
+                if not isinstance(tag_obj, Tag):
+                    # If the __iexact get failed to return the instance, do a second fetch
+                    tag_obj = Tag.objects.filter(name__iexact=name).first() or Tag.objects.create(name=name)
+                tag_objs.append(tag_obj)
+            sitter.tags.set(tag_objs)
+
+        # Specialties: must already exist; attach by slug
+        if specialty_slugs is not None:
+            spec_qs = Specialty.objects.filter(slug__in=specialty_slugs)
+            # Ensure all provided slugs exist (optional strictness)
+            missing = set(specialty_slugs) - set(spec_qs.values_list("slug", flat=True))
+            if missing:
+                raise serializers.ValidationError({"specialty_slugs": _(f"Unknown specialty slugs: {sorted(missing)}")})
+            sitter.specialties.set(list(spec_qs))
 
     def create(self, validated_data: Dict[str, Any]) -> SitterProfile:
+        tag_names = validated_data.pop("tag_names", [])
+        specialty_slugs = validated_data.pop("specialty_slugs", [])
         request = self.context.get("request")
         user = getattr(request, "user", None)
         if user is None or not user.is_authenticated:
@@ -160,15 +233,28 @@ class SitterProfileSerializer(serializers.ModelSerializer):
                 profile = SitterProfile.objects.create(user=user, **validated_data)
             except IntegrityError:
                 raise serializers.ValidationError(_("This user already has a sitter profile."))
+            # Apply M2M after instance exists
+            self._apply_tags_and_specialties(profile, tag_names, specialty_slugs)
         return profile
 
     def update(self, instance: SitterProfile, validated_data: Dict[str, Any]) -> SitterProfile:
+        tag_names = validated_data.pop("tag_names", None)
+        specialty_slugs = validated_data.pop("specialty_slugs", None)
+
         for attr, val in validated_data.items():
             setattr(instance, attr, val)
         instance.save()
+
+        # Only update M2M if keys present in payload
+        if tag_names is not None or specialty_slugs is not None:
+            self._apply_tags_and_specialties(instance, tag_names if tag_names is not None else [], specialty_slugs if specialty_slugs is not None else [])
         return instance
 
 class PublicSitterCardSerializer(serializers.ModelSerializer):
+    # Compact read-only slices for list/search cards
+    tags = serializers.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    specialties = serializers.SlugRelatedField(slug_field="slug", many=True, read_only=True)
+    
     class Meta:
         model = SitterProfile
         fields = ["id", "display_name", "rate_hourly", "avg_rating", "home_zip"]
