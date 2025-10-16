@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
 from .models import MessageThread, Message
@@ -28,7 +29,7 @@ class ThreadListCreateView(generics.ListCreateAPIView):
         user_a = serializer.validated_data.get("user_a")
         user_b = serializer.validated_data.get("user_b")
         if user not in (user_a, user_b):
-            raise PermissionError("You must be a participant of the thread you create.")
+            raise PermissionDenied("You must be a participant of the thread you create.")
         serializer.save()
 
 

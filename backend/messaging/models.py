@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 
 User = settings.AUTH_USER_MODEL
 
@@ -14,7 +15,16 @@ class MessageThread(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = [("booking", "user_a", "user_b")]  # keeps things tidy
+        # remove unique_together
+        constraints = [
+            # one thread for a given booking + pair
+            models.UniqueConstraint(fields=["booking", "user_a", "user_b"], name="uniq_thread_per_booking"),
+            # if there's NO booking, enforce one thread per pair
+            models.UniqueConstraint(
+                fields=["user_a", "user_b"], 
+                condition=Q(booking__isnull=True), 
+                name="uniq_thread_pair_when_booking_null",),
+        ]
         indexes = [models.Index(fields=["created_at"])]
 
     def __str__(self):
