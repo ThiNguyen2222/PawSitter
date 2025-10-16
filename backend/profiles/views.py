@@ -3,7 +3,7 @@ from django.db.models import Q
 from rest_framework import viewsets, filters, status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.exceptions import PermissionDenied
-from .models import (SitterProfile, OwnerProfile, Pet, Tag)
+from .models import (SitterProfile, OwnerProfile, Pet, Tag, Specialty)
 
 from .serializers import (
     PublicSitterCardSerializer,
@@ -11,9 +11,12 @@ from .serializers import (
     OwnerProfileSerializer,
     OwnerProfileWithPetsSerializer,
     PetSerializer,
+    TagSerializer,
+    SpecialtySerializer
 )
 
 from .serializers import TagSerializer
+from .serializers import SpecialtySerializer
 
 # -----------------------------
 # Tag ViewSet (simple browse/create)
@@ -25,6 +28,11 @@ class TagViewSet(viewsets.ModelViewSet):
     """
     queryset = Tag.objects.all().order_by("name")
     serializer_class = TagSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class SpecialtyViewSet(viewsets.ModelViewSet):
+    queryset = Specialty.objects.all().order_by("name")
+    serializer_class = SpecialtySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 # -----------------------------

@@ -43,6 +43,23 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Specialty(models.Model):
+    """
+    Represents a structured category of pet types or services
+    (e.g. Dog, Cat, Bird, Reptile).
+    Unlike tags, specialties are predefined and not user-created.
+    """
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
 class SitterProfile(models.Model):
     user = models.OneToOneField(
@@ -60,6 +77,7 @@ class SitterProfile(models.Model):
 
     # NEW field - connects sitter to tags 
     tags = models.ManyToManyField(Tag, related_name="sitters", blank=True)
+    specialties = models.ManyToManyField(Specialty, related_name="sitters", blank=True)
 
     def __str__(self):
         return f"{self.display_name} (Sitter)"

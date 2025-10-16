@@ -78,14 +78,19 @@ class OwnerProfileWithPetsSerializer(OwnerProfileSerializer):
         fields = OwnerProfileSerializer.Meta.fields + ["pets"]
 
 # -----------------------------
-# Tag & Specialty (read-only nested)
+# Tag Specialty (read-only nested)
+# describe experience: EX “Medication trained”, “Overnight care”, “Puppy friendly”
 # -----------------------------
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ["id", "name", "category"]
         read_only_fields = fields
-
+        
+# -----------------------------
+# Specialty 
+# Core categories like species: “Dog”, “Cat”, “Bird”, "reptile", "rabbit"
+# -----------------------------
 class SpecialtySerializer(serializers.ModelSerializer):
     class Meta:
         model = Specialty
@@ -254,7 +259,7 @@ class PublicSitterCardSerializer(serializers.ModelSerializer):
     # Compact read-only slices for list/search cards
     tags = serializers.SlugRelatedField(slug_field="name", many=True, read_only=True)
     specialties = serializers.SlugRelatedField(slug_field="slug", many=True, read_only=True)
-    
+
     class Meta:
         model = SitterProfile
         fields = ["id", "display_name", "rate_hourly", "avg_rating", "home_zip"]
