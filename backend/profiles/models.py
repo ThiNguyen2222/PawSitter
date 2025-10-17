@@ -79,8 +79,6 @@ class SitterProfile(models.Model):
     home_zip = models.CharField(max_length=20)
     avg_rating = models.FloatField(default=0.0)
     verification_status = models.CharField(max_length=20, default="PENDING")
-
-    # NEW field - connects sitter to tags 
     tags = models.ManyToManyField(Tag, related_name="sitters", blank=True)
     specialties = models.ManyToManyField(Specialty, related_name="sitters", blank=True)
 

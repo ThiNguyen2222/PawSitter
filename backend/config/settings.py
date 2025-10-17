@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "profiles.apps.ProfilesConfig",
     "accounts",
-    # "profiles",  ❌ duplicates the line "profiles.apps.ProfilesConfig"
     "availability",
     "booking",
     "messaging",
@@ -90,7 +89,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "pawsitter_db",
         "USER": "postgres",
-        "PASSWORD": "1234",
+        "PASSWORD": "password",
         "HOST": "localhost",
         "PORT": "5432",
     }

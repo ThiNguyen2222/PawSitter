@@ -261,5 +261,5 @@ class PublicSitterCardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SitterProfile
-        fields = ["id", "display_name", "rate_hourly", "avg_rating", "home_zip"]
+        fields = ["id", "display_name", "rate_hourly", "avg_rating", "home_zip", "tags", "specialities"]
         read_only_fields = fields
