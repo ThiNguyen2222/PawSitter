@@ -6,15 +6,12 @@ import PetSection from './components/PetSection';
 import About from './components/About';
 import Services from './components/Services';
 import Testimony from './components/Testimony';
-import BackendData from './components/BackendData';
 import LoginForm from './pages/LoginForm';
 import CreateAccount from './pages/CreateAccount';
 
-// ✅ Separate component so we can use useLocation
 const AppContent = () => {
   const location = useLocation();
 
-  // ✅ hide Navbar on these pages
   const hideNavbar = ['/login', '/create-account'].includes(location.pathname);
 
   return (
@@ -27,7 +24,6 @@ const AppContent = () => {
           path="/"
           element={
             <>
-              <BackendData />
               <HeroSection />
               <PetSection />
               <About />

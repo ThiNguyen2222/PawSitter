@@ -124,7 +124,7 @@ function LoginForm() {
           <div className="text-center mt-4 text-gray-600">
             <span>Don’t have an account? </span>
             <Link
-              to="/signup"
+              to="/create-account"
               className="text-secondary font-medium hover:underline"
             >
               Sign up
