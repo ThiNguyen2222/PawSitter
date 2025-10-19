@@ -94,3 +94,10 @@ export const testimonials = [
     image: Testimony3,
   },
 ];
+
+export const DashboardMenu = [
+  { label: "Search", href: "#" },
+  { label: "Messages", href: "#" },
+  { label: "Booking", href: "#" },
+  { label: "Profile", href: "#" },
+];
