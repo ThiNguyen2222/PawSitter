@@ -9,6 +9,12 @@ import Testimony1 from "../assets/images/owner1.jpg";
 import Testimony2 from "../assets/images/owner2.jpg";
 import Testimony3 from "../assets/images/owner3.jpg";
 
+import houseSitting from "../assets/images/house-sitting.png";
+import petBoarding from "../assets/images/pet-boarding.png";
+import inHomeVisit from "../assets/images/in-home-visit.png";
+import petGrooming from "../assets/images/pet-grooming.png";
+import petWalking from "../assets/images/pet-walking.png";
+
 export const NavbarMenu = [
   { label: "Home", href: "#" },
   { label: "Services", href: "#" },
@@ -48,26 +54,31 @@ export const servicesList = [
     title: "House Sitting",
     description:
       "Your sitter will provide an attentive in-home care while you're away and keep your pet comfortable in their familiar environment",
+    image: houseSitting,
   },
   {
     title: "Pet Boarding",
     description:
       "Your pet will stay overnight in your sitter's home where they will be treated like they're apart of a family.",
+    image: petBoarding,
   },
   {
     title: "In-Home Visit",
     description:
       "Your sitter will stop by your home for personalized check-ins for feeding, playtime, potty breaks, and lots of cuddles.",
+    image: inHomeVisit,
   },
   {
     title: "Pet Grooming",
     description:
       "Professional grooming to keep your pets looking and feeling their best--from baths, trims, nail care, and brushing.",
+    image: petGrooming,
   },
   {
     title: "Pet Walking",
     description:
       "Walks and exercise that match your pet's energy level, ensuring that they stay healthy, happy, and socialized.",
+    image: petWalking,
   },
 ];
 

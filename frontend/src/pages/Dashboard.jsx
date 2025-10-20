@@ -1,66 +1,72 @@
-import React, { useEffect } from 'react';
-import { Link } from "react-router-dom";
-import { MdMenu } from 'react-icons/md';
-import { DashboardMenu } from '../constants/index';
-import ResponsiveMenu from '../components/ResponsiveMenu';
+import React, { useEffect } from "react";
+import { MdMenu } from "react-icons/md";
+import { DashboardMenu } from "../constants/index";
+import ResponsiveMenu from "../components/ResponsiveMenu";
 import logo from "../assets/logo.png";
+import HeroSection from "../components/HeroSection";
+import { useNavigate } from "react-router-dom";
 
+const Dashboard = () => {
+  const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
 
-const Navbar = () => {
-    const [open, setOpen] = React.useState(false);
-    const btnClass = "hover:bg-primary text-primary font-semibold hover:text-white rounded-md border-2 border-primary px-6 py-2 duration-200";
-    const mobileBtnClass = "hover:bg-secondary text-white font-semibold hover:text-white rounded-md border-2 border-white px-6 py-2 duration-200";
+  const btnClass =
+    "hover:bg-primary text-primary font-semibold hover:text-white rounded-md border-2 border-primary px-6 py-2 duration-200";
+  const mobileBtnClass =
+    "hover:bg-secondary text-white font-semibold hover:text-white rounded-md border-2 border-white px-6 py-2 duration-200";
 
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth >= 1024) {
-                setOpen(false);
-            }
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    return (
+  return (
     <>
-        <nav>
-            <div className="container flex justify-between
-            items-center py-8">
-                {/* Logo Section */}
-                <div className="text-2xl flex items-center gap-2 font-bold uppercase">
-                    <img className="h-10 w-10 mr-2" src={logo} alt="Logo" />
-                    <p className="text-primary">PawSitter</p>
+      <nav>
+        <div className="container flex justify-between items-center py-8">
+          <div className="text-2xl flex items-center gap-2 font-bold uppercase">
+            <img className="h-10 w-10 mr-2" src={logo} alt="Logo" />
+            <p className="text-primary">PawSitter</p>
+          </div>
 
-                </div>
-                {/* Menu Section */}
-                <div className="hidden lg:block">
-                    <ul className="flex items-center gap-6 
-                    text-gray-500">
-                        {DashboardMenu.map((item, index) => (
-                            <li key={index}>
-                                <a
-                                href={item.href}
-                                className="inline-block py-1 px-3 hover:text-primary font-semibold"
-                                >
-                                {item.label}
-                                </a>
-                            </li>
-                            ))}
-                    </ul>
-                </div>
-                {/* Hamburger Menu */}
-                <div className="lg:hidden cursor-pointer hover:bg-transparent" 
-                onClick={() => setOpen(!open)}
-                >
-                    <MdMenu className="text-4xl" />
-                </div>
-            </div>
-        </nav>
+          <div className="hidden lg:block">
+            <ul className="flex items-center gap-6 text-gray-500">
+              {DashboardMenu.map((item, index) => (
+                <li key={index}>
+                  <a
+                    href={item.href}
+                    className="inline-block py-1 px-3 hover:text-primary font-semibold"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Mobile Sidebar section */}
-        <ResponsiveMenu open={open} btnClass={mobileBtnClass}/>
+          <div
+            className="lg:hidden cursor-pointer hover:bg-transparent"
+            onClick={() => setOpen(!open)}
+          >
+            <MdMenu className="text-4xl" />
+          </div>
+        </div>
+      </nav>
+
+      <ResponsiveMenu open={open} btnClass={mobileBtnClass} />
+
+      {/* Dashboard-specific HeroSection */}
+      <HeroSection
+        title="Welcome Back, Paw Parent!"
+        subtitle="Manage your bookings, messages, and sitter requests all in one place."
+        buttonText="Get Started"
+        onButtonClick={() => navigate("/booking")}
+      />
     </>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Dashboard;

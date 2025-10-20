@@ -9,13 +9,13 @@ import Testimony from './components/Testimony';
 import LoginForm from './pages/LoginForm';
 import CreateAccount from './pages/CreateAccount';
 import Dashboard from './pages/Dashboard';
+import Booking from './pages/Booking';
 
 const AppContent = () => {
   const location = useLocation();
-
-  const hideNavbar = ['/login', '/create-account'].includes(location.pathname);
-
+  const hideNavbar = ['/login', '/create-account', '/dashboard', '/booking'].includes(location.pathname);
   const isAuthenticated = !!localStorage.getItem('accessToken');
+  const isDev = import.meta.env.DEV;
 
   return (
     <div className="overflow-x-hidden">
@@ -38,31 +38,15 @@ const AppContent = () => {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/create-account" element={<CreateAccount />} />
 
-        {/* Use this to test out dashboard */}
         <Route
           path="/dashboard"
-          element={
-            isDev || !!localStorage.getItem('accessToken') ? (
-              <Dashboard />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
+          element={isDev || isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
         />
 
-
-        {/* Authenticated Account can go on Dashboard
         <Route
-          path="/dashboard"
-          element={
-            isAuthenticated ? (
-              <Dashboard />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        /> 
-        */}
+          path="/booking"
+          element={isDev || isAuthenticated ? <Booking /> : <Navigate to="/login" replace />}
+        />
       </Routes>
     </div>
   );
