@@ -18,8 +18,8 @@ function LoginForm() {
 
     try {
       const data = await loginUser({ username, password });
-      localStorage.setItem("accessToken", data.access);
-      localStorage.setItem("refreshToken", data.refresh);
+      localStorage.setItem("access", data.access);
+      localStorage.setItem("refresh", data.refresh);
       console.log("Login successful:", data);
 
       navigate("/");
