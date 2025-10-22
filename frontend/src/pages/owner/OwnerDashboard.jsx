@@ -1,19 +1,11 @@
-import React, { useEffect } from "react";
-import { MdMenu } from "react-icons/md";
-import { DashboardMenu } from "../constants/index";
-import ResponsiveMenu from "../components/ResponsiveMenu";
-import logo from "../assets/logo.png";
-import HeroSection from "../components/HeroSection";
+import React, { useEffect, useState } from "react";
+import ResponsiveMenu from "../../components/ResponsiveMenu";
+import HeroSection from "../../components/HeroSection";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
-  const btnClass =
-    "hover:bg-primary text-primary font-semibold hover:text-white rounded-md border-2 border-primary px-6 py-2 duration-200";
-  const mobileBtnClass =
-    "hover:bg-secondary text-white font-semibold hover:text-white rounded-md border-2 border-white px-6 py-2 duration-200";
 
   useEffect(() => {
     const handleResize = () => {
@@ -25,38 +17,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <nav>
-        <div className="container flex justify-between items-center py-8">
-          <div className="text-2xl flex items-center gap-2 font-bold uppercase">
-            <img className="h-10 w-10 mr-2" src={logo} alt="Logo" />
-            <p className="text-primary">PawSitter</p>
-          </div>
-
-          <div className="hidden lg:block">
-            <ul className="flex items-center gap-6 text-gray-500">
-              {DashboardMenu.map((item, index) => (
-                <li key={index}>
-                  <a
-                    href={item.href}
-                    className="inline-block py-1 px-3 hover:text-primary font-semibold"
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div
-            className="lg:hidden cursor-pointer hover:bg-transparent"
-            onClick={() => setOpen(!open)}
-          >
-            <MdMenu className="text-4xl" />
-          </div>
-        </div>
-      </nav>
-
-      <ResponsiveMenu open={open} btnClass={mobileBtnClass} />
+      <ResponsiveMenu open={open} />
 
       {/* Dashboard-specific HeroSection */}
       <HeroSection
