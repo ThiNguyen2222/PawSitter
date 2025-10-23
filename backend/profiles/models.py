@@ -12,7 +12,9 @@ class OwnerProfile(models.Model):
     phone = models.CharField(max_length=20)
     default_location = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
-
+    profile_picture = models.ImageField(upload_to="owner_profiles/", blank=True, null=True, default="owner_profiles/default_profile.png")
+    banner_picture = models.ImageField(upload_to="owner_banners/", blank=True, null=True, default="owner_banners/default_banner.png")
+    
     def __str__(self):
         return f"{self.name} (Owner)"
 
@@ -28,6 +30,7 @@ class Pet(models.Model):
     breed = models.CharField(max_length=100, blank=True)
     age = models.IntegerField()
     notes = models.TextField(blank=True)
+    profile_picture = models.ImageField(upload_to="pet_profiles/", blank=True, null=True,default="pet_profiles/default_banner.png")
 
     def __str__(self):
         return f"{self.name} ({self.species})"
@@ -79,6 +82,10 @@ class SitterProfile(models.Model):
     home_zip = models.CharField(max_length=20)
     avg_rating = models.FloatField(default=0.0)
     verification_status = models.CharField(max_length=20, default="PENDING")
+
+    profile_picture = models.ImageField(upload_to="sitter_profiles/", blank=True, null=True,default="sitter_profiles/default_banner.png")
+    banner_picture = models.ImageField(upload_to="sitter_banners/", blank=True, null=True,default="sitter_banners/default_banner.png")
+
     tags = models.ManyToManyField(Tag, related_name="sitters", blank=True)
     specialties = models.ManyToManyField(Specialty, related_name="sitters", blank=True)
 

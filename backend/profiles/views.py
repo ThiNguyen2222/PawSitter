@@ -55,6 +55,12 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
         if self.action in ("list", "retrieve"):
             return [AllowAny()]
         return [IsAuthenticated()]
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save()
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -140,6 +146,11 @@ class OwnerProfileViewSet(viewsets.ModelViewSet):
             qs = qs.filter(user=user)
         return qs
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 # -----------------------------
 # Pet ViewSet (nested under owner)
