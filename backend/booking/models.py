@@ -9,6 +9,14 @@ class Booking(models.Model):
         ("canceled", "Canceled"),
     ]
 
+    SERVICE_CHOICES = [
+        ("house_sitting", "House Sitting"),
+        ("pet_boarding", "Pet Boarding"),
+        ("in_home_visit", "In-Home Visit"),
+        ("pet_grooming", "Pet Grooming"),
+        ("pet_walking", "Pet Walking"),
+    ]
+
     owner = models.ForeignKey(
         "profiles.OwnerProfile",
         on_delete=models.CASCADE,
@@ -18,6 +26,11 @@ class Booking(models.Model):
         "profiles.SitterProfile",
         on_delete=models.CASCADE,
         related_name="bookings"
+    )
+    service_type = models.CharField(
+        max_length=20,
+        choices=SERVICE_CHOICES,
+        default="house_sitting"
     )
     start_ts = models.DateTimeField()
     end_ts = models.DateTimeField()
@@ -30,4 +43,5 @@ class Booking(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Booking #{self.id} | {self.owner} → {self.sitter} ({self.status})"
+        return f"Booking #{self.id} | {self.owner} → {self.sitter} ({self.status}) [{self.service_type}]"
+

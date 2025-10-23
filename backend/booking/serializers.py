@@ -19,6 +19,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "owner_id",
             "sitter_id",
             "sitter",
+            "service_type",
             "start_ts",
             "end_ts",
             "price_quote",
