@@ -80,7 +80,7 @@ python3 manage.py migrate
 ```
 5. **Run server** 
 ```bash
-python3 manage.py runserver
+python manage.py runserver
 ```
 
 hello
