@@ -1,17 +1,14 @@
-from typing import Any, Dict, List
 from decimal import Decimal
 import re
-
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from django.templatetags.static import static
 from rest_framework import serializers
-
 from .models import OwnerProfile, SitterProfile, Pet, Tag, Specialty
 
 
 # -----------------------------
-# Utility Functions
+# Default static images
 # -----------------------------
 def get_default_profile_image():
     return static("images/default_profile.png")
@@ -31,14 +28,14 @@ def get_default_pet_image():
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ["id", "name"]
+        fields = ["id", "name", "slug"]
         read_only_fields = fields
 
 
 class SpecialtySerializer(serializers.ModelSerializer):
     class Meta:
         model = Specialty
-        fields = ["id", "slug", "name"]
+        fields = ["id", "name", "slug"]
         read_only_fields = fields
 
 
@@ -57,7 +54,7 @@ class PetSerializer(serializers.ModelSerializer):
 
 
 # -----------------------------
-# Owner Profile Serializers
+# OwnerProfile Serializers
 # -----------------------------
 class OwnerProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="user.id", read_only=True)
@@ -76,14 +73,12 @@ class OwnerProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ("id", "user_id", "username", "email")
 
-    # ---- Image URLs ----
     def get_profile_picture_url(self, obj):
         return obj.profile_picture.url if obj.profile_picture else get_default_profile_image()
 
     def get_banner_picture_url(self, obj):
         return obj.banner_picture.url if obj.banner_picture else get_default_banner_image()
 
-    # ---- Validators ----
     def validate_phone(self, value: str) -> str:
         if not value:
             return value
@@ -94,8 +89,7 @@ class OwnerProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("Phone number appears too long."))
         return value
 
-    # ---- CRUD Methods ----
-    def create(self, validated_data: Dict[str, Any]) -> OwnerProfile:
+    def create(self, validated_data):
         user = getattr(self.context.get("request"), "user", None)
         if not user or not user.is_authenticated:
             raise serializers.ValidationError(_("Authentication required to create a profile."))
@@ -105,7 +99,7 @@ class OwnerProfileSerializer(serializers.ModelSerializer):
         except IntegrityError:
             raise serializers.ValidationError(_("This user already has an owner profile."))
 
-    def update(self, instance: OwnerProfile, validated_data: Dict[str, Any]) -> OwnerProfile:
+    def update(self, instance, validated_data):
         for attr, val in validated_data.items():
             setattr(instance, attr, val)
         instance.save()
@@ -120,7 +114,7 @@ class OwnerProfileWithPetsSerializer(OwnerProfileSerializer):
 
 
 # -----------------------------
-# Sitter Profile Serializers
+# SitterProfile Serializers
 # -----------------------------
 class SitterProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="user.id", read_only=True)
@@ -164,14 +158,12 @@ class SitterProfileSerializer(serializers.ModelSerializer):
             "tags", "specialties"
         )
 
-    # ---- Image URLs ----
     def get_profile_picture_url(self, obj):
         return obj.profile_picture.url if obj.profile_picture else get_default_profile_image()
 
     def get_banner_picture_url(self, obj):
         return obj.banner_picture.url if obj.banner_picture else get_default_banner_image()
 
-    # ---- Field Validators ----
     def validate_rate_hourly(self, value: Decimal) -> Decimal:
         if value is not None:
             if value < 0:
@@ -180,27 +172,18 @@ class SitterProfileSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("Hourly rate seems unusually high."))
         return value
 
-    def validate_service_radius_km(self, value: int) -> int:
-        if value is not None:
-            if value < 0:
-                raise serializers.ValidationError(_("Service radius must be non-negative."))
-            if value > 500:
-                raise serializers.ValidationError(_("Service radius seems too large for local services."))
-        return value
-
     def validate_home_zip(self, value: str) -> str:
         if value and not re.match(r"^\d{5}(-\d{4})?$", value):
             raise serializers.ValidationError(_("ZIP code must be 5 digits or ZIP+4."))
         return value
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs):
         if attrs.get("service_radius_km") is not None and not attrs.get("home_zip"):
             raise serializers.ValidationError({"home_zip": _("Provide a home ZIP code when setting a service radius.")})
         return attrs
 
-    # ---- M2M Handling ----
-    def _apply_tags_and_specialties(self, sitter: SitterProfile, tag_names: List[str], specialty_slugs: List[str]):
-        # Tags: create or fetch by name
+    def _apply_tags_and_specialties(self, sitter, tag_names, specialty_slugs):
+        # Tags
         if tag_names is not None:
             tag_objs = []
             seen = set()
@@ -210,12 +193,10 @@ class SitterProfileSerializer(serializers.ModelSerializer):
                     continue
                 seen.add(name.lower())
                 tag_obj, _ = Tag.objects.get_or_create(name__iexact=name, defaults={"name": name})
-                if not isinstance(tag_obj, Tag):
-                    tag_obj = Tag.objects.filter(name__iexact=name).first() or Tag.objects.create(name=name)
                 tag_objs.append(tag_obj)
             sitter.tags.set(tag_objs)
 
-        # Specialties: must exist
+        # Specialties
         if specialty_slugs is not None:
             spec_qs = Specialty.objects.filter(slug__in=specialty_slugs)
             missing = set(specialty_slugs) - set(spec_qs.values_list("slug", flat=True))
@@ -223,8 +204,7 @@ class SitterProfileSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"specialty_slugs": _(f"Unknown specialty slugs: {sorted(missing)}")})
             sitter.specialties.set(list(spec_qs))
 
-    # ---- CRUD Methods ----
-    def create(self, validated_data: Dict[str, Any]) -> SitterProfile:
+    def create(self, validated_data):
         tag_names = validated_data.pop("tag_names", [])
         specialty_slugs = validated_data.pop("specialty_slugs", [])
         user = getattr(self.context.get("request"), "user", None)
@@ -238,7 +218,7 @@ class SitterProfileSerializer(serializers.ModelSerializer):
             self._apply_tags_and_specialties(profile, tag_names, specialty_slugs)
         return profile
 
-    def update(self, instance: SitterProfile, validated_data: Dict[str, Any]) -> SitterProfile:
+    def update(self, instance, validated_data):
         tag_names = validated_data.pop("tag_names", None)
         specialty_slugs = validated_data.pop("specialty_slugs", None)
         for attr, val in validated_data.items():
@@ -252,7 +232,7 @@ class SitterProfileSerializer(serializers.ModelSerializer):
 
 
 # -----------------------------
-# Public / Card Serializer
+# Public Sitter Card Serializer
 # -----------------------------
 class PublicSitterCardSerializer(serializers.ModelSerializer):
     tags = serializers.SlugRelatedField(slug_field="name", many=True, read_only=True)
