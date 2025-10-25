@@ -1,29 +1,25 @@
 from decimal import Decimal
 import re
 from django.db import IntegrityError, transaction
+from django.conf import settings
+from django.core.files.storage import default_storage
 from django.utils.translation import gettext_lazy as _
-from django.templatetags.static import static
 from rest_framework import serializers
 from .models import OwnerProfile, SitterProfile, Pet, Tag, Specialty
 
+# -----------------------------
+# Default image helper
+# -----------------------------
+def get_default_image_url(image_type: str):
+    mapping = {
+        "profile": "images/default_profile.png",
+        "banner": "images/default_banner.png",
+        "pet": "images/default_profile.png"
+    }
+    return settings.STATIC_URL + mapping.get(image_type, "images/default_profile.png")
 
 # -----------------------------
-# Default static images
-# -----------------------------
-def get_default_profile_image():
-    return static("images/default_profile.png")
-
-
-def get_default_banner_image():
-    return static("images/default_banner.png")
-
-
-def get_default_pet_image():
-    return static("images/default_pet.png")
-
-
-# -----------------------------
-# Nested / Related Serializers
+# Tag / Specialty serializers
 # -----------------------------
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,14 +27,15 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "slug"]
         read_only_fields = fields
 
-
 class SpecialtySerializer(serializers.ModelSerializer):
     class Meta:
         model = Specialty
         fields = ["id", "name", "slug"]
         read_only_fields = fields
 
-
+# -----------------------------
+# Pet serializer
+# -----------------------------
 class PetSerializer(serializers.ModelSerializer):
     profile_picture_url = serializers.SerializerMethodField()
 
@@ -50,11 +47,10 @@ class PetSerializer(serializers.ModelSerializer):
     def get_profile_picture_url(self, obj):
         if obj.profile_picture:
             return obj.profile_picture.url
-        return get_default_pet_image()
-
+        return get_default_image_url("pet")
 
 # -----------------------------
-# OwnerProfile Serializers
+# OwnerProfile serializers
 # -----------------------------
 class OwnerProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="user.id", read_only=True)
@@ -74,10 +70,10 @@ class OwnerProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "user_id", "username", "email")
 
     def get_profile_picture_url(self, obj):
-        return obj.profile_picture.url if obj.profile_picture else get_default_profile_image()
+        return obj.profile_picture.url if obj.profile_picture else get_default_image_url("profile")
 
     def get_banner_picture_url(self, obj):
-        return obj.banner_picture.url if obj.banner_picture else get_default_banner_image()
+        return obj.banner_picture.url if obj.banner_picture else get_default_image_url("banner")
 
     def validate_phone(self, value: str) -> str:
         if not value:
@@ -105,16 +101,14 @@ class OwnerProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
 class OwnerProfileWithPetsSerializer(OwnerProfileSerializer):
     pets = PetSerializer(many=True, read_only=True)
 
     class Meta(OwnerProfileSerializer.Meta):
         fields = OwnerProfileSerializer.Meta.fields + ["pets"]
 
-
 # -----------------------------
-# SitterProfile Serializers
+# SitterProfile serializers
 # -----------------------------
 class SitterProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="user.id", read_only=True)
@@ -159,10 +153,10 @@ class SitterProfileSerializer(serializers.ModelSerializer):
         )
 
     def get_profile_picture_url(self, obj):
-        return obj.profile_picture.url if obj.profile_picture else get_default_profile_image()
+        return obj.profile_picture.url if obj.profile_picture else get_default_image_url("profile")
 
     def get_banner_picture_url(self, obj):
-        return obj.banner_picture.url if obj.banner_picture else get_default_banner_image()
+        return obj.banner_picture.url if obj.banner_picture else get_default_image_url("banner")
 
     def validate_rate_hourly(self, value: Decimal) -> Decimal:
         if value is not None:
@@ -192,7 +186,7 @@ class SitterProfileSerializer(serializers.ModelSerializer):
                 if not name or name.lower() in seen:
                     continue
                 seen.add(name.lower())
-                tag_obj, _ = Tag.objects.get_or_create(name__iexact=name, defaults={"name": name})
+                tag_obj, _ = Tag.objects.get_or_create(name=name)
                 tag_objs.append(tag_obj)
             sitter.tags.set(tag_objs)
 
@@ -230,7 +224,6 @@ class SitterProfileSerializer(serializers.ModelSerializer):
                                             specialty_slugs or [])
         return instance
 
-
 # -----------------------------
 # Public Sitter Card Serializer
 # -----------------------------
@@ -245,4 +238,4 @@ class PublicSitterCardSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_profile_picture_url(self, obj):
-        return obj.profile_picture.url if obj.profile_picture else get_default_profile_image()
+        return obj.profile_picture.url if obj.profile_picture else get_default_image_url("profile")

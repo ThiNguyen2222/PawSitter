@@ -60,7 +60,14 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
+        if serializer.instance.user != self.request.user:
+            raise PermissionDenied("You can only update your own profile.")
         serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.user != self.request.user:
+            raise PermissionDenied("You can only delete your own profile.")
+        instance.delete()
 
     def get_queryset(self):
         qs = super().get_queryset()

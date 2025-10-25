@@ -1,8 +1,9 @@
-# tests.py
 from decimal import Decimal
+import re
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from unittest import mock
 
 from .models import OwnerProfile, SitterProfile, Pet, Tag, Specialty
 from .serializers import (
@@ -157,56 +158,99 @@ class ProfileSerializerTests(TestCase):
         self.assertIn("tags", data)
         self.assertIn("specialties", data)
         self.assertIn("profile_picture_url", data)
-    
+
     # -----------------------------
-    # Image upload tests (fixed)
+    # Image upload tests
     # -----------------------------
+    def _dummy_image(self, filename):
+        return SimpleUploadedFile(filename, b"fake-image-content", content_type="image/png")
+
     def test_owner_profile_picture_upload(self):
-        dummy_image = SimpleUploadedFile(
-            "test_owner.png",
-            b"fake-image-content",
-            content_type="image/png"
-        )
-        self.owner_profile.profile_picture = dummy_image
+        img = self._dummy_image("owner.png")
+        self.owner_profile.profile_picture = img
         self.owner_profile.save()
-        self.assertTrue(self.owner_profile.profile_picture.name.startswith("owner_profiles/test_owner"))
+        self.assertTrue(f"owner_profiles/{self.owner_profile.id}" in self.owner_profile.profile_picture.name)
 
     def test_pet_profile_picture_upload(self):
-        dummy_image = SimpleUploadedFile(
-            "test_pet.png",
-            b"fake-image-content",
-            content_type="image/png"
-        )
-        self.pet.profile_picture = dummy_image
+        img = self._dummy_image("pet.png")
+        self.pet.profile_picture = img
         self.pet.save()
-        self.assertTrue(self.pet.profile_picture.name.startswith("pet_profiles/test_pet"))
+        # Changed: now uses owner.id instead of pet.id
+        self.assertTrue(f"pet_profiles/{self.pet.owner.id}" in self.pet.profile_picture.name)
 
     def test_sitter_profile_picture_upload(self):
-        dummy_image = SimpleUploadedFile(
-            "test_sitter.png",
-            b"fake-image-content",
-            content_type="image/png"
-        )
-        self.sitter_profile.profile_picture = dummy_image
+        img = self._dummy_image("sitter.png")
+        self.sitter_profile.profile_picture = img
         self.sitter_profile.save()
-        self.assertTrue(self.sitter_profile.profile_picture.name.startswith("sitter_profiles/test_sitter"))
+        self.assertTrue(f"sitter_profiles/{self.sitter_profile.id}" in self.sitter_profile.profile_picture.name)
 
     def test_owner_banner_upload(self):
-        dummy_banner = SimpleUploadedFile(
-            "owner_banner.png",
-            b"fake-image-content",
-            content_type="image/png"
-        )
-        self.owner_profile.banner_picture = dummy_banner
+        img = self._dummy_image("owner_banner.png")
+        self.owner_profile.banner_picture = img
         self.owner_profile.save()
-        self.assertTrue(self.owner_profile.banner_picture.name.startswith("owner_banners/owner_banner"))
+        self.assertTrue(f"owner_banners/{self.owner_profile.id}" in self.owner_profile.banner_picture.name)
 
     def test_sitter_banner_upload(self):
-        dummy_banner = SimpleUploadedFile(
-            "sitter_banner.png",
-            b"fake-image-content",
-            content_type="image/png"
-        )
-        self.sitter_profile.banner_picture = dummy_banner
+        img = self._dummy_image("sitter_banner.png")
+        self.sitter_profile.banner_picture = img
         self.sitter_profile.save()
-        self.assertTrue(self.sitter_profile.banner_picture.name.startswith("sitter_banners/sitter_banner"))
+        self.assertTrue(f"sitter_banners/{self.sitter_profile.id}" in self.sitter_profile.banner_picture.name)
+
+    # -----------------------------
+    # Image replacement (old file deletion)
+    # -----------------------------
+    def test_owner_profile_picture_replacement(self):
+        first_img = self._dummy_image("first_owner.png")
+        second_img = self._dummy_image("second_owner.png")
+
+        self.owner_profile.profile_picture = first_img
+        self.owner_profile.save()
+        old_name = self.owner_profile.profile_picture.name
+
+        with mock.patch("django.core.files.storage.FileSystemStorage.delete") as mock_delete:
+            self.owner_profile.profile_picture = second_img
+            self.owner_profile.save()
+            mock_delete.assert_called_with(old_name)
+            self.assertTrue(f"owner_profiles/{self.owner_profile.id}" in self.owner_profile.profile_picture.name)
+
+    def test_owner_banner_replacement(self):
+        first_banner = self._dummy_image("first_banner.png")
+        second_banner = self._dummy_image("second_banner.png")
+
+        self.owner_profile.banner_picture = first_banner
+        self.owner_profile.save()
+        old_name = self.owner_profile.banner_picture.name
+
+        with mock.patch("django.core.files.storage.FileSystemStorage.delete") as mock_delete:
+            self.owner_profile.banner_picture = second_banner
+            self.owner_profile.save()
+            mock_delete.assert_called_with(old_name)
+            self.assertTrue(f"owner_banners/{self.owner_profile.id}" in self.owner_profile.banner_picture.name)
+
+    def test_sitter_profile_picture_replacement(self):
+        first_img = self._dummy_image("first_sitter.png")
+        second_img = self._dummy_image("second_sitter.png")
+
+        self.sitter_profile.profile_picture = first_img
+        self.sitter_profile.save()
+        old_name = self.sitter_profile.profile_picture.name
+
+        with mock.patch("django.core.files.storage.FileSystemStorage.delete") as mock_delete:
+            self.sitter_profile.profile_picture = second_img
+            self.sitter_profile.save()
+            mock_delete.assert_called_with(old_name)
+            self.assertTrue(f"sitter_profiles/{self.sitter_profile.id}" in self.sitter_profile.profile_picture.name)
+
+    def test_sitter_banner_replacement(self):
+        first_banner = self._dummy_image("first_sitter_banner.png")
+        second_banner = self._dummy_image("second_sitter_banner.png")
+
+        self.sitter_profile.banner_picture = first_banner
+        self.sitter_profile.save()
+        old_name = self.sitter_profile.banner_picture.name
+
+        with mock.patch("django.core.files.storage.FileSystemStorage.delete") as mock_delete:
+            self.sitter_profile.banner_picture = second_banner
+            self.sitter_profile.save()
+            mock_delete.assert_called_with(old_name)
+            self.assertTrue(f"sitter_banners/{self.sitter_profile.id}" in self.sitter_profile.banner_picture.name)
