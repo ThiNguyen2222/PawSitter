@@ -10,7 +10,6 @@ class AvailabilitySlot(models.Model):
     )
     start_ts = models.DateTimeField()
     end_ts = models.DateTimeField()
-    is_recurring = models.BooleanField(default=False)
     status = models.CharField(
         max_length=20,
         choices=[('open', 'Open'), ('booked', 'Booked'), ('blocked', 'Blocked')],
