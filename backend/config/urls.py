@@ -34,7 +34,7 @@ urlpatterns = [
     path("api/accounts/", include("accounts.urls")), # where /accounts/register/ lives
     path("api/profiles/", include("profiles.urls")),   # sitters viewset/router
     path("api/availability/", include("availability.urls")),
-    path("api/booking/", include("booking.urls")),
+    path("api/bookings/", include("booking.urls")),
     path("api/messaging/", include("messaging.urls")),
     path("api/review/", include("review.urls"))
 
