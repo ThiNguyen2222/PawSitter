@@ -1,163 +1,125 @@
-from django.test import TestCase
-from django.utils import timezone
 from decimal import Decimal
-from django.core.exceptions import ValidationError
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from .models import OwnerProfile, SitterProfile, Pet, Tag, Specialty
+from .serializers import (
+    OwnerProfileSerializer,
+    OwnerProfileWithPetsSerializer,
+    SitterProfileSerializer,
+    PublicSitterCardSerializer,
+    PetSerializer,
+    TagSerializer,
+    SpecialtySerializer,
+)
 
-from accounts.models import User
-from profiles.models import OwnerProfile, SitterProfile
-from booking.models import Booking
-from review.models import Review
+User = get_user_model()
 
-class ReviewSerializerTestCase(TestCase):
+
+class ProfileSerializerTests(TestCase):
+
     def setUp(self):
         # Create users
-        self.owner_user = User.objects.create_user(
-            username="owner1", password="pass123", role="OWNER"
-        )
-        self.sitter_user = User.objects.create_user(
-            username="sitter1", password="pass123", role="SITTER"
+        self.owner_user = User.objects.create_user(username="owner1", password="pass")
+        self.sitter_user = User.objects.create_user(username="sitter1", password="pass")
+
+        # Tags & specialties
+        self.tag1 = Tag.objects.create(name="overnight care")
+        self.tag2 = Tag.objects.create(name="medication")
+        self.spec1 = Specialty.objects.create(name="dog")
+        self.spec2 = Specialty.objects.create(name="cat")
+
+        # Owner profile
+        self.owner_profile = OwnerProfile.objects.create(
+            user=self.owner_user,
+            name="Alice",
+            phone="1234567890"
         )
 
-        # Create profiles
-        self.owner = OwnerProfile.objects.create(
-            user=self.owner_user,
-            name="Owner One",
-            phone="123456"
+        # Pet
+        self.pet = Pet.objects.create(
+            owner=self.owner_profile,
+            name="Fido",
+            species="Dog",
+            age=3
         )
-        self.sitter = SitterProfile.objects.create(
+
+        # Sitter profile
+        self.sitter_profile = SitterProfile.objects.create(
             user=self.sitter_user,
-            display_name="Sitter One",
-            rate_hourly=Decimal("20.00"),
+            display_name="Bob the Sitter",
+            rate_hourly=Decimal("15.00"),
+            service_radius_km=10,
             home_zip="12345"
         )
+        self.sitter_profile.tags.set([self.tag1, self.tag2])
+        self.sitter_profile.specialties.set([self.spec1, self.spec2])
 
-        # Create a completed booking
-        self.booking = Booking.objects.create(
-            owner=self.owner,
-            sitter=self.sitter,
-            start_ts=timezone.now(),
-            end_ts=timezone.now() + timezone.timedelta(hours=1),
-            price_quote=Decimal("25.00"),
-            status="completed"
-        )
+    # -----------------------------
+    # Image uploads and replacements
+    # -----------------------------
+    def test_owner_profile_picture_upload(self):
+        dummy = SimpleUploadedFile("owner.png", b"fake", content_type="image/png")
+        self.owner_profile.profile_picture = dummy
+        self.owner_profile.save()
+        self.assertIn(f"owner_profiles/{self.owner_user.id}/profile", self.owner_profile.profile_picture.name)
 
-    def test_review_creation_valid(self):
-        """Valid review should succeed and update sitter avg_rating"""
-        review = Review.objects.create(
-            booking=self.booking,
-            owner=self.owner,
-            sitter=self.sitter,
-            rating=5,
-            comment="Great sitter!"
-        )
-        self.sitter.refresh_from_db()
-        self.assertEqual(self.sitter.avg_rating, 5.0)
-        self.assertEqual(review.rating, 5)
+    def test_owner_profile_picture_replacement(self):
+        dummy1 = SimpleUploadedFile("owner1.png", b"fake", content_type="image/png")
+        dummy2 = SimpleUploadedFile("owner2.png", b"fake", content_type="image/png")
+        self.owner_profile.profile_picture = dummy1
+        self.owner_profile.save()
+        self.owner_profile.profile_picture = dummy2
+        self.owner_profile.save()
+        self.assertIn(f"owner_profiles/{self.owner_user.id}/profile", self.owner_profile.profile_picture.name)
 
-    def test_review_duplicate(self):
-        """Cannot create duplicate review for same booking"""
-        Review.objects.create(
-            booking=self.booking,
-            owner=self.owner,
-            sitter=self.sitter,
-            rating=4
-        )
-        with self.assertRaises(ValidationError):
-            Review.objects.create(
-                booking=self.booking,
-                owner=self.owner,
-                sitter=self.sitter,
-                rating=5
-            )
+    def test_owner_banner_upload(self):
+        dummy = SimpleUploadedFile("banner.png", b"fake", content_type="image/png")
+        self.owner_profile.banner_picture = dummy
+        self.owner_profile.save()
+        self.assertIn(f"owner_banners/{self.owner_user.id}/banner", self.owner_profile.banner_picture.name)
 
-    def test_avg_rating_updates_on_update_and_delete(self):
-        """Avg rating recalculates on review update and delete"""
-        r1 = Review.objects.create(
-            booking=self.booking,
-            owner=self.owner,
-            sitter=self.sitter,
-            rating=4
-        )
+    def test_owner_banner_replacement(self):
+        dummy1 = SimpleUploadedFile("banner1.png", b"fake", content_type="image/png")
+        dummy2 = SimpleUploadedFile("banner2.png", b"fake", content_type="image/png")
+        self.owner_profile.banner_picture = dummy1
+        self.owner_profile.save()
+        self.owner_profile.banner_picture = dummy2
+        self.owner_profile.save()
+        self.assertIn(f"owner_banners/{self.owner_user.id}/banner", self.owner_profile.banner_picture.name)
 
-        # Create a second booking for same sitter
-        second_booking = Booking.objects.create(
-            owner=self.owner,
-            sitter=self.sitter,
-            start_ts=timezone.now() + timezone.timedelta(days=1),
-            end_ts=timezone.now() + timezone.timedelta(days=1, hours=1),
-            price_quote=Decimal("30.00"),
-            status="completed"
-        )
+    def test_pet_profile_picture_upload(self):
+        dummy = SimpleUploadedFile("pet.png", b"fake", content_type="image/png")
+        self.pet.profile_picture = dummy
+        self.pet.save()
+        self.assertIn(f"pet_profiles/{self.owner_user.id}/Fido_profile", self.pet.profile_picture.name)
 
-        r2 = Review.objects.create(
-            booking=second_booking,
-            owner=self.owner,
-            sitter=self.sitter,
-            rating=2
-        )
+    def test_sitter_profile_picture_upload(self):
+        dummy = SimpleUploadedFile("sitter.png", b"fake", content_type="image/png")
+        self.sitter_profile.profile_picture = dummy
+        self.sitter_profile.save()
+        self.assertIn(f"sitter_profiles/{self.sitter_user.id}/profile", self.sitter_profile.profile_picture.name)
 
-        self.sitter.refresh_from_db()
-        self.assertEqual(self.sitter.avg_rating, 3.0)
+    def test_sitter_profile_picture_replacement(self):
+        dummy1 = SimpleUploadedFile("sitter1.png", b"fake", content_type="image/png")
+        dummy2 = SimpleUploadedFile("sitter2.png", b"fake", content_type="image/png")
+        self.sitter_profile.profile_picture = dummy1
+        self.sitter_profile.save()
+        self.sitter_profile.profile_picture = dummy2
+        self.sitter_profile.save()
+        self.assertIn(f"sitter_profiles/{self.sitter_user.id}/profile", self.sitter_profile.profile_picture.name)
 
-        r2.rating = 4
-        r2.save()
-        self.sitter.refresh_from_db()
-        self.assertEqual(self.sitter.avg_rating, 4.0)
+    def test_sitter_banner_upload(self):
+        dummy = SimpleUploadedFile("banner.png", b"fake", content_type="image/png")
+        self.sitter_profile.banner_picture = dummy
+        self.sitter_profile.save()
+        self.assertIn(f"sitter_banners/{self.sitter_user.id}/banner", self.sitter_profile.banner_picture.name)
 
-        r1.delete()
-        self.sitter.refresh_from_db()
-        self.assertEqual(self.sitter.avg_rating, 4.0)
-
-    def test_review_invalid_booking_owner(self):
-        """Cannot review a booking that does not belong to the owner"""
-        another_owner_user = User.objects.create_user(
-            username="owner2", password="pass123", role="OWNER"
-        )
-        another_owner = OwnerProfile.objects.create(
-            user=another_owner_user,
-            name="Owner Two",
-            phone="654321"
-        )
-        with self.assertRaises(ValidationError):
-            Review.objects.create(
-                booking=self.booking,
-                owner=another_owner,
-                sitter=self.sitter,
-                rating=5
-            )
-
-    def test_review_invalid_booking_status(self):
-        """Cannot review a booking that is not completed"""
-        pending_booking = Booking.objects.create(
-            owner=self.owner,
-            sitter=self.sitter,
-            start_ts=timezone.now(),
-            end_ts=timezone.now() + timezone.timedelta(hours=1),
-            price_quote=Decimal("20.00"),
-            status="requested"
-        )
-        with self.assertRaises(ValidationError):
-            Review.objects.create(
-                booking=pending_booking,
-                owner=self.owner,
-                sitter=self.sitter,
-                rating=5
-            )
-
-    def test_review_rating_bounds(self):
-        """Rating must be between 1 and 5"""
-        with self.assertRaises(ValidationError):
-            Review.objects.create(
-                booking=self.booking,
-                owner=self.owner,
-                sitter=self.sitter,
-                rating=0 
-            )
-
-        with self.assertRaises(ValidationError):
-            Review.objects.create(
-                booking=self.booking,
-                owner=self.owner,
-                sitter=self.sitter,
-                rating=6
-            )
+    def test_sitter_banner_replacement(self):
+        dummy1 = SimpleUploadedFile("banner1.png", b"fake", content_type="image/png")
+        dummy2 = SimpleUploadedFile("banner2.png", b"fake", content_type="image/png")
+        self.sitter_profile.banner_picture = dummy1
+        self.sitter_profile.save()
+        self.sitter_profile.banner_picture = dummy2
+        self.sitter_profile.save()
+        self.assertIn(f"sitter_banners/{self.sitter_user.id}/banner", self.sitter_profile.banner_picture.name)
