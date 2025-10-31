@@ -52,17 +52,9 @@ class Review(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
-        # Update sitter's average rating
-        avg = self.sitter.reviews.aggregate(avg_rating=Avg('rating'))['avg_rating'] or 0
-        self.sitter.avg_rating = avg
-        self.sitter.save(update_fields=['avg_rating'])
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
-        # Recalculate sitter's avg_rating after deletion
-        avg = self.sitter.reviews.aggregate(avg_rating=Avg('rating'))['avg_rating'] or 0
-        self.sitter.avg_rating = avg
-        self.sitter.save(update_fields=['avg_rating'])
 
     def __str__(self):
         return f"Review {self.id} | {self.owner} → {self.sitter} ({self.rating})"
