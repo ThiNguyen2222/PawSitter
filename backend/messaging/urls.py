@@ -1,5 +1,9 @@
 from django.urls import path
-from .views import ThreadListCreateView, ThreadMessagesListCreateView
+from .views import (
+    ThreadListCreateView, 
+    ThreadMessagesListCreateView,
+    mark_thread_as_read  # NEW
+)
 
 urlpatterns = [
     # GET /api/messaging/threads  | POST /api/messaging/threads
@@ -7,6 +11,9 @@ urlpatterns = [
 
     # GET /api/messaging/threads/<id>/messages  | POST /api/messaging/threads/<id>/messages
     path("threads/<int:pk>/messages/", ThreadMessagesListCreateView.as_view(), name="thread-messages"),
+    
+    # NEW: POST /api/messaging/threads/<id>/mark-read
+    path("threads/<int:pk>/mark-read/", mark_thread_as_read, name="thread-mark-read"),
 ]
 
 """

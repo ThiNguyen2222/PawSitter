@@ -15,10 +15,15 @@ class MessageThreadSerializer(serializers.ModelSerializer):
     # helpful extras for UI
     last_message = serializers.SerializerMethodField()
     participants = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()  # NEW
 
     class Meta:
         model = MessageThread
-        fields = ["id", "booking", "user_a", "user_b", "participants", "created_at", "last_message"]
+        fields = [
+            "id", "booking", "user_a", "user_b", 
+            "participants", "created_at", "last_message", 
+            "unread_count"  # NEW
+        ]
         read_only_fields = ["id", "created_at"]
 
     def _normalize_pair(self, a, b):
@@ -48,13 +53,30 @@ class MessageThreadSerializer(serializers.ModelSerializer):
         return attrs
 
     def get_last_message(self, obj):
-        m = obj.messages.order_by("-created_at").first()
-        if not m:
-            return None
-        return {"id": m.id, "body": m.body, "created_at": m.created_at}
+        # FIXED: Use prefetched data to avoid N+1 queries
+        messages = getattr(obj, 'last_message_cached', [])
+        if messages:
+            m = messages[0]
+            return {
+                "id": m.id, 
+                "body": m.body, 
+                "sender": str(m.sender),
+                "created_at": m.created_at
+            }
+        return None
 
     def get_participants(self, obj):
         # adjust if you want emails/usernames instead of __str__
         return [str(obj.user_a), str(obj.user_b)]
 
-    
+    def get_unread_count(self, obj):
+        # NEW: Count unread messages for current user
+        request = self.context.get('request')
+        if not request:
+            return 0
+        
+        return obj.messages.filter(
+            read_at__isnull=True
+        ).exclude(
+            sender=request.user
+        ).count()

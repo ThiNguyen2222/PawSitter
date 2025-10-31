@@ -1,13 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Prefetch, Q
+from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, permission_classes
 
 from .models import MessageThread, Message
 from .serializers import MessageThreadSerializer, MessageSerializer
 from .permissions import IsThreadParticipant
+
 
 class ThreadListCreateView(generics.ListCreateAPIView):
     """
@@ -18,9 +21,22 @@ class ThreadListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        # FIXED: Use Q() instead of union(), and add prefetch to avoid N+1
         u = self.request.user
-        return MessageThread.objects.filter(user_a=u).union(
-            MessageThread.objects.filter(user_b=u)
+        
+        # Prefetch only the last message
+        last_message_prefetch = Prefetch(
+            'messages',
+            queryset=Message.objects.select_related('sender').order_by('-created_at')[:1],
+            to_attr='last_message_cached'
+        )
+        
+        return MessageThread.objects.filter(
+            Q(user_a=u) | Q(user_b=u)
+        ).select_related(
+            'user_a', 'user_b', 'booking'
+        ).prefetch_related(
+            last_message_prefetch
         ).order_by("-created_at")
 
     def perform_create(self, serializer):
@@ -58,3 +74,24 @@ class ThreadMessagesListCreateView(generics.ListCreateAPIView):
         thread = self.get_thread()
         serializer.save(thread=thread, sender=self.request.user)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_thread_as_read(request, pk):
+    """Mark all unread messages in a thread as read for the current user"""
+    thread = get_object_or_404(MessageThread, pk=pk)
+    
+    # Check permission: user must be a participant
+    if request.user not in [thread.user_a, thread.user_b]:
+        raise PermissionDenied("You are not a participant in this thread.")
+    
+    # Mark all unread messages (not sent by current user) as read
+    updated = thread.messages.filter(
+        read_at__isnull=True
+    ).exclude(
+        sender=request.user
+    ).update(read_at=timezone.now())
+    
+    return Response({
+        'status': 'success',
+        'messages_marked_read': updated
+    })
