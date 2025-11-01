@@ -83,4 +83,30 @@ python3 manage.py migrate
 python manage.py runserver
 ```
 
-hello
+### Create Dummy Users + Tags/Specialities
+``` bash
+cd PawSitter
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+sudo service postgresql start
+psql -U postgres
+CREATE DATABASE pawsitter_db;
+\q
+cd backend
+python manage.py makemigrations
+python manage.py migrate
+python manage.py seed_tags_specialties
+python manage.py create_dummy_data --owners 10 --sitters 15  [can change numbers to any amount]
+```
+## (Optional) Create Superuser for Admin Access
+``` bash
+python manage.py createsuperuser
+```
+Enter credentials:
+```
+Username: admin
+Email: admin@example.com
+Password: admin123
+Password (again): admin123
+```
