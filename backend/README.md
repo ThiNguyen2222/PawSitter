@@ -113,6 +113,7 @@ Password (again): admin123
 ```
 ## Verifiy Dummy Data 
 Checking if dummy data was created successfully and there is the correct amount
+Should be 25 tags and 20 specialties; Users/Owners/Sitters should be the amount you put in the command
 ``` bash
 python manage.py shell
 from django.contrib.auth import get_user_model
@@ -128,3 +129,4 @@ print(f"Specialties: {Specialty.objects.count()}")
 
 # Exit
 exit()
+```
