@@ -83,4 +83,51 @@ python3 manage.py migrate
 python manage.py runserver
 ```
 
-hello
+### Create Dummy Users + Tags/Specialities
+``` bash
+cd PawSitter
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+sudo service postgresql start
+psql -U postgres
+CREATE DATABASE pawsitter_db;
+\q
+cd backend
+python manage.py makemigrations
+python manage.py migrate
+python manage.py seed_tags_specialties
+python manage.py create_dummy_data --owners 10 --sitters 15  [can change numbers to any amount]
+python manage.py runserver
+```
+## (Optional) Create Superuser for Admin Access
+``` bash
+python manage.py createsuperuser
+```
+Enter credentials:
+```
+Username: admin
+Email: admin@example.com
+Password: admin123
+Password (again): admin123
+```
+## Verifiy Dummy Data 
+- Checking if dummy data was created successfully and there is the correct amount
+- Should be 25 tags and 20 specialties; Users/Owners/Sitters should be the amount you put in the command
+- If there is more than expected you might want to delete the unwanted data to keep development clean
+``` bash
+python manage.py shell
+from django.contrib.auth import get_user_model
+from profiles.models import OwnerProfile, SitterProfile, Tag, Specialty
+User = get_user_model()
+
+# Check counts
+print(f"Users: {User.objects.count()}")
+print(f"Owners: {OwnerProfile.objects.count()}")
+print(f"Sitters: {SitterProfile.objects.count()}")
+print(f"Tags: {Tag.objects.count()}")
+print(f"Specialties: {Specialty.objects.count()}")
+
+# Exit
+exit()
+```
