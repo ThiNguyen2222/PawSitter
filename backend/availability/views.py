@@ -6,14 +6,15 @@ from .serializers import AvailabilitySlotSerializer
 class AvailabilitySlotViewSet(viewsets.ModelViewSet):
     queryset = AvailabilitySlot.objects.all()
     serializer_class = AvailabilitySlotSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        """Only show sitter's own availability slots"""
-        user = self.request.user
-        if user.role == "SITTER":
-            return AvailabilitySlot.objects.filter(sitter=user.sitter_profile)
-        return AvailabilitySlot.objects.none()
+    def get_permissions(self):
+        """
+        Allow unrestricted access to GET requests.
+        Restrict POST/PUT/PATCH/DELETE to authenticated users.
+        """
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
     
     def perform_create(self, serializer):
         """Auto-assign sitter from logged-in user"""
