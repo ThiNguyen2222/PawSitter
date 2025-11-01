@@ -98,6 +98,7 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py seed_tags_specialties
 python manage.py create_dummy_data --owners 10 --sitters 15  [can change numbers to any amount]
+python manage.py runserver
 ```
 ## (Optional) Create Superuser for Admin Access
 ``` bash
@@ -110,3 +111,20 @@ Email: admin@example.com
 Password: admin123
 Password (again): admin123
 ```
+## Verifiy Dummy Data 
+Checking if dummy data was created successfully and there is the correct amount
+``` bash
+python manage.py shell
+from django.contrib.auth import get_user_model
+from profiles.models import OwnerProfile, SitterProfile, Tag, Specialty
+User = get_user_model()
+
+# Check counts
+print(f"Users: {User.objects.count()}")
+print(f"Owners: {OwnerProfile.objects.count()}")
+print(f"Sitters: {SitterProfile.objects.count()}")
+print(f"Tags: {Tag.objects.count()}")
+print(f"Specialties: {Specialty.objects.count()}")
+
+# Exit
+exit()
