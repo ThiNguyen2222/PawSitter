@@ -114,6 +114,7 @@ Password (again): admin123
 ## Verifiy Dummy Data 
 - Checking if dummy data was created successfully and there is the correct amount
 - Should be 25 tags and 20 specialties; Users/Owners/Sitters should be the amount you put in the command
+- If there is more than expected you might want to delete the unwanted data to keep development clean
 ``` bash
 python manage.py shell
 from django.contrib.auth import get_user_model
