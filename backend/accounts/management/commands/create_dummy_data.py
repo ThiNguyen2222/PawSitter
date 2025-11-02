@@ -33,14 +33,21 @@ class Command(BaseCommand):
         specialties = self.create_specialties()
 
         self.stdout.write('Creating owners...')
+        owners = []
         for i in range(num_owners):
-            self.create_owner(i)
+            owner = self.create_owner(i)
+            owners.append(owner)
 
         self.stdout.write('Creating sitters...')
+        sitters = []
         for i in range(num_sitters):
-            self.create_sitter(i, tags, specialties)
+            sitter = self.create_sitter(i, tags, specialties)
+            sitters.append(sitter)
 
-        self.stdout.write(self.style.SUCCESS(f'Successfully created {num_owners} owners and {num_sitters} sitters'))
+        self.stdout.write('Creating bookings and reviews...')
+        self.create_bookings_and_reviews(owners, sitters)
+
+        self.stdout.write(self.style.SUCCESS(f'Successfully created {num_owners} owners and {num_sitters} sitters with reviews'))
 
     def create_tags(self):
         tag_names = ['Experienced', 'Pet CPR Certified', 'Dog Trainer', 'Cat Specialist', 
@@ -90,6 +97,7 @@ class Command(BaseCommand):
         )
 
         self.create_pets(profile, index)
+        return profile
 
     def create_pets(self, owner_profile, owner_index):
         pet_data = [
@@ -163,6 +171,7 @@ class Command(BaseCommand):
             profile.specialties.set(random.sample(specialties, random.randint(1, 3)))
 
         self.create_availability(profile)
+        return profile
 
     def create_availability(self, sitter_profile):
         """Create availability slots for the next 2 weeks"""
@@ -188,3 +197,101 @@ class Command(BaseCommand):
                         'status': random.choice(['open', 'open', 'open', 'booked', 'blocked'])
                     }
                 )
+
+    def create_bookings_and_reviews(self, owners, sitters):
+        """Create completed bookings and reviews for each sitter"""
+        from django.utils import timezone
+        
+        review_comments = {
+            5: [
+                "Excellent service! My pet was very happy and well-cared for.",
+                "Very professional and caring. Would definitely book again!",
+                "Amazing with my cat! Very attentive and sent regular updates.",
+                "Fantastic sitter! My pet was in great hands.",
+                "Professional and caring. Exceeded my expectations!",
+                "Wonderful experience! Very responsible and caring.",
+                "Excellent care for my senior dog. Very gentle and patient.",
+                "Outstanding service! My pet was treated like family.",
+            ],
+            4: [
+                "Great experience, my dog loved spending time with them.",
+                "Reliable and trustworthy sitter. Highly recommended!",
+                "Good service overall. My pet seemed comfortable.",
+                "Very impressed with the care provided. Will use again!",
+                "My pet loved them! Great communication throughout.",
+                "Great with multiple pets. Very organized and professional.",
+            ],
+            3: [
+                "Satisfactory service. Everything went smoothly.",
+                "Service was okay. Pet was taken care of as expected.",
+                "Decent experience, nothing exceptional but no complaints.",
+                "Average service. Would consider booking again if needed.",
+            ],
+            2: [
+                "Service was below expectations. Communication could be better.",
+                "My pet seemed stressed when I picked them up.",
+                "Not very attentive. I had to follow up multiple times.",
+                "Disappointing experience. Expected more for the price.",
+            ],
+            1: [
+                "Very unprofessional. Would not recommend.",
+                "My pet was not properly cared for. Very concerned.",
+                "Terrible experience. Sitter was late and unprepared.",
+                "Will not be using this service again. Very disappointed.",
+            ]
+        }
+        
+        reviews_created = 0
+        
+        for sitter in sitters:
+            num_reviews = random.randint(3, 8)
+            
+            for _ in range(num_reviews):
+                owner = random.choice(owners)
+                
+                pets = list(owner.pets.all())
+                if not pets:
+                    continue
+                
+                days_ago = random.randint(7, 90)
+                start_ts = timezone.now() - timedelta(days=days_ago, hours=random.randint(8, 16))
+                end_ts = start_ts + timedelta(hours=random.choice([2, 3, 4]))
+                
+                hours = Decimal((end_ts - start_ts).total_seconds() / 3600)
+                price_quote = sitter.rate_hourly * hours
+                
+                service_type = random.choice(['house_sitting', 'pet_boarding', 'in_home_visit', 'pet_grooming', 'pet_walking'])
+                
+                booking = Booking.objects.create(
+                    owner=owner,
+                    sitter=sitter,
+                    service_type=service_type,
+                    start_ts=start_ts,
+                    end_ts=end_ts,
+                    price_quote=price_quote,
+                    status='completed'
+                )
+                
+                rating = random.choices(
+                    [5, 4, 3, 2, 1],
+                    weights=[50, 30, 10, 5, 5], 
+                    k=1
+                )[0]
+                
+                comment = ""
+                if random.random() > 0.2:
+                    comment = random.choice(review_comments[rating])
+                
+                try:
+                    Review.objects.create(
+                        booking=booking,
+                        owner=owner,
+                        sitter=sitter,
+                        rating=rating,
+                        comment=comment
+                    )
+                    reviews_created += 1
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f'Could not create review: {e}'))
+        
+        self.stdout.write(f'Created {reviews_created} reviews')
