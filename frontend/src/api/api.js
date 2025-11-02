@@ -76,3 +76,9 @@ export const getAvailabilitySlots = async () => {
   const response = await API.get("availability/");
   return response.data;
 };
+
+// Get all sitters
+export const getSitters = async () => {
+  const response = await API.get("profiles/sitters/");
+  return response.data;
+};
