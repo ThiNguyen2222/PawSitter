@@ -100,7 +100,9 @@ python manage.py seed_tags_specialties
 python manage.py create_dummy_data --owners 10 --sitters 15  [can change numbers to any amount]
 python manage.py runserver
 ```
-## (Optional) Create Superuser for Admin Access
+## Create Superuser for Admin Access
+- Access admin control: http://127.0.0.1:8000/admin/
+- See data or change it here
 ``` bash
 python manage.py createsuperuser
 ```
