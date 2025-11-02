@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.db.models import Q
 from .models import Booking
 from profiles.models import SitterProfile
 from availability.models import AvailabilitySlot
+
 
 class BookingSerializer(serializers.ModelSerializer):
     owner_id = serializers.IntegerField(source="owner.id", read_only=True)
@@ -38,28 +40,53 @@ class BookingSerializer(serializers.ModelSerializer):
             if start >= end:
                 raise serializers.ValidationError("End time must be after start time.")
 
-            if sitter and not AvailabilitySlot.objects.filter(
-                sitter=sitter,
-                status="open",
-                start_ts__lte=start,
-                end_ts__gte=end
-            ).exists():
-                raise serializers.ValidationError("Sitter is not available for the requested time.")
+            if sitter:
+                blocked_or_booked_slots = AvailabilitySlot.objects.filter(
+                    sitter=sitter,
+                    status__in=['blocked', 'booked'],
+                    start_ts__lt=end,
+                    end_ts__gt=start
+                )
+                if blocked_or_booked_slots.exists():
+                    raise serializers.ValidationError(
+                        "Sitter has blocked time or existing bookings during the requested period."
+                    )
 
-            overlapping = Booking.objects.filter(
-                sitter=sitter,
-                status__in=["requested", "confirmed"],
-                start_ts__lt=end,
-                end_ts__gt=start
-            )
-            if self.instance:
-                overlapping = overlapping.exclude(pk=self.instance.pk)
+                open_slots = AvailabilitySlot.objects.filter(
+                    sitter=sitter,
+                    status='open',
+                    start_ts__lt=end,
+                    end_ts__gt=start
+                ).order_by('start_ts')
 
-            if overlapping.exists():
-                raise serializers.ValidationError("Sitter already has a booking during this time.")
+                if not open_slots.exists():
+                    raise serializers.ValidationError(
+                        "Sitter has no available time slots for the requested period."
+                    )
+
+                earliest_slot_start = min(slot.start_ts for slot in open_slots)
+                latest_slot_end = max(slot.end_ts for slot in open_slots)
+                
+                if earliest_slot_start > start or latest_slot_end < end:
+                    raise serializers.ValidationError(
+                        "Sitter's available time slots don't fully cover the requested booking period."
+                    )
+
+                overlapping = Booking.objects.filter(
+                    sitter=sitter,
+                    status__in=["requested", "confirmed"],
+                    start_ts__lt=end,
+                    end_ts__gt=start
+                )
+                if self.instance:
+                    overlapping = overlapping.exclude(pk=self.instance.pk)
+
+                if overlapping.exists():
+                    raise serializers.ValidationError(
+                        "Sitter already has a booking during this time."
+                    )
 
         return attrs
-
 
     def create(self, validated_data):
         user = self.context["request"].user
