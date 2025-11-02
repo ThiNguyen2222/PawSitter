@@ -113,7 +113,7 @@ Email: admin@example.com
 Password: admin123
 Password (again): admin123
 ```
-## Verifiy Dummy Data 
+## Verifiy Dummy Data or Use Superuser
 - Checking if dummy data was created successfully and there is the correct amount
 - Should be 25 tags and 20 specialties; Users/Owners/Sitters should be the amount you put in the command
 - If there is more than expected you might want to delete the unwanted data to keep development clean
