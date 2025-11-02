@@ -28,13 +28,13 @@ export const registerUser = async (userData) => {
 
 // Login user
 export const loginUser = async (credentials) => {
-  try {
-    const response = await API.post("accounts/login/", credentials);
-    return response.data;
-  } catch (err) {
-    throw err;
-  }
+  const response = await API.post("accounts/login/", {
+    username: credentials.username,
+    password: credentials.password,
+  });
+  return response.data;
 };
+
 
 // ========== DASHBOARD APIs ==========
 
@@ -45,18 +45,18 @@ export const getBookings = async () => {
 };
 
 export const updateBookingStatus = async (bookingId, status) => {
-  const response = await API.patch(`bookings/${bookingId}/`, { status });
+  const response = await API.patch(`bookings/${bookingId}/`, { status }); 
   return response.data;
 };
 
 // Owner Profile & Pets
 export const getOwnerProfile = async (ownerId) => {
-  const response = await API.get(`profiles/owners/${ownerId}/`);
+  const response = await API.get(`profiles/owners/${ownerId}/`); 
   return response.data;
 };
 
 export const getOwnerPets = async (ownerId) => {
-  const response = await API.get(`profiles/owners/${ownerId}/pets/`);
+  const response = await API.get(`profiles/owners/${ownerId}/pets/`); 
   return response.data;
 };
 
@@ -67,7 +67,7 @@ export const getSitterProfile = async (sitterId) => {
 };
 
 export const getSitterReviews = async (sitterId) => {
-  const response = await API.get(`reviews/?sitter=${sitterId}`);
+  const response = await API.get(`reviews/?sitter=${sitterId}`); 
   return response.data;
 };
 

@@ -11,6 +11,8 @@ cd frontend
 npm install
 ```
 
+### Run Backend Server @ the same time as Frontend for APIs to work
+
 ## Start Development Server
 ```bash
 npm run dev
