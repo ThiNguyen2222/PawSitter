@@ -22,7 +22,12 @@ function LoginForm() {
       localStorage.setItem("refresh", data.refresh);
       console.log("Login successful:", data);
 
-      navigate("/");
+      // ✅ Redirect after login
+      if (isOwnerLogin) {
+        navigate("/owner/dashboard", { replace: true });
+      } else {
+        navigate("/sitter/dashboard", { replace: true });
+      }
     } catch (err) {
       console.error(err);
       setError("Invalid username or password. Please try again.");
