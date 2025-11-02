@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
@@ -6,28 +7,48 @@ from django.core.files.storage import default_storage
 # -----------------------------
 # Dynamic upload paths
 # -----------------------------
-# -----------------------------
-# Dynamic upload paths
-# -----------------------------
 def owner_profile_picture_path(instance, filename):
+    """
+    Upload path for owner profile pictures.
+    Uses user.id to ensure path exists even on creation.
+    """
     ext = filename.split('.')[-1]
-    return f"owner_profiles/{instance.id}/profile.{ext}"
+    return f"owner_profiles/{instance.user.id}/profile.{ext}"
 
 def owner_banner_picture_path(instance, filename):
+    """
+    Upload path for owner banner pictures.
+    Uses user.id to ensure path exists even on creation.
+    """
     ext = filename.split('.')[-1]
-    return f"owner_banners/{instance.id}/banner.{ext}"
+    return f"owner_banners/{instance.user.id}/banner.{ext}"
 
 def sitter_profile_picture_path(instance, filename):
+    """
+    Upload path for sitter profile pictures.
+    Uses user.id to ensure path exists even on creation.
+    """
     ext = filename.split('.')[-1]
-    return f"sitter_profiles/{instance.id}/profile.{ext}"
+    return f"sitter_profiles/{instance.user.id}/profile.{ext}"
 
 def sitter_banner_picture_path(instance, filename):
+    """
+    Upload path for sitter banner pictures.
+    Uses user.id to ensure path exists even on creation.
+    """
     ext = filename.split('.')[-1]
-    return f"sitter_banners/{instance.id}/banner.{ext}"
+    return f"sitter_banners/{instance.user.id}/banner.{ext}"
 
 def pet_profile_picture_path(instance, filename):
+    """
+    Upload path for pet profile pictures.
+    Uses owner.user.id and a unique identifier to avoid name conflicts.
+    Using UUID ensures uniqueness even if multiple pets have same name.
+    """
     ext = filename.split('.')[-1]
-    return f"pet_profiles/{instance.owner.id}/{instance.name}_profile.{ext}"
+    # Generate unique identifier
+    unique_id = uuid.uuid4().hex[:8]
+    return f"pet_profiles/{instance.owner.user.id}/{unique_id}.{ext}"
 
 # -----------------------------
 # OwnerProfile
