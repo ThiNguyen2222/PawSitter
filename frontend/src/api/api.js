@@ -28,13 +28,13 @@ export const registerUser = async (userData) => {
 
 // Login user
 export const loginUser = async (credentials) => {
-  try {
-    const response = await API.post("accounts/login/", credentials);
-    return response.data;
-  } catch (err) {
-    throw err;
-  }
+  const response = await API.post("accounts/login/", {
+    username: credentials.username,
+    password: credentials.password,
+  });
+  return response.data;
 };
+
 
 // ========== DASHBOARD APIs ==========
 
