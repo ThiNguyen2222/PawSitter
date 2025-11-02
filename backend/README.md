@@ -85,7 +85,7 @@ python manage.py runserver
 
 ### Create Dummy Users + Tags/Specialities
 ``` bash
-cd PawSitter
+cd PawSitter/backend/
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -93,7 +93,6 @@ sudo service postgresql start
 psql -U postgres
 CREATE DATABASE pawsitter_db;
 \q
-cd backend
 python manage.py makemigrations
 python manage.py migrate
 python manage.py seed_tags_specialties
@@ -114,6 +113,7 @@ Password: admin123
 Password (again): admin123
 ```
 ## Verifiy Dummy Data or Use Superuser
+- Don't need to do this if you did the superuser
 - Checking if dummy data was created successfully and there is the correct amount
 - Should be 25 tags and 20 specialties; Users/Owners/Sitters should be the amount you put in the command
 - If there is more than expected you might want to delete the unwanted data to keep development clean
