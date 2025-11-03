@@ -19,13 +19,28 @@ import Booking from "./pages/owner/Booking";
 // import Messages from "./pages/Messages";
 import Profile from "./pages/owner/Profile"; // Owner Profile
 
+// Helper to get the correct dashboard based on user role
+const getUserDashboard = () => {
+  const user = localStorage.getItem("user");
+  if (user) {
+    try {
+      const userData = JSON.parse(user);
+      if (userData.role === "OWNER") return "/owner/dashboard";
+      if (userData.role === "SITTER") return "/sitter/dashboard";
+    } catch (e) {
+      console.error("Error parsing user data:", e);
+    }
+  }
+  return "/dashboard"; // fallback
+};
+
 const AppContent = () => {
   const { pathname } = useLocation();
 
   // -----------------------------
   // Toggle this flag to bypass login for development
   const isDevBypass = false; // const isDev = true;
-  const isAuthenticated = !!localStorage.getItem("token"); // CHANGED from "access" to "token"
+  const isAuthenticated = !!localStorage.getItem("token");
   // -----------------------------
 
   // Any path that should show the logged-in navbar
@@ -40,10 +55,6 @@ const AppContent = () => {
   const showDashboardNav = dashboardPrefixes.some((p) =>
     pathname.startsWith(p)
   );
-
-  // (older version)line 31-41 Dashboard/protected routes
-  //const dashboardRoutes = ["/dashboard", "/booking", "/messages", "/profile"];
-  //const showDashboardNav = dashboardRoutes.includes(pathname);
 
   // Pages where **no navbar** should appear
   const hideNavbar = ["/login", "/create-account"].includes(pathname);
@@ -63,7 +74,11 @@ const AppContent = () => {
         <Route
           path="/"
           element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Home />
+            isAuthenticated ? (
+              <Navigate to={getUserDashboard()} replace />
+            ) : (
+              <Home />
+            )
           }
         />
 
