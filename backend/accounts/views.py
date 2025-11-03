@@ -23,10 +23,6 @@ def login_view(request):
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
         
-        # Get profile IDs
-        owner_profile_id = None
-        sitter_profile_id = None
-        
         if user.role == 'OWNER' and hasattr(user, 'owner_profile'):
             owner_profile_id = user.owner_profile.id
         elif user.role == 'SITTER' and hasattr(user, 'sitter_profile'):
@@ -39,8 +35,6 @@ def login_view(request):
                 'username': user.username,
                 'email': user.email,
                 'role': user.role,
-                'owner_profile_id': owner_profile_id,
-                'sitter_profile_id': sitter_profile_id,
             }
         })
     
