@@ -16,19 +16,21 @@ const ResponsiveMenu = ({ open, btnClass, menuItems }) => {
           <div className="text-xl font-semibold uppercase bg-primary text-white py-10 m-6 rounded-3xl">
             <ul className="flex flex-col justify-center items-center gap-6">
               {menuItems.map((item) => (
-                <li key={item.path || item.href}>
-                  {item.path ? (
-                    <Link
-                      to={item.path}
+                <li key={item.path || item.href || item.label || idx}>
+                  {/* Support both links and clickable actions (like Logout) */}
+                  {item.onClick ? (
+                    <button
+                      onClick={item.onClick}
                       className={`${btnClass} border-none`}
                     >
                       {item.label}
+                    </button>
+                  ) : item.path ? (
+                    <Link to={item.path} className={`${btnClass} border-none`}>
+                      {item.label}
                     </Link>
                   ) : (
-                    <a
-                      href={item.href}
-                      className={`${btnClass} border-none`}
-                    >
+                    <a href={item.href} className={`${btnClass} border-none`}>
                       {item.label}
                     </a>
                   )}

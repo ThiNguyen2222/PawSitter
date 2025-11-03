@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom"; // + useNavigate
 import { MdMenu } from "react-icons/md";
 import ResponsiveMenu from "./ResponsiveMenu";
 import logo from "../assets/logo.png";
 
 const LoginNavbar = () => {
   const location = useLocation();
+  const navigate = useNavigate(); 
   const [open, setOpen] = React.useState(false);
 
   const btnClass =
@@ -34,6 +35,14 @@ const LoginNavbar = () => {
     { path: "/profile", label: "Profile" },
   ];
 
+  // 🔐 Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    // remove any other auth/user keys you might have saved
+    navigate("/login", { replace: true });
+  };
+
   return (
     <>
       <nav>
@@ -59,6 +68,14 @@ const LoginNavbar = () => {
                 {item.label}
               </Link>
             ))}
+
+            {/* 🔸 Add Logout button here */}
+            <button
+              onClick={handleLogout}
+              className="py-1 px-3 text-gray-700 hover:text-orange-400 font-semibold"
+            >
+              Logout
+            </button>
           </div>
 
           {/* Hamburger Menu */}
@@ -71,11 +88,14 @@ const LoginNavbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar — pass Logout as an action item */}
       <ResponsiveMenu
         open={open}
         btnClass={mobileBtnClass}
-        menuItems={dashboardItems}
+        menuItems={[
+          ...dashboardItems,
+          {label: "LOGOUT", onClick: handleLogout}, // <-- action item
+        ]}
       />
     </>
   );
