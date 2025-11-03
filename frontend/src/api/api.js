@@ -1,84 +1,80 @@
 import axios from "axios";
 
+// Base API setup
 const API = axios.create({
   baseURL: "http://127.0.0.1:8000/api/",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
-// Set auth token for all requests
+// Reapply token after page reload
+const token = localStorage.getItem("token");
+if (token) {
+  API.defaults.headers.common["Authorization"] = `Token ${token}`;
+}
+
+// Set or remove auth token
 export const setAuthToken = (token) => {
   if (token) {
-    API.defaults.headers.common['Authorization'] = `Token ${token}`;
+    API.defaults.headers.common["Authorization"] = `Token ${token}`;
   } else {
-    delete API.defaults.headers.common['Authorization'];
+    delete API.defaults.headers.common["Authorization"];
   }
 };
 
-// Register a new user
+// ===== Auth =====
 export const registerUser = async (userData) => {
-  try {
-    const response = await API.post("accounts/register/", userData);
-    return response.data;
-  } catch (err) {
-    throw err; 
-  }
+  const res = await API.post("accounts/register/", userData);
+  return res.data;
 };
 
-// Login user
 export const loginUser = async (credentials) => {
-  const response = await API.post("accounts/login/", {
-    username: credentials.username,
-    password: credentials.password,
-  });
-  return response.data;
+  const res = await API.post("accounts/login/", credentials);
+  return res.data;
 };
 
-
-// ========== DASHBOARD APIs ==========
-
-// Bookings
+// ===== Bookings =====
 export const getBookings = async () => {
-  const response = await API.get("bookings/");
-  return response.data;
+  const res = await API.get("bookings/");
+  return res.data;
 };
 
 export const updateBookingStatus = async (bookingId, status) => {
-  const response = await API.patch(`bookings/${bookingId}/`, { status }); 
-  return response.data;
+  const res = await API.patch(`bookings/${bookingId}/`, { status });
+  return res.data;
 };
 
-// Owner Profile & Pets
+// ===== Owner =====
 export const getOwnerProfile = async (ownerId) => {
-  const response = await API.get(`profiles/owners/${ownerId}/`); 
-  return response.data;
+  const res = await API.get(`profiles/owners/${ownerId}/`);
+  return res.data;
 };
 
 export const getOwnerPets = async (ownerId) => {
-  const response = await API.get(`profiles/owners/${ownerId}/pets/`); 
-  return response.data;
+  const res = await API.get(`profiles/owners/${ownerId}/pets/`);
+  return res.data;
 };
 
-// Sitter Profile & Reviews
+// ===== Sitter =====
 export const getSitterProfile = async (sitterId) => {
-  const response = await API.get(`profiles/sitters/${sitterId}/`);
-  return response.data;
+  const res = await API.get(`sitters/${sitterId}/`);
+  return res.data;
 };
 
 export const getSitterReviews = async (sitterId) => {
-  const response = await API.get(`reviews/?sitter=${sitterId}`); 
-  return response.data;
+  const res = await API.get(`reviews/?sitter=${sitterId}`);
+  return res.data;
 };
 
-// Availability
+// ===== Availability =====
 export const getAvailabilitySlots = async () => {
-  const response = await API.get("availability/");
-  return response.data;
+  const res = await API.get("availability/");
+  return res.data;
 };
 
-// Get all sitters
+// ===== General =====
 export const getSitters = async () => {
-  const response = await API.get("profiles/sitters/");
-  return response.data;
+  const res = await API.get("sitters/");
+  return res.data;
 };
+
+export default API;

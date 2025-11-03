@@ -12,6 +12,7 @@ const HeroSection = ({
   return (
     <section id="home" className="relative w-full scroll-mt-28">
       <div className="home-banner-container relative z-0">
+        {/* Background image */}
         <img
           src={BannerBackground}
           alt="Hero background shape"
@@ -37,13 +38,18 @@ const HeroSection = ({
 
         {/* Overlay text + button */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-sky-700 leading-tight">
+          {/* Changed text color to primary for better contrast */}
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-secondary leading-tight">
             {title}
           </h1>
-          <p className="primary-text mt-4 text-sm md:text-base">{subtitle}</p>
+
+          <p className="mt-4 text-gray-700 text-sm md:text-base">
+            {subtitle}
+          </p>
+
           {buttonText && (
             <button
-              className="mt-6 bg-sky-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-sky-700 transition font-bold"
+              className="mt-6 bg-secondary text-white px-6 py-3 rounded-lg shadow-md hover:bg-secondary/80 transition font-bold"
               onClick={onButtonClick}
             >
               {buttonText}

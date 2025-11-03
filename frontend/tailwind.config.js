@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#5d4233",
-        secondary: "#2FA0C9",
+        primary: "#5d4233",    // your warm brown
+        secondary: "#0284c7",  // sky-600 shade 💙
       },
       container: {
         center: true,
@@ -15,10 +15,9 @@ export default {
           lg: "4rem",
           xl: "5rem",
           "2xl": "6rem",
-        }
-      }
+        },
+      },
     },
   },
   plugins: [],
-}
-
+};

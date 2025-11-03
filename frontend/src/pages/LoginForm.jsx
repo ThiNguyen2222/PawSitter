@@ -18,18 +18,32 @@ function LoginForm() {
 
     try {
       const data = await loginUser({ username, password });
-      localStorage.setItem("access", data.access);
-      localStorage.setItem("refresh", data.refresh);
+      
+      // DEBUG: See EVERYTHING about the response
+      console.log("Full response:", data);
+      console.log("Response type:", typeof data);
+      console.log("Response keys:", Object.keys(data));
+      console.log("Response values:", Object.values(data));
+      
+      // Log each key-value pair
+      Object.keys(data).forEach(key => {
+        console.log(`data.${key}:`, data[key]);
+      });
+      
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       console.log("Login successful:", data);
 
-      // ✅ Redirect after login
-      if (isOwnerLogin) {
+      // ✅ Redirect after login based on user role
+      if (data.user.role === 'OWNER') {
+        console.log("Navigating to owner dashboard");
         navigate("/owner/dashboard", { replace: true });
-      } else {
+      } else if (data.user.role === 'SITTER') {
+        console.log("Navigating to sitter dashboard");
         navigate("/sitter/dashboard", { replace: true });
       }
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err);
       setError("Invalid username or password. Please try again.");
     }
   };
@@ -127,7 +141,7 @@ function LoginForm() {
 
           {/* Don't have an account? */}
           <div className="text-center mt-4 text-gray-600">
-            <span>Don’t have an account? </span>
+            <span>Don't have an account? </span>
             <Link
               to="/create-account"
               className="text-secondary font-medium hover:underline"
