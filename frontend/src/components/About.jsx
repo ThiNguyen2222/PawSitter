@@ -3,9 +3,7 @@ import AboutBackground from "../assets/images/about-bg.png";
 
 const About = () => {
   return (
-    <div
-      className="container mx-auto flex flex-col md:flex-row-reverse items-center justify-between gap-10 py-10"
-    >
+    <section id="about" className="container mx-auto flex flex-col md:flex-row-reverse items-center justify-between gap-10 py-10 scroll-mt-28">
       {/* Image */}
       <div className="w-full md:w-1/2 flex justify-center">
         <img
@@ -32,7 +30,7 @@ const About = () => {
           consistent care to pets.
         </p>
       </div>
-    </div>
+    </section>
   );
 };
 

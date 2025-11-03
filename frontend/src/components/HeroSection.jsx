@@ -10,7 +10,7 @@ const HeroSection = ({
   onButtonClick,
 }) => {
   return (
-    <section className="relative w-full">
+    <section id="home" className="relative w-full scroll-mt-28">
       <div className="home-banner-container relative z-0">
         <img
           src={BannerBackground}

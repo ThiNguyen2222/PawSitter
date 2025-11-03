@@ -5,7 +5,7 @@ import AllPets from "../assets/images/services.png";
 
 const Services = () => {
   return (
-    <div className="container mx-auto flex flex-col lg:flex-row justify-between items-center py-8 gap-10">
+    <section id="services" className="container mx-auto flex flex-col lg:flex-row justify-between items-center py-8 gap-10 scroll-mt-28">
       {/* Image */}
       <div className="w-full lg:w-1/2 flex justify-center">
         <img
@@ -37,7 +37,7 @@ const Services = () => {
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
