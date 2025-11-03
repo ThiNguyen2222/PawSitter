@@ -7,7 +7,7 @@ class User(AbstractUser):
         ("SITTER", "Sitter"),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="OWNER")
-    is_verified = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.username} ({self.role})"
