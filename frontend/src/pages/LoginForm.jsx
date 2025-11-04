@@ -23,7 +23,7 @@ function LoginForm({ onLogin }) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // ✅ Update AppContent auth state
+      // Update AppContent auth state
       if (onLogin) onLogin();
 
       // Navigate based on role

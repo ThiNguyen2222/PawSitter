@@ -13,7 +13,7 @@ import LoginNavbar from "./components/LoginNavbar";
 import Home from "./pages/Landing";
 import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
-import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import SitterDashboard from "./pages/sitter/SitterDashboard";
 import Booking from "./pages/owner/Booking";
 import Profile from "./pages/owner/Profile";
@@ -40,7 +40,7 @@ const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // ✅ Only check token validity on mount
+  // Only check token validity on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -60,7 +60,7 @@ const AppContent = () => {
       .finally(() => setCheckingAuth(false));
   }, []);
 
-  // ✅ Show nothing while checking token
+  // Show nothing while checking token
   if (checkingAuth) return null;
 
   // Navbar logic
@@ -85,7 +85,7 @@ const AppContent = () => {
       {!hideNavbar && (showDashboardNav ? <LoginNavbar /> : <Navbar />)}
 
       <Routes>
-        {/* ✅ Landing page is always "/" */}
+        {/* Landing page is always "/" */}
         <Route path="/" element={<Home />} />
 
         {/* Auth pages */}
