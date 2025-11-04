@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,8 +16,9 @@ import CreateAccount from "./pages/CreateAccount";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import SitterDashboard from "./pages/sitter/SitterDashboard";
 import Booking from "./pages/owner/Booking";
-// import Messages from "./pages/Messages";
-import Profile from "./pages/owner/Profile"; // Owner Profile
+import Profile from "./pages/owner/Profile";
+
+import API from "./api/api";
 
 // Helper to get the correct dashboard based on user role
 const getUserDashboard = () => {
@@ -31,19 +32,38 @@ const getUserDashboard = () => {
       console.error("Error parsing user data:", e);
     }
   }
-  return "/dashboard"; // fallback
+  return "/dashboard";
 };
 
 const AppContent = () => {
   const { pathname } = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // -----------------------------
-  // Toggle this flag to bypass login for development
-  const isDevBypass = false; // const isDev = true;
-  const isAuthenticated = !!localStorage.getItem("token");
-  // -----------------------------
+  // ✅ Only check token validity on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setIsAuthenticated(false);
+      setCheckingAuth(false);
+      return;
+    }
 
-  // Any path that should show the logged-in navbar
+    API.get("profiles/owners/me/")
+      .then(() => setIsAuthenticated(true))
+      .catch(() => {
+        // Token invalid → remove it
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setIsAuthenticated(false);
+      })
+      .finally(() => setCheckingAuth(false));
+  }, []);
+
+  // ✅ Show nothing while checking token
+  if (checkingAuth) return null;
+
+  // Navbar logic
   const dashboardPrefixes = [
     "/dashboard",
     "/booking",
@@ -55,48 +75,44 @@ const AppContent = () => {
   const showDashboardNav = dashboardPrefixes.some((p) =>
     pathname.startsWith(p)
   );
-
-  // Pages where **no navbar** should appear
   const hideNavbar = ["/login", "/create-account"].includes(pathname);
 
-  // Helper for protected routes
   const Protected = (element) =>
-    isDevBypass || isAuthenticated ? element : <Navigate to="/login" replace />;
+    isAuthenticated ? element : <Navigate to="/login" replace />;
 
   return (
     <>
-      {/* Render Navbar conditionally */}
       {!hideNavbar && (showDashboardNav ? <LoginNavbar /> : <Navbar />)}
 
-      {/* Routes */}
       <Routes>
-        {/* Public landing: if logged in, push to dashboard */}
+        {/* ✅ Landing page is always "/" */}
+        <Route path="/" element={<Home />} />
+
+        {/* Auth pages */}
         <Route
-          path="/"
+          path="/login"
           element={
-            isAuthenticated ? (
-              <Navigate to={getUserDashboard()} replace />
-            ) : (
-              <Home />
-            )
+            <LoginForm
+              onLogin={() => setIsAuthenticated(true)} // update state after login
+            />
           }
         />
-
-        {/* Auth pages NO navbar */}
-        <Route path="/login" element={<LoginForm />} />
         <Route path="/create-account" element={<CreateAccount />} />
 
-        {/* Protected routes */}
+        {/* Protected pages */}
         <Route path="/dashboard" element={Protected(<OwnerDashboard />)} />
-        <Route path="/owner/dashboard" element={Protected(<OwnerDashboard />)} />
-        <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />
+        <Route
+          path="/owner/dashboard"
+          element={Protected(<OwnerDashboard />)}
+        />
+        <Route
+          path="/sitter/dashboard"
+          element={Protected(<SitterDashboard />)}
+        />
         <Route path="/booking" element={Protected(<Booking />)} />
-        {/* <Route path="/messages" element={Protected(<Messages />)} /> */}
-
-        {/* ✅ Added back profile route */}
         <Route path="/profile" element={Protected(<Profile />)} />
 
-        {/* Fallback 404 */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

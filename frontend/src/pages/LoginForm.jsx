@@ -4,7 +4,7 @@ import { loginUser } from "../api/api";
 import PawAnimals from "../assets/images/paw-animals.png";
 import logo from "../assets/logo.png";
 
-function LoginForm() {
+function LoginForm({ onLogin }) {
   const [isOwnerLogin, setIsOwnerLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -18,33 +18,31 @@ function LoginForm() {
 
     try {
       const data = await loginUser({ username, password });
-      
-      // DEBUG: See EVERYTHING about the response
-      console.log("Full response:", data);
-      console.log("Response type:", typeof data);
-      console.log("Response keys:", Object.keys(data));
-      console.log("Response values:", Object.values(data));
-      
-      // Log each key-value pair
-      Object.keys(data).forEach(key => {
-        console.log(`data.${key}:`, data[key]);
-      });
-      
+
+      // Save token and user
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      console.log("Login successful:", data);
 
-      // ✅ Redirect after login based on user role
-      if (data.user.role === 'OWNER') {
-        console.log("Navigating to owner dashboard");
+      // ✅ Update AppContent auth state
+      if (onLogin) onLogin();
+
+      // Navigate based on role
+      if (data.user.role === "OWNER") {
         navigate("/owner/dashboard", { replace: true });
-      } else if (data.user.role === 'SITTER') {
-        console.log("Navigating to sitter dashboard");
+      } else if (data.user.role === "SITTER") {
         navigate("/sitter/dashboard", { replace: true });
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Invalid username or password. Please try again.");
+
+      // Clear any invalid token
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      setError(
+        err.response?.data?.detail ||
+          "Invalid username or password. Please try again."
+      );
     }
   };
 
@@ -52,7 +50,6 @@ function LoginForm() {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#f0e6e4] to-white">
       {/* Logo Header */}
       <div className="container flex justify-between items-center py-8 px-8">
-        {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2">
           <img className="h-10 w-10 mr-2" src={logo} alt="Logo" />
           <p className="text-2xl font-bold uppercase text-primary">PawSitter</p>
@@ -139,7 +136,7 @@ function LoginForm() {
             </button>
           </form>
 
-          {/* Don't have an account? */}
+          {/* Sign up */}
           <div className="text-center mt-4 text-gray-600">
             <span>Don't have an account? </span>
             <Link
@@ -151,7 +148,7 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Right Image (slightly right) */}
+        {/* Right Image */}
         <div className="hidden md:block transform lg:translate-x-10">
           <img
             src={PawAnimals}

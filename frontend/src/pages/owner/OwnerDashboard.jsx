@@ -2,17 +2,8 @@ import React, { useEffect, useState } from "react";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import HeroSection from "../../components/HeroSection";
 import { useNavigate } from "react-router-dom";
-import { getSitters, getOwnerPets } from "../../api/api";
+import { getSitters } from "../../api/api";
 import API from "../../api/api";
-
-// import profile1 from "../../assets/dummy/profile1.jpg";
-// import profile2 from "../../assets/dummy/profile2.jpg";
-// import profile3 from "../../assets/dummy/profile3.jpg";
-// import profile4 from "../../assets/dummy/profile4.jpg";
-// import profile5 from "../../assets/dummy/profile5.jpg";
-// import profile6 from "../../assets/dummy/profile6.jpg";
-
-// const sitterImages = [profile1, profile2, profile3, profile4, profile5, profile6];
 
 // Helper for Unsplash images
 const getPetImage = (species) => {
@@ -56,39 +47,18 @@ const Dashboard = () => {
     async function fetchPets() {
       try {
         setLoading(true);
-        const userString = localStorage.getItem("user");
-        if (!userString) {
-          console.warn("No user found in localStorage.");
-          setLoading(false);
-          return;
-        }
-
-        const user = JSON.parse(userString);
-        if (!user || !user.id) {
-          console.warn("Invalid user data.");
-          setLoading(false);
-          return;
-        }
-
-        console.log("Current user ID:", user.id);
-
-        // Fetch ALL owner profiles and find the one that matches the current user
-        const allOwnersResponse = await API.get("profiles/owners/");
-        const myOwnerProfile = allOwnersResponse.data.find(
-          (owner) => owner.user_id === user.id
-        );
-
-        if (!myOwnerProfile || !myOwnerProfile.id) {
-          console.warn("No owner profile found for this user");
-          setPets([]);
-          setLoading(false);
-          return;
-        }
-
-        const petsData = await getOwnerPets(myOwnerProfile.id);
-        setPets(Array.isArray(petsData) ? petsData : []);
+        
+        // Get authenticated user's owner profile
+        const ownerProfile = await API.get("profiles/owners/me/");
+        
+        // The OwnerProfileWithPetsSerializer returns pets nested
+        setPets(Array.isArray(ownerProfile.data.pets) ? ownerProfile.data.pets : []);
+        
       } catch (error) {
-        console.error("=== ERROR FETCHING PETS ===", error);
+        console.error("Error fetching pets:", error);
+        if (error.response?.status === 404) {
+          console.warn("No owner profile found for this user");
+        }
         setPets([]);
       } finally {
         setLoading(false);
@@ -142,7 +112,7 @@ const Dashboard = () => {
               {pets.map((pet) => (
                 <div
                   key={pet.id}
-                    className="bg-white rounded-2xl shadow-md overflow-hidden transition-shadow duration-300 hover:shadow-xl"
+                  className="bg-white rounded-2xl shadow-md overflow-hidden transition-shadow duration-300 hover:shadow-xl"
                 >
                   <img
                     src={

@@ -9,19 +9,10 @@ const API = axios.create({
 // Add a request interceptor to always include the latest token
 API.interceptors.request.use(
   (config) => {
-    // Get whatever token your login saved
-    const rawToken =
-      localStorage.getItem("token") || localStorage.getItem("accessToken");
-
-    if (rawToken) {
-      // If it looks like a JWT (it has 3 parts separated by dots)
-      const prefix = rawToken.includes(".") ? "Bearer" : "Token";
-      config.headers.Authorization = `${prefix} ${rawToken}`;
-      console.log(`Interceptor using header: ${prefix} ${rawToken.slice(0, 12)}...`);
-    } else {
-      console.warn("Interceptor: No token found in localStorage");
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Token ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
