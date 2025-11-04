@@ -3,6 +3,8 @@ from django.db.models import Q
 from rest_framework import viewsets, filters, status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import (SitterProfile, OwnerProfile, Pet, Tag, Specialty)
 
 from .serializers import (
@@ -68,6 +70,18 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
         if instance.user != self.request.user:
             raise PermissionDenied("You can only delete your own profile.")
         instance.delete()
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        try:
+            sitter_profile = SitterProfile.objects.select_related("user").prefetch_related("tags", "specialties").get(user=request.user)
+            serializer = SitterProfileSerializer(sitter_profile)
+            return Response(serializer.data)
+        except SitterProfile.DoesNotExist:
+            return Response(
+                {"detail": "Sitter profile not found for this user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -158,6 +172,18 @@ class OwnerProfileViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save()
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        try:
+            owner_profile = OwnerProfile.objects.get(user=request.user)
+            serializer = OwnerProfileWithPetsSerializer(owner_profile)
+            return Response(serializer.data)
+        except OwnerProfile.DoesNotExist:
+            return Response(
+                {"detail": "Owner profile not found for this user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 # -----------------------------
 # Pet ViewSet (nested under owner)
