@@ -134,7 +134,7 @@ const Profile = () => {
               <div className="bg-white border border-gray-200 rounded-lg p-5">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-xl font-semibold text-primary">Photos</h3>
-                  <button className="text-blue-600 text-sm hover:underline">
+                  <button className="text-blue-600 text-md hover:underline">
                     See all photos
                   </button>
                 </div>
