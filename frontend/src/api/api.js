@@ -6,18 +6,36 @@ const API = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Reapply token after page reload
-const token = localStorage.getItem("token");
-if (token) {
-  API.defaults.headers.common["Authorization"] = `Token ${token}`;
-}
+// Add a request interceptor to always include the latest token
+API.interceptors.request.use(
+  (config) => {
+    // Get whatever token your login saved
+    const rawToken =
+      localStorage.getItem("token") || localStorage.getItem("accessToken");
 
-// Set or remove auth token
+    if (rawToken) {
+      // If it looks like a JWT (it has 3 parts separated by dots)
+      const prefix = rawToken.includes(".") ? "Bearer" : "Token";
+      config.headers.Authorization = `${prefix} ${rawToken}`;
+      console.log(`Interceptor using header: ${prefix} ${rawToken.slice(0, 12)}...`);
+    } else {
+      console.warn("Interceptor: No token found in localStorage");
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+
+// Set or remove auth token (keep for backward compatibility)
 export const setAuthToken = (token) => {
   if (token) {
     API.defaults.headers.common["Authorization"] = `Token ${token}`;
+    localStorage.setItem("token", token);
   } else {
     delete API.defaults.headers.common["Authorization"];
+    localStorage.removeItem("token");
   }
 };
 
@@ -61,6 +79,11 @@ export const deleteSitterProfile = async (sitterId) => {
 // ===== Owners =====
 export const getOwnerProfile = async (ownerId) => {
   const res = await API.get(`profiles/owners/${ownerId}/`);
+  return res.data;
+};
+
+export const getMyOwnerProfile = async () => {
+  const res = await API.get(`profiles/owners/me/`);
   return res.data;
 };
 
@@ -159,25 +182,21 @@ export const updateBooking = async (bookingId, bookingData) => {
 };
 
 export const updateBookingStatus = async (bookingId, status) => {
-  // status can be: "requested", "confirmed", "completed", "canceled"
   const res = await API.patch(`bookings/${bookingId}/`, { status });
   return res.data;
 };
 
 export const cancelBooking = async (bookingId) => {
-  // Helper function for owners to cancel
   const res = await API.patch(`bookings/${bookingId}/`, { status: "canceled" });
   return res.data;
 };
 
 export const confirmBooking = async (bookingId) => {
-  // Helper function for sitters to confirm
   const res = await API.patch(`bookings/${bookingId}/`, { status: "confirmed" });
   return res.data;
 };
 
 export const completeBooking = async (bookingId) => {
-  // Helper function for sitters to mark complete
   const res = await API.patch(`bookings/${bookingId}/`, { status: "completed" });
   return res.data;
 };
