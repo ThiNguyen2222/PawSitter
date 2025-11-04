@@ -23,11 +23,6 @@ def login_view(request):
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
         
-        if user.role == 'OWNER' and hasattr(user, 'owner_profile'):
-            owner_profile_id = user.owner_profile.id
-        elif user.role == 'SITTER' and hasattr(user, 'sitter_profile'):
-            sitter_profile_id = user.sitter_profile.id
-        
         return Response({
             'token': token.key,
             'user': {

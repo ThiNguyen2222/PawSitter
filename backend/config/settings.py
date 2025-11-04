@@ -89,7 +89,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "pawsitter_db",
         "USER": "postgres",
-        "PASSWORD": "1234",
+        "PASSWORD": "password",
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -133,8 +133,10 @@ AUTH_USER_MODEL = "accounts.User"
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174", 
 ]
 
 CORS_ALLOW_CREDENTIALS = True
