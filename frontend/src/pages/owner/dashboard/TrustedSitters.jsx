@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getSitters } from "../../../api/api";
 import { useNavigate } from "react-router-dom";
+import { getSitterImage } from "./utils";
 
 const SittersSection = () => {
   const [sitters, setSitters] = useState([]);
@@ -30,54 +31,66 @@ const SittersSection = () => {
           <p className="text-gray-600 text-center">No sitters available yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sitters.slice(0, visibleCount).map((sitter) => (
-              <div
-                key={sitter.id}
-                className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center transition-shadow duration-300 hover:shadow-xl"
-              >
-                <img
-                  src={
-                    sitter.profile_picture_url ||
-                    "https://images.unsplash.com/photo-1603415526960-f7e0328d8e3b?auto=format&fit=crop&w=400&q=80"
-                  }
-                  alt={sitter.display_name}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-secondary mb-4"
-                />
-                <h3 className="text-xl font-semibold text-gray-800">
-                  {sitter.display_name}
-                </h3>
-                <p className="text-gray-600 text-sm mb-2">
-                  Westminster, CA {sitter.home_zip}
-                </p>
-                <div className="flex justify-center items-center gap-1 mb-3">
-                  <span className="text-yellow-500 font-medium text-lg">
-                    {"★".repeat(Math.round(sitter.avg_rating || 0))}
-                  </span>
-                  <span className="text-gray-500 text-sm ml-1">
-                    {sitter.avg_rating?.toFixed(1) || "N/A"}
-                  </span>
-                </div>
-                <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  {sitter.tags?.slice(0, 3).map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="bg-secondary/20 text-secondary text-xs font-semibold px-2 py-1 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-primary font-semibold mb-2">
-                  from ${sitter.rate_hourly}/night
-                </p>
-                <button
-                  onClick={() => navigate(`/sitter/${sitter.id}`)}
-                  className="bg-secondary text-white px-5 py-2 rounded-full hover:bg-secondary/80 transition"
+            {sitters.slice(0, visibleCount).map((sitter, index) => {
+              const localImage = getSitterImage(sitter.gender, index);
+
+              return (
+                <div
+                  key={sitter.id}
+                  className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center transition-shadow duration-300 hover:shadow-xl"
                 >
-                  Contact
-                </button>
-              </div>
-            ))}
+                  <img
+                    src={
+                      sitter.profile_picture_url
+                        ? sitter.profile_picture_url.startsWith("http")
+                          ? sitter.profile_picture_url
+                          : `http://127.0.0.1:8000${sitter.profile_picture_url}`
+                        : localImage
+                    }
+                    onError={(e) => (e.target.src = getSitterImage(null, 0))}
+                    alt={sitter.display_name || "Pet sitter"}
+                    className="w-24 h-24 rounded-full object-cover border-2 border-secondary mb-4"
+                  />
+
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {sitter.display_name || "Unknown Sitter"}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-2">
+                    Westminster, CA {sitter.home_zip || ""}
+                  </p>
+
+                  <div className="flex justify-center items-center gap-1 mb-3">
+                    <span className="text-yellow-500 font-medium text-lg">
+                      {"★".repeat(Math.round(sitter.avg_rating || 0))}
+                    </span>
+                    <span className="text-gray-500 text-sm ml-1">
+                      {sitter.avg_rating?.toFixed(1) || "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-2 mb-4">
+                    {sitter.tags?.slice(0, 3).map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-secondary/20 text-secondary text-xs font-semibold px-2 py-1 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-primary font-semibold mb-2">
+                    from ${sitter.rate_hourly || "?"}/night
+                  </p>
+                  <button
+                    onClick={() => navigate(`/sitter/${sitter.id}`)}
+                    className="bg-secondary text-white px-5 py-2 rounded-full hover:bg-secondary/80 transition"
+                  >
+                    Contact
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
 
