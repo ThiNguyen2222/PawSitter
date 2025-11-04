@@ -9,8 +9,8 @@ pip install -r requirements.txt
 ```
 **For Windows(Command Prompt)**
 ```bash
-python3 -m venv venv
-venv/bin/activate
+python -m venv venv
+venv/bin/activate.bat
 pip install -r requirements.txt
 ```
 
@@ -75,8 +75,8 @@ pip install -r requirements.txt
 ```
 4. **Apply migrations**
 ```bash
-python3 manage.py makemigrations
-python3 manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 ```
 5. **Run server** 
 ```bash
