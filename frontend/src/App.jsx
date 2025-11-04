@@ -14,7 +14,7 @@ import Home from "./pages/Landing";
 import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
 import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
-import SitterDashboard from "./pages/sitter/SitterDashboard";
+import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
 import Booking from "./pages/owner/Booking";
 import Profile from "./pages/owner/Profile";
 
