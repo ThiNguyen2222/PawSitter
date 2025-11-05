@@ -16,6 +16,22 @@ class AvailabilitySlotViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
     
+    # added filtering so that sitters see only their own
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # filter by sitter id: /api/availability/slots?sitter=123
+        sitter_id = self.request.query_params.get("sitter")
+        if sitter_id:
+            return qs.filter(sitter_id=sitter_id)
+
+        # only my slots: /api/availability/slots?mine=true
+        mine = self.request.query_params.get("mine")
+        user = self.request.user
+        if mine == "true" and user.is_authenticated and hasattr(user, "sitter_profile"):
+            return qs.filter(sitter=user.sitter_profile)
+
+        return qs
+    
     def perform_create(self, serializer):
         """Auto-assign sitter from logged-in user"""
         user = self.request.user

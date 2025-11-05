@@ -15,8 +15,9 @@ import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
 import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
-import Booking from "./pages/owner/Booking";
-import Profile from "./pages/owner/Profile";
+import OwnerBooking from "./pages/owner/Booking";
+import OwnerProfile from "./pages/owner/Profile";
+import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 
 import API from "./api/api";
 
@@ -63,19 +64,11 @@ const AppContent = () => {
   // Show nothing while checking token
   if (checkingAuth) return null;
 
-  // Navbar logic
-  const dashboardPrefixes = [
-    "/dashboard",
-    "/booking",
-    "/messages",
-    "/profile",
-    "/owner",
-    "/sitter",
-  ];
-  const showDashboardNav = dashboardPrefixes.some((p) =>
-    pathname.startsWith(p)
-  );
-  const hideNavbar = ["/login", "/create-account"].includes(pathname);
+  // Navbar logic (simplified and more accurate)
+const showDashboardNav =
+  pathname.startsWith("/owner") || pathname.startsWith("/sitter");
+
+const hideNavbar = ["/login", "/create-account"].includes(pathname);
 
   const Protected = (element) =>
     isAuthenticated ? element : <Navigate to="/login" replace />;
@@ -99,19 +92,17 @@ const AppContent = () => {
         />
         <Route path="/create-account" element={<CreateAccount />} />
 
-        {/* Protected pages */}
-        <Route path="/dashboard" element={Protected(<OwnerDashboard />)} />
-        <Route
-          path="/owner/dashboard"
-          element={Protected(<OwnerDashboard />)}
-        />
-        <Route
-          path="/sitter/dashboard"
-          element={Protected(<SitterDashboard />)}
-        />
-        <Route path="/booking" element={Protected(<Booking />)} />
-        <Route path="/profile" element={Protected(<Profile />)} />
-
+        {/* Protected Routes to owner/... */}
+        <Route path="/owner/booking" element={Protected(<OwnerBooking />)} />
+        <Route path="/owner/dashboard" element={Protected(<OwnerDashboard />)}/>
+        {/* <Route path="/owner/messages" element={Protected(<OwnerMessages />)} /> */}
+        <Route path="/owner/profile" element={Protected(<OwnerProfile />)} />
+        {/* Protected Routes to sitter/... */}
+        <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)}/>
+        <Route path="/sitter/availability" element={Protected(<AvailabilityPage />)}/>
+        {/* <Route path="/sitter/booking" element={Protected(<SitterBooking />)} /> */}
+        {/* <Route path="/sitter/profile" element={Protected(<SitterProfile />)} /> */}
+        
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
