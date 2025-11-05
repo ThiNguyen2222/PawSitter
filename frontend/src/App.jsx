@@ -64,19 +64,11 @@ const AppContent = () => {
   // Show nothing while checking token
   if (checkingAuth) return null;
 
-  // Navbar logic
-  const dashboardPrefixes = [
-    "/dashboard",
-    "/booking",
-    "/messages",
-    "/profile",
-    "/owner",
-    "/sitter",
-  ];
-  const showDashboardNav = dashboardPrefixes.some((p) =>
-    pathname.startsWith(p)
-  );
-  const hideNavbar = ["/login", "/create-account"].includes(pathname);
+  // Navbar logic (simplified and more accurate)
+const showDashboardNav =
+  pathname.startsWith("/owner") || pathname.startsWith("/sitter");
+
+const hideNavbar = ["/login", "/create-account"].includes(pathname);
 
   const Protected = (element) =>
     isAuthenticated ? element : <Navigate to="/login" replace />;
