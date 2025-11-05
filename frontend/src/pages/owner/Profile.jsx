@@ -44,24 +44,53 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
+  // Helper to get profile picture URL
+  const getProfilePictureUrl = (pictureUrl) => {
+    if (!pictureUrl) {
+      return getSitterImage(null, 0); // Use local fallback
+    }
+    if (pictureUrl.startsWith("http")) {
+      return pictureUrl;
+    }
+    return `http://127.0.0.1:8000${pictureUrl}`;
+  };
+
+  // Helper to get banner picture URL or background color
+  const getBannerStyle = (bannerUrl) => {
+    if (!bannerUrl) {
+      return { backgroundColor: "#dbeafe" }; // Light blue default
+    }
+    if (bannerUrl.startsWith("http")) {
+      return {
+        backgroundImage: `url(${bannerUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    }
+    return {
+      backgroundImage: `url(http://127.0.0.1:8000${bannerUrl})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
+  };
+
+  // Helper to get pet image URL
+  const getPetImageUrl = (pet) => {
+    if (pet.profile_picture_url) {
+      if (pet.profile_picture_url.startsWith("http")) {
+        return pet.profile_picture_url;
+      }
+      return `http://127.0.0.1:8000${pet.profile_picture_url}`;
+    }
+    return getPetImage(pet.species); // Use local fallback
+  };
+
   if (loading)
     return <div className="text-center py-10 text-gray-600">Loading profile...</div>;
   if (error)
     return <div className="text-center py-10 text-red-500">{error}</div>;
   if (!profile)
     return <div className="text-center py-10 text-gray-600">No profile data found.</div>;
-
-  // Banner & profile image fallback
-  const bannerStyle = profile.banner_picture_url
-    ? {
-        backgroundImage: `url(${profile.banner_picture_url})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }
-    : { backgroundColor: "#dbeafe" }; // light blue default
-
-  const profilePicture =
-    profile.profile_picture_url || getSitterImage(null, 0);
 
   return (
     <>
@@ -71,14 +100,7 @@ const Profile = () => {
       <section className="w-full flex justify-between items-center py-8">
         <div
           className="w-full h-48"
-          style={{
-            backgroundColor: profile.banner_picture_url ? undefined : "#dbeafe",
-            backgroundImage: profile.banner_picture_url
-              ? `url(${profile.banner_picture_url})`
-              : "none",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
+          style={getBannerStyle(profile.banner_picture_url)}
         ></div>
       </section>
 
@@ -88,11 +110,7 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row justify-between items-center bg-white px-6 py-4 border-b border-gray-200">
             <div className="flex items-center gap-6 -mt-12 md:-mt-16">
               <img
-                src={
-                  profilePicture.startsWith("http")
-                    ? profilePicture
-                    : `http://127.0.0.1:8000${profilePicture}`
-                }
+                src={getProfilePictureUrl(profile.profile_picture_url)}
                 onError={(e) => (e.target.src = getSitterImage(null, 0))}
                 alt={profile.name || "Pet Owner"}
                 className="w-28 h-28 rounded-full border-4 border-white object-cover bg-gray-100"
@@ -100,7 +118,7 @@ const Profile = () => {
 
               <div>
                 <h1 className="text-2xl font-semibold text-gray-900">
-                  {profile.name || "Pet Owner’s Name"}
+                  {profile.name || "Pet Owner's Name"}
                 </h1>
                 <p className="text-gray-600">{profile.email || "email@example.com"}</p>
                 <p className="text-gray-500 text-sm">
@@ -158,13 +176,8 @@ const Profile = () => {
                       className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-none"
                     >
                       <img
-                        src={
-                          pet.photo_url
-                            ? pet.photo_url.startsWith("http")
-                              ? pet.photo_url
-                              : `http://127.0.0.1:8000${pet.photo_url}`
-                            : getPetImage(pet.species)
-                        }
+                        src={getPetImageUrl(pet)}
+                        onError={(e) => (e.target.src = getPetImage("default"))}
                         alt={pet.name}
                         className="w-20 h-20 rounded-lg object-cover bg-gray-100"
                       />
@@ -178,12 +191,6 @@ const Profile = () => {
                         <p className="text-gray-700 text-base mt-1">
                           {pet.notes || "Loves walks and treats"}
                         </p>
-                        {/* Example: special info line */}
-                        {pet.special_info && (
-                          <p className="text-primary font-medium text-base mt-1">
-                            {pet.special_info}
-                          </p>
-                        )}
                       </div>
                     </div>
                   ))}
