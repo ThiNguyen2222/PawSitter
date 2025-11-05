@@ -15,8 +15,8 @@ import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
 import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
-import Booking from "./pages/owner/Booking";
-import Profile from "./pages/owner/Profile";
+import OwnerBooking from "./pages/owner/Booking";
+import OwnerProfile from "./pages/owner/Profile";
 import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 
 import API from "./api/api";
@@ -92,23 +92,16 @@ const hideNavbar = ["/login", "/create-account"].includes(pathname);
         />
         <Route path="/create-account" element={<CreateAccount />} />
 
-        {/* Protected pages */}
-        <Route path="/dashboard" element={Protected(<OwnerDashboard />)} />
-        <Route
-          path="/owner/dashboard"
-          element={Protected(<OwnerDashboard />)}
-        />
-        <Route
-          path="/sitter/dashboard"
-          element={Protected(<SitterDashboard />)}
-        />
-        {/* ✅ Add this route below sitter/dashboard */}
-        <Route
-        path="/sitter/availability"
-        element={Protected(<AvailabilityPage />)}
-        />
-        <Route path="/booking" element={Protected(<Booking />)} />
-        <Route path="/profile" element={Protected(<Profile />)} />
+        {/* Protected Routes to owner/... */}
+        <Route path="/owner/booking" element={Protected(<OwnerBooking />)} />
+        <Route path="/owner/dashboard" element={Protected(<OwnerDashboard />)}/>
+        {/* <Route path="/owner/messages" element={Protected(<OwnerMessages />)} /> */}
+        <Route path="/owner/profile" element={Protected(<OwnerProfile />)} />
+        {/* Protected Routes to sitter/... */}
+        <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)}/>
+        <Route path="/sitter/availability" element={Protected(<AvailabilityPage />)}/>
+        {/* <Route path="/sitter/booking" element={Protected(<SitterBooking />)} /> */}
+        {/* <Route path="/sitter/profile" element={Protected(<SitterProfile />)} /> */}
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
