@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../../components/ResponsiveMenu";
 import HeroSection from "../../../components/HeroSection";
 
-// ⬇️ Create these three files as simple sections (stubs shown below)
+// Dashboard widgets
 import AvailabilitySection from "./MyAvailability";
-import JobsSection from "./UpcomingJobs";
-import ReviewsSection from "./MyReviews";
+//do this later 
+//import JobsSection from "./UpcomingJobs";
+//import ReviewsSection from "./MyReviews";
 
 const SitterDashboard = () => {
   const [open, setOpen] = useState(false);
@@ -33,8 +34,8 @@ const SitterDashboard = () => {
       />
 
       <AvailabilitySection />
-      <JobsSection />
-      <ReviewsSection />
+      {/* <JobsSection /> */}
+      {/* <ReviewsSection /> */}
     </>
   );
 };

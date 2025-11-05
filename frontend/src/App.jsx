@@ -17,6 +17,7 @@ import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
 import Booking from "./pages/owner/Booking";
 import Profile from "./pages/owner/Profile";
+import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 
 import API from "./api/api";
 
@@ -109,9 +110,14 @@ const AppContent = () => {
           path="/sitter/dashboard"
           element={Protected(<SitterDashboard />)}
         />
+        {/* ✅ Add this route below sitter/dashboard */}
+        <Route
+        path="/sitter/availability"
+        element={Protected(<AvailabilityPage />)}
+        />
         <Route path="/booking" element={Protected(<Booking />)} />
         <Route path="/profile" element={Protected(<Profile />)} />
-
+        
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
