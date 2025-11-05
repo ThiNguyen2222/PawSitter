@@ -15,7 +15,7 @@ import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
 import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
-import OwnerBooking from "./pages/owner/Booking";
+import OwnerBooking from "./pages/owner/booking/Booking";
 import OwnerProfile from "./pages/owner/Profile";
 import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 
