@@ -1,13 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ResponsiveMenu from "../../../components/ResponsiveMenu";
+import HeroSection from "../../../components/HeroSection";
 
-function SitterDashboard() {
+// ⬇️ Create these three files as simple sections (stubs shown below)
+import AvailabilitySection from "./MyAvailability";
+import JobsSection from "./UpcomingJobs";
+import ReviewsSection from "./MyReviews";
+
+const SitterDashboard = () => {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Close mobile menu on resize (same pattern as OwnerDashboard)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">Pet Sitter Dashboard</h1>
-      <p>Welcome to your sitter dashboard!</p>
-      {/* Add your sitter dashboard content here */}
-    </div>
+    <>
+      <ResponsiveMenu open={open} />
+
+      <HeroSection
+        title="Welcome Back, Trusted Sitter!"
+        subtitle="Manage your availability, job requests, and messages in one place."
+        buttonText="Manage Availability"
+        onButtonClick={() => navigate("/sitter/availability")}
+      />
+
+      <AvailabilitySection />
+      <JobsSection />
+      <ReviewsSection />
+    </>
   );
-}
+};
 
 export default SitterDashboard;
