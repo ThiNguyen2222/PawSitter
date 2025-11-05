@@ -26,7 +26,7 @@ const Dashboard = () => {
         title="Welcome Back, Paw Parent!"
         subtitle="Manage your bookings, messages, and sitter requests all in one place."
         buttonText="Get Started"
-        onButtonClick={() => navigate("/booking")}
+        onButtonClick={() => navigate("/owner/booking")}
       />
 
       <PetsSection />
