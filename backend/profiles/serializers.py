@@ -8,17 +8,6 @@ from rest_framework import serializers
 from .models import OwnerProfile, SitterProfile, Pet, Tag, Specialty
 
 # -----------------------------
-# Default image helper
-# -----------------------------
-def get_default_image_url(image_type: str):
-    mapping = {
-        "profile": "images/default_profile.png",
-        "banner": "images/default_banner.png",
-        "pet": "images/default_profile.png"
-    }
-    return settings.STATIC_URL + mapping.get(image_type, "images/default_profile.png")
-
-# -----------------------------
 # Tag / Specialty serializers
 # -----------------------------
 class TagSerializer(serializers.ModelSerializer):
@@ -45,9 +34,10 @@ class PetSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
     def get_profile_picture_url(self, obj):
+        # Return the URL if image exists, otherwise None (frontend handles fallback)
         if obj.profile_picture:
             return obj.profile_picture.url
-        return get_default_image_url("pet")
+        return None
 
 # -----------------------------
 # OwnerProfile serializers
@@ -70,10 +60,12 @@ class OwnerProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "user_id", "username", "email")
 
     def get_profile_picture_url(self, obj):
-        return obj.profile_picture.url if obj.profile_picture else get_default_image_url("profile")
+        # Return the URL if image exists, otherwise None (frontend handles fallback)
+        return obj.profile_picture.url if obj.profile_picture else None
 
     def get_banner_picture_url(self, obj):
-        return obj.banner_picture.url if obj.banner_picture else get_default_image_url("banner")
+        # Return the URL if image exists, otherwise None (frontend handles fallback)
+        return obj.banner_picture.url if obj.banner_picture else None
 
     def validate_phone(self, value: str) -> str:
         if not value:
@@ -153,10 +145,12 @@ class SitterProfileSerializer(serializers.ModelSerializer):
         )
 
     def get_profile_picture_url(self, obj):
-        return obj.profile_picture.url if obj.profile_picture else get_default_image_url("profile")
+        # Return the URL if image exists, otherwise None (frontend handles fallback)
+        return obj.profile_picture.url if obj.profile_picture else None
 
     def get_banner_picture_url(self, obj):
-        return obj.banner_picture.url if obj.banner_picture else get_default_image_url("banner")
+        # Return the URL if image exists, otherwise None (frontend handles fallback)
+        return obj.banner_picture.url if obj.banner_picture else None
 
     def validate_rate_hourly(self, value: Decimal) -> Decimal:
         if value is not None:
@@ -238,4 +232,5 @@ class PublicSitterCardSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_profile_picture_url(self, obj):
-        return obj.profile_picture.url if obj.profile_picture else get_default_image_url("profile")
+        # Return the URL if image exists, otherwise None (frontend handles fallback)
+        return obj.profile_picture.url if obj.profile_picture else None

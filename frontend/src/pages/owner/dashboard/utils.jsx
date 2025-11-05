@@ -1,11 +1,5 @@
-// Local sitter profile images
+// Gender-neutral sitter profile images
 import profile0 from "../../../assets/dummy/profile0.png";
-import profile1 from "../../../assets/dummy/profile1.jpg";
-import profile2 from "../../../assets/dummy/profile2.jpg";
-import profile3 from "../../../assets/dummy/profile3.jpg";
-import profile4 from "../../../assets/dummy/profile4.jpg";
-import profile5 from "../../../assets/dummy/profile5.jpg";
-import profile6 from "../../../assets/dummy/profile6.jpg";
 
 // Pet images
 import bird from "../../../assets/dummy/bird.jpg";
@@ -17,19 +11,11 @@ import fish from "../../../assets/dummy/fish.jpg";
 import rabbit from "../../../assets/dummy/rabbit.jpg";
 import reptile from "../../../assets/dummy/reptile.jpg";
 
-// Get sitter image based on gender + index
+// Get sitter image - uses only gender-neutral images
 export const getSitterImage = (gender, index = 0) => {
-  const femaleImages = [profile1, profile2, profile3];
-  const maleImages = [profile4, profile5, profile6];
-
-  if (gender?.toLowerCase() === "male") {
-    return maleImages[index % maleImages.length];
-  } else if (gender?.toLowerCase() === "female") {
-    return femaleImages[index % femaleImages.length];
-  }
-
-  // Default gender-neutral fallback
-  return profile0;
+  // Array of gender-neutral profile images
+  const neutralImages = [profile0];
+  return neutralImages[index % neutralImages.length];
 };
 
 // Get pet image based on species (uses local photos)
