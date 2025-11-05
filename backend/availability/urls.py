@@ -8,3 +8,6 @@ router.register(r"", AvailabilitySlotViewSet, basename="availability")
 urlpatterns = [
     path("", include(router.urls)),
 ]
+
+# In frontend, our fetch URL should be:
+# fetch("http://localhost:8000/api/availability/?mine=true")
