@@ -21,38 +21,44 @@ import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 
 import API from "./api/api";
 
-// Helper to get the correct dashboard based on user role
-const getUserDashboard = () => {
-  const user = localStorage.getItem("user");
-  if (user) {
-    try {
-      const userData = JSON.parse(user);
-      if (userData.role === "OWNER") return "/owner/dashboard";
-      if (userData.role === "SITTER") return "/sitter/dashboard";
-    } catch (e) {
-      console.error("Error parsing user data:", e);
-    }
-  }
-  return "/dashboard";
-};
-
 const AppContent = () => {
   const { pathname } = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Only check token validity on mount
+  // Check token validity on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
+    const user = localStorage.getItem("user");
+    
+    if (!token || !user) {
       setIsAuthenticated(false);
       setCheckingAuth(false);
       return;
     }
 
-    API.get("profiles/owners/me/")
+    // Parse user to check their role
+    let userData;
+    try {
+      userData = JSON.parse(user);
+    } catch (e) {
+      console.error("Error parsing user data:", e);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setIsAuthenticated(false);
+      setCheckingAuth(false);
+      return;
+    }
+
+    // Validate token based on user role
+    const endpoint = userData.role === "OWNER" 
+      ? "profiles/owners/me/" 
+      : "profiles/sitters/me/";
+
+    API.get(endpoint)
       .then(() => setIsAuthenticated(true))
-      .catch(() => {
+      .catch((error) => {
+        console.error("Auth check failed:", error);
         // Token invalid → remove it
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -64,11 +70,11 @@ const AppContent = () => {
   // Show nothing while checking token
   if (checkingAuth) return null;
 
-  // Navbar logic (simplified and more accurate)
-const showDashboardNav =
-  pathname.startsWith("/owner") || pathname.startsWith("/sitter");
+  // Navbar logic
+  const showDashboardNav =
+    pathname.startsWith("/owner") || pathname.startsWith("/sitter");
 
-const hideNavbar = ["/login", "/create-account"].includes(pathname);
+  const hideNavbar = ["/login", "/create-account"].includes(pathname);
 
   const Protected = (element) =>
     isAuthenticated ? element : <Navigate to="/login" replace />;
@@ -86,7 +92,7 @@ const hideNavbar = ["/login", "/create-account"].includes(pathname);
           path="/login"
           element={
             <LoginForm
-              onLogin={() => setIsAuthenticated(true)} // update state after login
+              onLogin={() => setIsAuthenticated(true)}
             />
           }
         />
@@ -94,14 +100,12 @@ const hideNavbar = ["/login", "/create-account"].includes(pathname);
 
         {/* Protected Routes to owner/... */}
         <Route path="/owner/booking" element={Protected(<OwnerBooking />)} />
-        <Route path="/owner/dashboard" element={Protected(<OwnerDashboard />)}/>
-        {/* <Route path="/owner/messages" element={Protected(<OwnerMessages />)} /> */}
+        <Route path="/owner/dashboard" element={Protected(<OwnerDashboard />)} />
         <Route path="/owner/profile" element={Protected(<OwnerProfile />)} />
+        
         {/* Protected Routes to sitter/... */}
-        <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)}/>
-        <Route path="/sitter/availability" element={Protected(<AvailabilityPage />)}/>
-        {/* <Route path="/sitter/booking" element={Protected(<SitterBooking />)} /> */}
-        {/* <Route path="/sitter/profile" element={Protected(<SitterProfile />)} /> */}
+        <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />
+        <Route path="/sitter/availability" element={Protected(<AvailabilityPage />)} />
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

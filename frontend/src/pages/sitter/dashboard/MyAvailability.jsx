@@ -9,15 +9,14 @@ const MyAvailability = () => {
     status: "open",
   });
 
-  // TODO: replace with your real API base + auth token logic
   const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
-  const token = localStorage.getItem("access"); // if you store JWT here
+  const token = localStorage.getItem("token"); // Changed from "access" to "token"
 
   const fetchMySlots = async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/availability/?mine=true`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: token ? { Authorization: `Token ${token}` } : {}, // Changed from "Bearer" to "Token"
       });
       const data = await res.json();
       setSlots(data);
@@ -31,15 +30,19 @@ const MyAvailability = () => {
   const createSlot = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE}/api/availability/slots/`, {
+      const res = await fetch(`${API_BASE}/api/availability/`, { // Removed "/slots"
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(token ? { Authorization: `Token ${token}` } : {}), // Changed from "Bearer" to "Token"
         },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Create failed");
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error creating slot:", errorData);
+        throw new Error("Create failed");
+      }
       setForm({ start_ts: "", end_ts: "", status: "open" });
       fetchMySlots();
     } catch (e) {
@@ -50,7 +53,6 @@ const MyAvailability = () => {
 
   useEffect(() => {
     fetchMySlots();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
