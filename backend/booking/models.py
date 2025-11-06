@@ -27,6 +27,11 @@ class Booking(models.Model):
         on_delete=models.CASCADE,
         related_name="bookings"
     )
+    pets = models.ManyToManyField(
+        "profiles.Pet",
+        related_name="bookings",
+        blank=False
+    )
     service_type = models.CharField(
         max_length=20,
         choices=SERVICE_CHOICES,
@@ -43,5 +48,5 @@ class Booking(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Booking #{self.id} | {self.owner} → {self.sitter} ({self.status}) [{self.service_type}]"
-
+        pet_names = ", ".join([pet.name for pet in self.pets.all()])
+        return f"Booking #{self.id} | {self.owner} → {self.sitter} ({self.status}) [{self.service_type}] - Pets: {pet_names}"

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q
 from .models import Booking
-from profiles.models import SitterProfile
+from profiles.models import SitterProfile, Pet
 from availability.models import AvailabilitySlot
 
 
@@ -13,6 +13,14 @@ class BookingSerializer(serializers.ModelSerializer):
         queryset=SitterProfile.objects.all(),
         write_only=True
     )
+    # NEW: Accept list of pet IDs for write, return pet details for read
+    pets = serializers.PrimaryKeyRelatedField(
+        queryset=Pet.objects.all(),
+        many=True,
+        write_only=True
+    )
+    pet_ids = serializers.SerializerMethodField(read_only=True)
+    pet_details = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Booking
@@ -21,6 +29,9 @@ class BookingSerializer(serializers.ModelSerializer):
             "owner_id",
             "sitter_id",
             "sitter",
+            "pets",  # Write only
+            "pet_ids",  # Read only - just IDs
+            "pet_details",  # Read only - full pet info
             "service_type",
             "start_ts",
             "end_ts",
@@ -29,7 +40,41 @@ class BookingSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = ("id", "created_at", "updated_at", "pet_ids", "pet_details")
+
+    def get_pet_ids(self, obj):
+        """Return list of pet IDs"""
+        return [pet.id for pet in obj.pets.all()]
+    
+    def get_pet_details(self, obj):
+        """Return list of pet details"""
+        return [
+            {
+                "id": pet.id,
+                "name": pet.name,
+                "species": pet.species,
+                "breed": pet.breed,
+            }
+            for pet in obj.pets.all()
+        ]
+
+    def validate_pets(self, pets):
+        """Validate that pets belong to the owner"""
+        user = self.context["request"].user
+        try:
+            owner_profile = user.owner_profile
+        except AttributeError:
+            raise ValidationError("Authenticated user must have an owner profile.")
+        
+        if not pets:
+            raise ValidationError("At least one pet is required for booking.")
+        
+        # Check all pets belong to this owner
+        for pet in pets:
+            if pet.owner != owner_profile:
+                raise ValidationError(f"Pet '{pet.name}' does not belong to you.")
+        
+        return pets
 
     def validate(self, attrs):
         sitter = attrs.get("sitter")
@@ -94,5 +139,23 @@ class BookingSerializer(serializers.ModelSerializer):
             owner_profile = user.owner_profile
         except AttributeError:
             raise ValidationError("Authenticated user must have an owner profile.")
+        
+        pets = validated_data.pop('pets')
+        
         validated_data["owner"] = owner_profile
-        return super().create(validated_data)
+        booking = super().create(validated_data)
+        
+        booking.pets.set(pets)
+        
+        return booking
+    
+    def update(self, instance, validated_data):
+        # Handle pets separately if included in update
+        pets = validated_data.pop('pets', None)
+        
+        booking = super().update(instance, validated_data)
+        
+        if pets is not None:
+            booking.pets.set(pets)
+        
+        return booking

@@ -188,25 +188,63 @@ class OwnerProfileViewSet(viewsets.ModelViewSet):
 # -----------------------------
 # Pet ViewSet (nested under owner)
 # -----------------------------
+
 class PetViewSet(viewsets.ModelViewSet):
     """
     Nested CRUD for Pets under an owner:
-    /owners/<owner_id>/pets/
+    /api/profiles/owners/<owner_id>/pets/
     """
     serializer_class = PetSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         owner_id = self.kwargs.get("owner_pk")
-        owner = OwnerProfile.objects.get(pk=owner_id)
+        
+        try:
+            owner = OwnerProfile.objects.get(pk=owner_id)
+        except OwnerProfile.DoesNotExist:
+            raise PermissionDenied("Owner profile not found.")
+        
         # Only allow owner to see their own pets
-        if owner.user != self.request.user:
+        # Check if request user has an owner profile first
+        try:
+            request_owner_profile = self.request.user.owner_profile
+        except AttributeError:
+            raise PermissionDenied("You must have an owner profile to access pets.")
+        
+        if owner != request_owner_profile:
             raise PermissionDenied("You cannot access pets of another owner.")
+        
         return owner.pets.all()
 
     def perform_create(self, serializer):
         owner_id = self.kwargs.get("owner_pk")
-        owner = OwnerProfile.objects.get(pk=owner_id)
-        if owner.user != self.request.user:
+        
+        try:
+            owner = OwnerProfile.objects.get(pk=owner_id)
+        except OwnerProfile.DoesNotExist:
+            raise PermissionDenied("Owner profile not found.")
+        
+        # Check if request user has an owner profile
+        try:
+            request_owner_profile = self.request.user.owner_profile
+        except AttributeError:
+            raise PermissionDenied("You must have an owner profile to add pets.")
+        
+        if owner != request_owner_profile:
             raise PermissionDenied("You cannot add pets to another owner.")
+        
         serializer.save(owner=owner)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def my_pets(self, request):
+        """
+        Return the authenticated user's pets.
+        """
+        try:
+            owner = request.user.owner_profile  # If the user is an Owner
+            pets = owner.pets.all()
+            serializer = self.get_serializer(pets, many=True)
+            return Response(serializer.data)
+        except OwnerProfile.DoesNotExist:
+            return Response({"detail": "You do not have an associated owner profile."}, status=400)
