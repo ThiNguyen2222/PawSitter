@@ -22,12 +22,14 @@ const Dashboard = () => {
     <>
       <ResponsiveMenu open={open} />
 
-      <HeroSection
-        title="Welcome Back, Paw Parent!"
-        subtitle="Manage your bookings, messages, and sitter requests all in one place."
-        buttonText="Get Started"
-        onButtonClick={() => navigate("/owner/booking")}
-      />
+      <div className="pt-24">
+        <HeroSection
+          title="Welcome Back, Paw Parent!"
+          subtitle="Manage your bookings, messages, and sitter requests all in one place."
+          buttonText="Get Started"
+          onButtonClick={() => navigate("/owner/booking")}
+        />
+      </div>
 
       <PetsSection />
       <SittersSection />

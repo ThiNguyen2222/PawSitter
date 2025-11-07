@@ -1,9 +1,12 @@
+// scr/pages/owner/Profile.jsx
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
-import { getOwnerProfile } from "../../api/api";
+import { getMyOwnerProfile } from "../../api/api";
 import { getSitterImage, getPetImage } from "./dashboard/utils";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [pets, setPets] = useState([]);
@@ -23,14 +26,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user || !user.id) {
-          setError("User not found. Please log in again.");
-          setLoading(false);
-          return;
-        }
-
-        const data = await getOwnerProfile(user.id);
+        const data = await getMyOwnerProfile();
         setProfile(data);
         setPets(Array.isArray(data.pets) ? data.pets : []);
       } catch (err) {
@@ -86,18 +82,18 @@ const Profile = () => {
   };
 
   if (loading)
-    return <div className="text-center py-10 text-gray-600">Loading profile...</div>;
+    return <div className="text-center py-10 pt-32 text-gray-600">Loading profile...</div>;
   if (error)
-    return <div className="text-center py-10 text-red-500">{error}</div>;
+    return <div className="text-center py-10 pt-32 text-red-500">{error}</div>;
   if (!profile)
-    return <div className="text-center py-10 text-gray-600">No profile data found.</div>;
+    return <div className="text-center py-10 pt-32 text-gray-600">No profile data found.</div>;
 
   return (
     <>
       <ResponsiveMenu open={open} />
 
       {/* --- Banner Section --- */}
-      <section className="container flex justify-between items-center">
+      <section className="container flex justify-between items-center pt-24">
         <div
           className="w-full h-64 md:h-80"
           style={getBannerStyle(profile.banner_picture_url)}
@@ -105,36 +101,39 @@ const Profile = () => {
       </section>
 
        {/* --- Profile Info Section --- */}
-<div className="bg-white flex justify-center">
-  <div className="w-[85%] md:w-[80%] border-b border-gray-200">
-  <div className="container mx-auto px-1 py-8">
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-6 md:px-20">
-      <div className="flex items-center gap-6 -mt-8 md:-mt-12 w-full md:w-auto justify-between md:justify-start md:mr-auto">
-        <img
-          src={getProfilePictureUrl(profile.profile_picture_url)}
-          onError={(e) => (e.target.src = getSitterImage(null, 0))}
-          alt={profile.name || "Pet Owner"}
-          className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-white object-cover bg-gray-100 shadow-lg"
-        />
+      <div className="bg-white flex justify-center">
+        <div className="w-[85%] md:w-[80%] border-b border-gray-200">
+        <div className="container mx-auto px-1 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-6 md:px-20">
+            <div className="flex items-center gap-6 -mt-8 md:-mt-12 w-full md:w-auto justify-between md:justify-start md:mr-auto">
+              <img
+                src={getProfilePictureUrl(profile.profile_picture_url)}
+                onError={(e) => (e.target.src = getSitterImage(null, 0))}
+                alt={profile.name || "Pet Owner"}
+                className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-white object-cover bg-gray-100 shadow-lg"
+              />
 
-        <div className="mt-2 md:mt-0">
-          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
-            {profile.name || "Pet Owner's Name"}
-          </h1>
-          <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p>
-          <p className="text-gray-500 text-sm mt-0.5">
-            {profile.phone || "phone number"}
-          </p>
+              <div className="mt-2 md:mt-0">
+                <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
+                  {profile.name || "Pet Owner's Name"}
+                </h1>
+                <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p>
+                <p className="text-gray-500 text-sm mt-0.5">
+                  {profile.phone || "phone number"}
+                </p>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => navigate("/owner/edit-profile")}
+              className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2"
+            >
+              Edit profile
+            </button>
+          </div>
         </div>
       </div>
-
-      <button className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2">
-        Edit profile
-      </button>
-    </div>
-  </div>
-</div>
-</div>
+      </div>
 
       {/* --- Profile Body Section --- */}
       <section className="container flex justify-between items-center py-8">

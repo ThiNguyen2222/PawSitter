@@ -53,14 +53,14 @@ const LoginNavbar = () => {
     navigate("/login", { replace: true });
   };
 
-  // ✅ Only one return statement — with conditional UI
+  // Only one return statement — with conditional UI
   return (
     <>
       {basePath === null ? (
         <div style={{ height: "80px" }}></div> // temporary placeholder
       ) : (
         <>
-          <nav>
+          <nav className="absolute top-0 left-0 right-0 z-50 bg-transparent">
             <div className="container flex justify-between items-center py-8">
               {/* Logo → goes to the correct dashboard */}
               <div className="text-2xl flex items-center gap-2 font-bold uppercase">

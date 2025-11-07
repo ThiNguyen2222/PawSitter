@@ -14,12 +14,14 @@ import Home from "./pages/Landing";
 import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
 import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
-import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
 import OwnerBooking from "./pages/owner/booking/Booking";
 import OwnerProfile from "./pages/owner/Profile";
+import EditProfile from "./pages/owner/EditProfile";
+import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
 import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 
 import API from "./api/api";
+
 
 const AppContent = () => {
   const { pathname } = useLocation();
@@ -102,6 +104,7 @@ const AppContent = () => {
         <Route path="/owner/booking" element={Protected(<OwnerBooking />)} />
         <Route path="/owner/dashboard" element={Protected(<OwnerDashboard />)} />
         <Route path="/owner/profile" element={Protected(<OwnerProfile />)} />
+        <Route path="/owner/edit-profile" element={Protected(<EditProfile />)} />
         
         {/* Protected Routes to sitter/... */}
         <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />
