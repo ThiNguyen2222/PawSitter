@@ -457,7 +457,7 @@ const EditProfile = () => {
                     {/* Banner Picture Section */}
                     <div className="mb-8 pb-8 border-b border-gray-200">
                       <h2 className="text-lg font-semibold text-gray-800 mb-4">Banner Picture</h2>
-                      <label className="bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/90 transition cursor-pointer inline-block">
+                      <label className="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition cursor-pointer inline-block">
                         Upload Banner
                         <input
                           type="file"
@@ -608,7 +608,7 @@ const EditProfile = () => {
                               className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200"
                             />
                           )}
-                          <label className="bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/90 transition cursor-pointer">
+                          <label className="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition cursor-pointer">
                             Choose File
                             <input
                               type="file"
@@ -761,7 +761,7 @@ const EditProfile = () => {
                           <div className="flex gap-2 mt-4">
                             <button
                               onClick={() => handleEditPet(pet)}
-                              className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition text-sm"
+                              className="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition text-sm"
                             >
                               Edit
                             </button>
