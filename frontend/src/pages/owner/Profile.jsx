@@ -97,46 +97,48 @@ const Profile = () => {
       <ResponsiveMenu open={open} />
 
       {/* --- Banner Section --- */}
-      <section className="w-full flex justify-between items-center py-8">
+      <section className="container flex justify-between items-center">
         <div
-          className="w-full h-48"
+          className="w-full h-64 md:h-80"
           style={getBannerStyle(profile.banner_picture_url)}
         ></div>
       </section>
 
-      {/* --- Profile Info Section --- */}
-      <section className="container flex justify-between items-center py-8">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center bg-white px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center gap-6 -mt-12 md:-mt-16">
-              <img
-                src={getProfilePictureUrl(profile.profile_picture_url)}
-                onError={(e) => (e.target.src = getSitterImage(null, 0))}
-                alt={profile.name || "Pet Owner"}
-                className="w-28 h-28 rounded-full border-4 border-white object-cover bg-gray-100"
-              />
+       {/* --- Profile Info Section --- */}
+<div className="bg-white flex justify-center">
+  <div className="w-[85%] md:w-[80%] border-b border-gray-200">
+  <div className="container mx-auto px-1 py-8">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-6 md:px-20">
+      <div className="flex items-center gap-6 -mt-8 md:-mt-12 w-full md:w-auto justify-between md:justify-start md:mr-auto">
+        <img
+          src={getProfilePictureUrl(profile.profile_picture_url)}
+          onError={(e) => (e.target.src = getSitterImage(null, 0))}
+          alt={profile.name || "Pet Owner"}
+          className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-white object-cover bg-gray-100 shadow-lg"
+        />
 
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  {profile.name || "Pet Owner's Name"}
-                </h1>
-                <p className="text-gray-600">{profile.email || "email@example.com"}</p>
-                <p className="text-gray-500 text-sm">
-                  {profile.phone || "phone number"}
-                </p>
-              </div>
-            </div>
-
-            <button className="mt-4 md:mt-0 bg-secondary text-white px-5 py-2 rounded-lg font-semibold hover:bg-secondary/80 transition">
-              Edit Profile
-            </button>
-          </div>
+        <div className="mt-2 md:mt-0">
+          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
+            {profile.name || "Pet Owner's Name"}
+          </h1>
+          <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p>
+          <p className="text-gray-500 text-sm mt-0.5">
+            {profile.phone || "phone number"}
+          </p>
         </div>
-      </section>
+      </div>
+
+      <button className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2">
+        Edit profile
+      </button>
+    </div>
+  </div>
+</div>
+</div>
 
       {/* --- Profile Body Section --- */}
       <section className="container flex justify-between items-center py-8">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-1 ">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Left Column */}
             <div className="space-y-6">
