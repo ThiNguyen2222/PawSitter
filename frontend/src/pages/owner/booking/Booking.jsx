@@ -111,6 +111,7 @@ const Booking = () => {
     try {
       const newBooking = await createBooking({
         sitter: parseInt(formData.sitterId),
+        pets: formData.selectedPets.map(id => parseInt(id)),
         service_type: formData.serviceType,
         start_ts: `${formData.startDate}T${formData.startTime}:00`,
         end_ts: `${formData.endDate}T${formData.endTime}:00`,
