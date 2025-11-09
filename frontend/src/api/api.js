@@ -52,6 +52,11 @@ export const getSitterProfile = async (sitterId) => {
   return res.data;
 };
 
+export const getMySitterProfile = async () => {
+  const res = await API.get("profiles/sitters/me/");
+  return res.data;
+};
+
 export const createSitterProfile = async (profileData) => {
   const res = await API.post("profiles/sitters/", profileData);
   return res.data;
