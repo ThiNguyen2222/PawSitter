@@ -28,7 +28,51 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const data = await getMySitterProfile();
-        setProfile(data);
+
+        // Normalize image URLs (serializer may return field name or *_url)
+        const pic =
+          data?.profile_picture_url ??
+          data?.profile_picture ??
+          "";
+        const banner =
+          data?.banner_picture_url ??
+          data?.banner_picture ??
+          "";
+
+        // Build absolute/relative-safe URLs
+        const normalizeUrl = (u) => {
+          if (!u) return "";
+          if (typeof u !== "string") return "";
+          return u.startsWith("http") ? u : `http://127.0.0.1:8000${u}`;
+        };
+
+        // Normalize sitter core fields
+        const normalized = {
+          name:
+            data?.display_name ||
+            [data?.user?.first_name, data?.user?.last_name].filter(Boolean).join(" ") ||
+            data?.user?.username ||
+            "",
+          email: data?.user?.email || data?.email || "",
+          phone: data?.user?.phone || data?.contact_phone || "",
+          bio: data?.bio || "",
+          profile_picture_url: normalizeUrl(pic),
+          banner_picture_url: normalizeUrl(banner),
+        };
+        setProfile(normalized);
+
+        // Normalize "services" from tags + specialties (both lists of objects with .name)
+        const tagList = Array.isArray(data?.tags) ? data.tags : [];
+        const specList = Array.isArray(data?.specialties) ? data.specialties : [];
+        const merged = [...tagList, ...specList];
+
+        const servicesNorm = merged.map((item) => {
+          // Accept shapes: {name: "Birds"}, "Birds", {label: "Birds"}
+          if (typeof item === "string") return { id: item, name: item };
+          const nm = item?.name || item?.label || item?.title || item?.type || "Service";
+          return { id: item?.id ?? nm, name: nm };
+        });
+        setServices(servicesNorm);
 
         // Try a few common shapes from API
         const svc =
@@ -99,7 +143,7 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-6 md:px-20">
               <div className="flex items-center gap-6 -mt-8 md:-mt-12 w-full md:w-auto justify-between md:justify-start md:mr-auto">
                 <img
-                  src={getProfilePictureUrl(profile.profile_picture_url)}
+                  src={profile.profile_picture_url || getSitterImage(null, 0)}
                   onError={(e) => (e.target.src = getSitterImage(null, 0))}
                   alt={profile.name || "Pet Sitter"}
                   className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-white object-cover bg-gray-100 shadow-lg"
@@ -134,7 +178,7 @@ const Profile = () => {
               <div className="bg-white border border-gray-200 rounded-lg p-5">
                 <h3 className="text-xl font-semibold text-primary mb-3">Bio</h3>
                 <p className="text-gray-700 text-lg">
-                  {profile.notes || profile.bio || "No bio available yet."}
+                  {profile.bio || "No bio available yet."}
                 </p>
               </div>
 
