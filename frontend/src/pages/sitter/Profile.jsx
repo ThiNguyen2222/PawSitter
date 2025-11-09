@@ -5,6 +5,8 @@ import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMySitterProfile } from "../../api/api";
 // NOTE: utils is under owner/dashboard in your structure
 import { getSitterImage, getPetImage } from "../owner/dashboard/utils";
+import pawIcon from "../../assets/images/paw.png";
+console.log("paw icon path:", pawIcon);
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -74,12 +76,15 @@ const Profile = () => {
         });
         setServices(servicesNorm);
 
-        // Try a few common shapes from API
-        const svc =
-          (Array.isArray(data?.services) && data.services) ||
-          (Array.isArray(data?.listings) && data.listings) ||
-          [];
+        // Build services from tags + specialties (Both are arrays of { id, name, slug })
+        const tags        = Array.isArray(data?.tags) ? data.tags : [];
+        const specialties = Array.isArray(data?.specialties) ? data.specialties : [];
+        const svc = [
+          ...tags.map(t => ({ id: t.id ?? t.name, name: t.name })),
+          ...specialties.map(s => ({ id: s.id ?? s.slug ?? s.name, name: s.name ?? s.slug })),
+        ];
         setServices(svc);
+        
       } catch (err) {
         console.error("Error fetching sitter profile:", err);
         setError("Failed to load profile.");
@@ -204,31 +209,15 @@ const Profile = () => {
                 <div className="flex flex-col gap-4">
                   {services.map((svc) => (
                     <div
-                      key={svc.id || `${svc.name}-${svc.species || ""}`}
+                      key={svc.id || `${svc.name}`}
                       className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-none"
                     >
-                      <img
-                        src={getServiceThumb(svc)}
-                        onError={(e) => (e.target.src = getPetImage("default"))}
-                        alt={svc.name || "Service"}
-                        className="w-20 h-20 rounded-lg object-cover bg-gray-100"
-                      />
+                      {/* WORK IM PROGRESS*/}
+                      <img src={pawIcon} alt="paw" style={{ width: 30, height: 30 }} />
                       <div>
                         <h4 className="text-lg font-semibold text-gray-800">
                           {svc.name || "Service"}
                         </h4>
-                        <p className="text-gray-600 text-base capitalize">
-                          {(svc.species || svc.pet_type || "all pets") +
-                            (svc.breed ? ` — ${svc.breed}` : "")}
-                        </p>
-                        {svc.rate ? (
-                          <p className="text-gray-700 text-base mt-1">
-                            Rate: {typeof svc.rate === "number" ? `$${svc.rate}` : svc.rate}
-                          </p>
-                        ) : null}
-                        <p className="text-gray-700 text-base mt-1">
-                          {svc.description || svc.notes || "Caring and reliable sitter service"}
-                        </p>
                       </div>
                     </div>
                   ))}
