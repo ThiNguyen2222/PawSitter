@@ -1,157 +1,201 @@
+// src/pages/sitter/Profile.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import ResponsiveMenu from "../../components/ResponsiveMenu";
+import { getMySitterProfile } from "../../api/api";
+// NOTE: utils is under owner/dashboard in your structure
+import { getSitterImage, getPetImage } from "../owner/dashboard/utils";
 
-const SitterDashboardPage = ({ sitterId }) => {
-  const [sitterProfile, setSitterProfile] = useState({});
-  const [userInfo, setUserInfo] = useState({ user: "", email: "" });
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
+const Profile = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  // Close mobile menu on resize
   useEffect(() => {
-    if (!sitterId) return;
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    // Fetch sitter profile
-    axios.get(`http://localhost:3000/api/sitters/${sitterId}/`)
-      .then(res => {
-        const data = res.data;
-        setSitterProfile(data);
-        if (data.user) setUserInfo({ user: data.user.username, email: data.user.email });
-      })
-      .catch(err => console.error("Error fetching sitter profile:", err));
-  }, [sitterId]);
+  // Fetch sitter profile + services
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getMySitterProfile();
+        setProfile(data);
 
-  // Handle profile field changes
-  const handleProfileChange = (e) => {
-    setSitterProfile({ ...sitterProfile, [e.target.name]: e.target.value });
+        // Try a few common shapes from API
+        const svc =
+          (Array.isArray(data?.services) && data.services) ||
+          (Array.isArray(data?.listings) && data.listings) ||
+          [];
+        setServices(svc);
+      } catch (err) {
+        console.error("Error fetching sitter profile:", err);
+        setError("Failed to load profile.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const getProfilePictureUrl = (pictureUrl) => {
+    if (!pictureUrl) return getSitterImage(null, 0);
+    if (pictureUrl.startsWith("http")) return pictureUrl;
+    return `http://127.0.0.1:8000${pictureUrl}`;
   };
 
-  // Handle user field changes
-  const handleUserChange = (e) => {
-    setUserInfo({ ...userInfo, [e.target.name]: e.target.value });
+  const getBannerStyle = (bannerUrl) => {
+    if (!bannerUrl) return { backgroundColor: "#dbeafe" };
+    if (bannerUrl.startsWith("http")) {
+      return {
+        backgroundImage: `url(${bannerUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    }
+    return {
+      backgroundImage: `url(http://127.0.0.1:8000${bannerUrl})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
   };
 
-  const validateInputs = () => {
-    let newErrors = {};
-    if (!sitterProfile.display_name) newErrors.display_name = "Display name is required.";
-    if (!userInfo.user) newErrors.user = "Username is required.";
-    if (userInfo.email && !/\S+@\S+\.\S+/.test(userInfo.email))
-      newErrors.email = "Invalid email format.";
-    if (password && password.length < 6)
-      newErrors.password = "Password must be at least 6 characters.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const getServiceThumb = (service) => {
+    // Prefer explicit image; otherwise species/pet_type-based fallback
+    if (service?.image_url) {
+      return service.image_url.startsWith("http")
+        ? service.image_url
+        : `http://127.0.0.1:8000${service.image_url}`;
+    }
+    const species = service?.species || service?.pet_type || "default";
+    return getPetImage(species);
   };
 
-  // Save sitter profile
-  const saveProfile = () => {
-    if (!validateInputs()) return;
-
-    axios.put(`http://localhost:3000/api/sitters/${sitterId}/`, sitterProfile)
-      .then(() => alert("Profile updated successfully!"))
-      .catch(err => console.error("Error updating profile:", err));
-  };
-
-  // Save user account info
-  const saveUser = () => {
-    if (!validateInputs()) return;
-
-    axios.put(`http://localhost:3000/api/users/${sitterId}/`, {
-      user: userInfo.user,
-      email: userInfo.email,
-      password: password,
-    })
-    .then(() => {
-      alert("User info updated!");
-      setPassword(""); 
-    })
-    .catch(err => console.error("Error updating user info:", err));
-  };
+  if (loading) return <div className="text-center py-10 pt-32 text-gray-600">Loading profile...</div>;
+  if (error) return <div className="text-center py-10 pt-32 text-red-500">{error}</div>;
+  if (!profile) return <div className="text-center py-10 pt-32 text-gray-600">No profile data found.</div>;
 
   return (
-    <div>
-      <h1>Sitter Dashboard</h1>
+    <>
+      <ResponsiveMenu open={open} />
 
-      <h2>Edit Profile</h2>
-      <input
-        type="text"
-        name="display_name"
-        value={sitterProfile.display_name || ""}
-        onChange={handleProfileChange}
-        placeholder="Display Name"
-      />
-      {errors.display_name && <p style={{ color: "red" }}>{errors.display_name}</p>}
+      {/* --- Banner Section --- */}
+      <section className="container flex justify-between items-center pt-24">
+        <div className="w-full h-64 md:h-80" style={getBannerStyle(profile.banner_picture_url)} />
+      </section>
 
-      <textarea
-        name="bio"
-        value={sitterProfile.bio || ""}
-        onChange={handleProfileChange}
-        placeholder="Bio"
-      />
+      {/* --- Profile Info Section --- */}
+      <div className="bg-white flex justify-center">
+        <div className="w-[85%] md:w-[80%] border-b border-gray-200">
+          <div className="container mx-auto px-1 py-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-6 md:px-20">
+              <div className="flex items-center gap-6 -mt-8 md:-mt-12 w-full md:w-auto justify-between md:justify-start md:mr-auto">
+                <img
+                  src={getProfilePictureUrl(profile.profile_picture_url)}
+                  onError={(e) => (e.target.src = getSitterImage(null, 0))}
+                  alt={profile.name || "Pet Sitter"}
+                  className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-white object-cover bg-gray-100 shadow-lg"
+                />
+                <div className="mt-2 md:mt-0">
+                  <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
+                    {profile.name || "Pet Sitter's Name"}
+                  </h1>
+                  <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p>
+                  <p className="text-gray-500 text-sm mt-0.5">{profile.phone || "phone number"}</p>
+                </div>
+              </div>
 
-      <input
-        type="number"
-        name="rate_hourly"
-        value={sitterProfile.rate_hourly || ""}
-        onChange={handleProfileChange}
-        placeholder="Rate per Hour"
-      />
+              <button
+                onClick={() => navigate("/sitter/edit-profile")}
+                className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2"
+              >
+                Edit profile
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <input
-        type="number"
-        name="service_radius_km"
-        value={sitterProfile.service_radius_km || ""}
-        onChange={handleProfileChange}
-        placeholder="Service Radius (km)"
-      />
+      {/* --- Profile Body Section --- */}
+      <section className="container flex justify-between items-center py-8">
+        <div className="container mx-auto px-1 ">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Bio */}
+              <div className="bg-white border border-gray-200 rounded-lg p-5">
+                <h3 className="text-xl font-semibold text-primary mb-3">Bio</h3>
+                <p className="text-gray-700 text-lg">
+                  {profile.notes || profile.bio || "No bio available yet."}
+                </p>
+              </div>
 
-      <input
-        type="text"
-        name="home_zip"
-        value={sitterProfile.home_zip || ""}
-        onChange={handleProfileChange}
-        placeholder="Home Zip"
-      />
+              {/* Photos */}
+              <div className="bg-white border border-gray-200 rounded-lg p-5">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-xl font-semibold text-primary">Photos</h3>
+                  <button className="text-blue-600 text-md hover:underline">See all photos</button>
+                </div>
+                <div className="w-full h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                  No photos uploaded
+                </div>
+              </div>
+            </div>
 
-      <input
-        type="text"
-        name="verification_status"
-        value={sitterProfile.verification_status || ""}
-        onChange={handleProfileChange}
-        placeholder="Verification Status"
-      />
+            {/* Right Column - My Services */}
+            <div className="bg-white border border-gray-200 rounded-lg p-5">
+              <h3 className="text-xl font-semibold text-primary mb-5">My Services</h3>
 
-      <button onClick={saveProfile}>Save Profile</button>
-
-      <h2>Edit Account Info</h2>
-      <input
-        type="text"
-        name="user"
-        value={userInfo.user || ""}
-        onChange={handleUserChange}
-        placeholder="Username"
-      />
-      {errors.user && <p style={{ color: "red" }}>{errors.user}</p>}
-
-      <input
-        type="email"
-        name="email"
-        value={userInfo.email || ""}
-        onChange={handleUserChange}
-        placeholder="Email"
-      />
-      {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
-
-      <input
-        type="password"
-        placeholder="New Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      {errors.password && <p style={{ color: "red" }}>{errors.password}</p>}
-
-      <button onClick={saveUser}>Save Account</button>
-    </div>
+              {services.length === 0 ? (
+                <p className="text-gray-600 text-sm">No services listed yet.</p>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {services.map((svc) => (
+                    <div
+                      key={svc.id || `${svc.name}-${svc.species || ""}`}
+                      className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-none"
+                    >
+                      <img
+                        src={getServiceThumb(svc)}
+                        onError={(e) => (e.target.src = getPetImage("default"))}
+                        alt={svc.name || "Service"}
+                        className="w-20 h-20 rounded-lg object-cover bg-gray-100"
+                      />
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-800">
+                          {svc.name || "Service"}
+                        </h4>
+                        <p className="text-gray-600 text-base capitalize">
+                          {(svc.species || svc.pet_type || "all pets") +
+                            (svc.breed ? ` — ${svc.breed}` : "")}
+                        </p>
+                        {svc.rate ? (
+                          <p className="text-gray-700 text-base mt-1">
+                            Rate: {typeof svc.rate === "number" ? `$${svc.rate}` : svc.rate}
+                          </p>
+                        ) : null}
+                        <p className="text-gray-700 text-base mt-1">
+                          {svc.description || svc.notes || "Caring and reliable sitter service"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 
-export default SitterDashboardPage;
+export default Profile;

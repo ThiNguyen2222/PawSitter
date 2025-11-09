@@ -13,11 +13,14 @@ import LoginNavbar from "./components/LoginNavbar";
 import Home from "./pages/Landing";
 import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
+
 import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import OwnerBooking from "./pages/owner/booking/Booking";
 import OwnerProfile from "./pages/owner/Profile";
 import EditProfile from "./pages/owner/EditProfile";
+
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
+import SitterProfile from "./pages/sitter/Profile";
 import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 
 import API from "./api/api";
@@ -109,6 +112,7 @@ const AppContent = () => {
         {/* Protected Routes to sitter/... */}
         <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />
         <Route path="/sitter/availability" element={Protected(<AvailabilityPage />)} />
+        <Route path="/sitter/profile" element={Protected(<SitterProfile />)} />
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
