@@ -22,6 +22,8 @@ import EditProfile from "./pages/owner/EditProfile";
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
 import SitterProfile from "./pages/sitter/Profile";
 import AvailabilityPage from "./pages/sitter/AvailabilityPage";
+import EditProfileS from "./pages/sitter/EditProfileS"; 
+
 
 import API from "./api/api";
 
@@ -113,6 +115,7 @@ const AppContent = () => {
         <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />
         <Route path="/sitter/availability" element={Protected(<AvailabilityPage />)} />
         <Route path="/sitter/profile" element={Protected(<SitterProfile />)} />
+        <Route path="/sitter/edit-profile" element={Protected(<EditProfileS />)} />
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
