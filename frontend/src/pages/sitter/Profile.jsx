@@ -212,7 +212,7 @@ const Profile = () => {
                       key={svc.id || `${svc.name}`}
                       className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-none"
                     >
-                      {/* WORK IM PROGRESS*/}
+                      {/* paw icon next to sitter tags & specialties  */}
                       <img src={pawIcon} alt="paw" style={{ width: 30, height: 30 }} />
                       <div>
                         <h4 className="text-lg font-semibold text-gray-800">
