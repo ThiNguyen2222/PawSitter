@@ -67,6 +67,17 @@ const Profile = () => {
         };
         setProfile(normalized);
 
+        // Prefer pre-flattened names from serializer; fall back to objects
+        const tagsRaw  = Array.isArray(data?.tag_names) ? data.tag_names
+              : Array.isArray(data?.tags) ? data.tags : [];
+        const specsRaw = Array.isArray(data?.specialty_slugs) ? data.specialty_slugs
+              : Array.isArray(data?.specialties) ? data.specialties : [];
+        // Convert to strings, dedupe, and keep it tidy
+        const toName = (x) => typeof x === "string" ? x : (x?.name ?? x?.slug ?? x?.label ?? "Tag");
+        const tagStrings = [...new Set([...tagsRaw, ...specsRaw].map(toName))];
+        setProfile(prev => ({ ...prev, tags: tagStrings }));
+
+
         // Normalize "services" from tags + specialties (both lists of objects with .name)
         const tagList = Array.isArray(data?.tags) ? data.tags : [];
         const specList = Array.isArray(data?.specialties) ? data.specialties : [];
@@ -200,20 +211,20 @@ const Profile = () => {
               <div className="bg-white border border-gray-200 rounded-lg p-5">
                 <h3 className="text-xl font-semibold text-primary mb-3">My Specialties</h3>
 
-                {(!profile.tags || profile.tags.length === 0) && (
+                {!profile.tags?.length ? (
                   <p className="text-gray-500 text-sm">No specialties listed yet.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.tags.slice(0, 12).map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-secondary/20 text-secondary text-sm font-semibold px-3 py-1 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
-
-                <div className="flex flex-wrap justify-start gap-2">
-                  {profile.tags?.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="bg-secondary/20 text-secondary text-sm font-semibold px-3 py-1 rounded-full"
-                    >
-                      {tag.name || tag}
-                    </span>
-                  ))}
-                </div>
               </div>
             </div>
 
