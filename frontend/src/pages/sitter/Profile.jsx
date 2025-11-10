@@ -43,7 +43,7 @@ const Profile = () => {
 
         // Build absolute/relative-safe URLs
         const normalizeUrl = (u) => {
-          if (!u) return "";
+          if (!u || typeof u !== "string") return "";
           if (typeof u !== "string") return "";
           return u.startsWith("http") ? u : `http://127.0.0.1:8000${u}`;
         };
@@ -56,6 +56,10 @@ const Profile = () => {
             data?.user?.username ||
             "",
           email: data?.user?.email || data?.email || "",
+
+          rate_hourly: data?.rate_hourly ?? null,
+          avg_rating:  data?.avg_rating  ?? null,
+
           phone: data?.user?.phone || data?.contact_phone || "",
           bio: data?.bio || "",
           profile_picture_url: normalizeUrl(pic),
@@ -85,6 +89,8 @@ const Profile = () => {
         ];
         setServices(svc);
         
+        console.log("Sitter profile payload →", data);
+        console.log("Normalized profile →", normalized);
       } catch (err) {
         console.error("Error fetching sitter profile:", err);
         setError("Failed to load profile.");
@@ -160,7 +166,7 @@ const Profile = () => {
                   {/* <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p> */}
                   {/* <p className="text-gray-500 text-sm mt-0.5">{profile.phone || "phone number"}</p> */}
                   {/* ⭐️ Add rate & rating here */}
-                  <p className="text-gray-600 mt-1">{profile.rate_hourly ? `$${profile.rate_hourly}/hr` : "Hourly rate not set"}</p>
+                  <p className="text-gray-600 mt-1">{profile.rate_hourly ? `$${profile.rate_hourly}/night` : "Hourly rate not set"}</p>
                   <p className="text-gray-600 mt-1">⭐ {profile.avg_rating ? profile.avg_rating.toFixed(1) : "No ratings yet"}</p>
                 </div>
               </div>
