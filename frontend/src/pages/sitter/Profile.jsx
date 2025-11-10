@@ -157,8 +157,11 @@ const Profile = () => {
                   <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
                     {profile.name || "Pet Sitter's Name"}
                   </h1>
-                  <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p>
-                  <p className="text-gray-500 text-sm mt-0.5">{profile.phone || "phone number"}</p>
+                  {/* <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p> */}
+                  {/* <p className="text-gray-500 text-sm mt-0.5">{profile.phone || "phone number"}</p> */}
+                  {/* ⭐️ Add rate & rating here */}
+                  <p className="text-gray-600 mt-1">{profile.rate_hourly ? `$${profile.rate_hourly}/hr` : "Hourly rate not set"}</p>
+                  <p className="text-gray-600 mt-1">⭐ {profile.avg_rating ? profile.avg_rating.toFixed(1) : "No ratings yet"}</p>
                 </div>
               </div>
 
