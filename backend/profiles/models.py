@@ -143,6 +143,7 @@ class SitterProfile(models.Model):
     home_zip = models.CharField(max_length=20)
     avg_rating = models.FloatField(default=0.0)
     verification_status = models.CharField(max_length=20, default="PENDING")
+    phone = models.CharField(max_length=20, blank=True, null=True)  # 👈 added phone num field for sitter
 
     profile_picture = models.ImageField(upload_to=sitter_profile_picture_path, blank=True, null=True)
     banner_picture = models.ImageField(upload_to=sitter_banner_picture_path, blank=True, null=True)
