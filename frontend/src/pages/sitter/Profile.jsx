@@ -196,14 +196,23 @@ const Profile = () => {
                 </p>
               </div>
 
-              {/* Photos */}
+              {/* Tags / Specialties Section */}
               <div className="bg-white border border-gray-200 rounded-lg p-5">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-xl font-semibold text-primary">Photos</h3>
-                  <button className="text-blue-600 text-md hover:underline">See all photos</button>
-                </div>
-                <div className="w-full h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                  No photos uploaded
+                <h3 className="text-xl font-semibold text-primary mb-3">My Specialties</h3>
+
+                {(!profile.tags || profile.tags.length === 0) && (
+                  <p className="text-gray-500 text-sm">No specialties listed yet.</p>
+                )}
+
+                <div className="flex flex-wrap justify-start gap-2">
+                  {profile.tags?.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-secondary/20 text-secondary text-sm font-semibold px-3 py-1 rounded-full"
+                    >
+                      {tag.name || tag}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
