@@ -53,6 +53,7 @@ class ProfileSerializerTests(TestCase):
             rate_hourly=Decimal("15.00"),
             service_radius_km=10,
             home_zip="12345"
+            phone="0987654321" # ✅ Added
         )
         self.sitter_profile.tags.set([self.tag1, self.tag2])
         self.sitter_profile.specialties.set([self.spec1, self.spec2])
@@ -120,6 +121,7 @@ class ProfileSerializerTests(TestCase):
         self.assertIn("banner_picture_url", data)
         self.assertEqual(len(data["tags"]), 2)
         self.assertEqual(len(data["specialties"]), 2)
+        self.assertEqual(data["phone"], "0987654321")
 
     def test_sitter_serializer_create(self):
         user = User.objects.create_user(username="sitter2", password="pass")
@@ -128,6 +130,7 @@ class ProfileSerializerTests(TestCase):
             "rate_hourly": "20.00",
             "service_radius_km": 15,
             "home_zip": "54321",
+            "phone": "0987654321",  # ✅ Added phone field
             "tag_names": ["overnight care"],
             "specialty_slugs": ["dog"]
         }
@@ -135,6 +138,7 @@ class ProfileSerializerTests(TestCase):
         self.assertTrue(serializer.is_valid(), serializer.errors)
         profile = serializer.save()
         self.assertEqual(profile.user, user)
+        self.assertEqual(profile.phone, "0987654321")  # ✅ Add this phone assertion
         self.assertEqual(profile.tags.first().name, "overnight care")
         self.assertEqual(profile.specialties.first().slug, "dog")
 
