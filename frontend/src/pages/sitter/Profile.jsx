@@ -147,6 +147,30 @@ const Profile = () => {
     })();
   }, [openPicker]);
 
+  // add handleSaveTags function
+  const handleSaveTags = async () => {
+    try {
+      setSaving(true);
+
+      const selected = options.filter(o => selectedIds.has(o.id));
+      const tagIds   = selected.filter(o => o.kind === "tag").map(o => o.rawId);
+      const specIds  = selected.filter(o => o.kind === "spec").map(o => o.rawId);
+
+      // call your backend PATCH helper
+      await setSitterTaxonomy({ tag_ids: tagIds, specialty_ids: specIds });
+
+      // update tags displayed on the profile
+      const labels = selected.map(o => o.name);
+      setProfile(prev => ({ ...prev, tags: labels }));
+
+      setOpenPicker(false);
+    } catch (e) {
+      console.error("Failed to save tags/specialties", e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   const getProfilePictureUrl = (pictureUrl) => {
     if (!pictureUrl) return getSitterImage(null, 0);
@@ -272,7 +296,10 @@ const Profile = () => {
                   ))}
                 </div>
               )}
-              </div>
+              </div>  {/* This closes the “My Specialties” card */}
+
+              
+
             </div>
 
             {/* Right Column - My Services */}
