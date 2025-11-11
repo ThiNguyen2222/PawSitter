@@ -8,6 +8,8 @@ import { getSitterImage, getPetImage } from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
 console.log("paw icon path:", pawIcon);
 import { FaPlus } from "react-icons/fa";
+import { MdClose } from "react-icons/md";
+import { getTags, getSpecialties, setSitterTaxonomy } from "../../api/api";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -17,9 +19,10 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [openPicker, setOpenPicker] = useState(false); // State for the picker
-  const [options, setOptions] = React.useState([]); // all predefined tags + specialties
-  const [selectedIds, setSelectedIds] = React.useState(new Set()); // ids to add
+  const [openPicker, setOpenPicker] = useState(false); // State for the tag/specility
+  const [options, setOptions] = useState([]);         // [{ id, rawId, kind: 'tag'|'spec', name }]
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [saving, setSaving] = useState(false);
 
   // Close mobile menu on resize
   useEffect(() => {
@@ -123,21 +126,12 @@ const Profile = () => {
 
     (async () => {
       try {
-        const [tags, specs] = await Promise.all([
-          getTags(),        // ✅ our existing helper
-          getSpecialties(), // ✅ our existing helper
-        ]);
+        const [tags, specs] = await Promise.all([ getTags(), getSpecialties(), ]);
 
         const normalized = [
           ...tags.map(t => ({ id: `tag:${t.id}`, rawId: t.id, kind: "tag", name: t.name })),
-          ...specs.map(s => ({
-            id: `spec:${s.id}`,
-            rawId: s.id,
-            kind: "spec",
-            name: s.name ?? s.slug,
-          })),
+          ...specs.map(s => ({id: `spec:${s.id}`,rawId: s.id,kind: "spec",name: s.name ?? s.slug,})),
         ];
-
         setOptions(normalized);
 
         // preselect current sitter tags
