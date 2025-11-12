@@ -1,3 +1,4 @@
+// src/components/LoginNavbar.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { MdMenu } from "react-icons/md";
@@ -9,12 +10,14 @@ const LoginNavbar = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [basePath, setBasePath] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
   // Load role immediately on mount
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
       const user = JSON.parse(userData);
+      setUserRole(user?.role);
       if (user?.role === "OWNER") setBasePath("/owner");
       else if (user?.role === "SITTER") setBasePath("/sitter");
     } else {
@@ -22,12 +25,27 @@ const LoginNavbar = () => {
     }
   }, []);
 
-  const DASHBOARD_LINKS = [
-    { path: `${basePath}/dashboard`, label: "Search" },
-    { path: `${basePath}/messages`, label: "Messages" },
-    { path: `${basePath}/booking`, label: "Bookings" },
-    { path: `${basePath}/profile`, label: "Profile" },
-  ];
+  // Define navigation links based on user role
+  const getNavLinks = () => {
+    if (userRole === "SITTER") {
+      return [
+        { path: `${basePath}/messages`, label: "Messages" },
+        { path: `${basePath}/availability`, label: "Availability" },
+        { path: `${basePath}/schedule`, label: "Schedule" },
+        { path: `${basePath}/profile`, label: "Profile" },
+      ];
+    } else if (userRole === "OWNER") {
+      return [
+        { path: `${basePath}/dashboard`, label: "Search" },
+        { path: `${basePath}/messages`, label: "Messages" },
+        { path: `${basePath}/booking`, label: "Bookings" },
+        { path: `${basePath}/profile`, label: "Profile" },
+      ];
+    }
+    return [];
+  };
+
+  const DASHBOARD_LINKS = getNavLinks();
 
   const btnClass =
     "hover:bg-primary text-primary font-semibold hover:text-white rounded-md border-2 border-primary px-6 py-2 duration-200";
@@ -53,6 +71,11 @@ const LoginNavbar = () => {
     navigate("/login", { replace: true });
   };
 
+  // Determine the correct home/logo link - always goes to dashboard
+  const getHomeLink = () => {
+    return `${basePath}/dashboard`;
+  };
+
   // Only one return statement — with conditional UI
   return (
     <>
@@ -65,7 +88,7 @@ const LoginNavbar = () => {
               {/* Logo → goes to the correct dashboard */}
               <div className="text-2xl flex items-center gap-2 font-bold uppercase">
                 <Link
-                  to={`${basePath}/dashboard`}
+                  to={getHomeLink()}
                   className="flex items-center gap-2"
                 >
                   <img className="h-10 w-10 mr-2" src={logo} alt="Logo" />
