@@ -26,12 +26,14 @@ const SitterDashboard = () => {
     <>
       <ResponsiveMenu open={open} />
 
-      <HeroSection
-        title="Welcome Back, Trusted Sitter!"
-        subtitle="Manage your availability, job requests, and messages in one place."
-        buttonText="Manage Availability"
-        onButtonClick={() => navigate("/sitter/availability")}
-      />
+      <div className="pt-24">
+        <HeroSection
+          title="Welcome Back, Trusted Sitter!"
+          subtitle="Manage your availability, job requests, and messages in one place."
+          buttonText="Manage Availability"
+          onButtonClick={() => navigate("/sitter/availability")}
+        />
+      </div>
 
       <AvailabilitySection />
       {/* <JobsSection /> */}
