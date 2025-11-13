@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMySitterProfile } from "../../api/api";
 // NOTE: utils is under owner/dashboard in your structure
-import { getSitterImage, getPetImage } from "../owner/dashboard/utils";
+import { getSitterImage} from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
 console.log("paw icon path:", pawIcon);
 
