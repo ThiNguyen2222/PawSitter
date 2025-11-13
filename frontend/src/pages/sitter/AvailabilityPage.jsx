@@ -9,6 +9,8 @@ const MyAvailability = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [timeFrom, setTimeFrom] = useState("08:00");
   const [timeTo, setTimeTo] = useState("20:00");
+  const [selectedStatus, setSelectedStatus] = useState("open");
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const fetchMySlots = async () => {
     setLoading(true);
@@ -75,9 +77,28 @@ const MyAvailability = () => {
   const handleDateClick = (day) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
     setSelectedDate(date);
+    setShowEditModal(false); // Close modal when selecting a new date
+    
+    // Load existing status if available
+    const dateStr = date.toDateString();
+    const existingSlot = slots.find((slot) => {
+      const slotDate = new Date(slot.start_ts).toDateString();
+      return slotDate === dateStr;
+    });
+    
+    if (existingSlot) {
+      // If status is booked, default to open for editing
+      setSelectedStatus(existingSlot.status === "booked" ? "open" : existingSlot.status);
+    } else {
+      setSelectedStatus("open");
+    }
   };
 
-  const handleSetAvailability = async (status) => {
+  const handleEditClick = () => {
+    setShowEditModal(true);
+  };
+
+  const handleSetAvailability = async () => {
     if (!selectedDate) return;
 
     const startOfDay = new Date(selectedDate);
@@ -94,19 +115,24 @@ const MyAvailability = () => {
       });
 
       if (existingSlot) {
-        // Update existing slot
-        await API.patch(`availability/${existingSlot.id}/`, { status });
+        // Update existing slot - include all required fields
+        await API.patch(`availability/${existingSlot.id}/`, { 
+          status: selectedStatus,
+          start_ts: startOfDay.toISOString(),
+          end_ts: endOfDay.toISOString()
+        });
       } else {
         // Create new slot
         await API.post("availability/", {
           start_ts: startOfDay.toISOString(),
           end_ts: endOfDay.toISOString(),
-          status,
+          status: selectedStatus,
         });
       }
 
       fetchMySlots();
       setSelectedDate(null);
+      setShowEditModal(false);
     } catch (e) {
       console.error(e);
       alert("Could not update availability.");
@@ -130,6 +156,7 @@ const MyAvailability = () => {
       await API.delete(`availability/${existingSlot.id}/`);
       fetchMySlots();
       setSelectedDate(null);
+      setShowEditModal(false);
     } catch (e) {
       console.error(e);
       alert("Could not delete availability.");
@@ -270,82 +297,99 @@ const MyAvailability = () => {
               </div>
             </div>
 
-            {/* Right Panel - Set Availability */}
+            {/* Right Panel - Availability Details */}
             <div className="space-y-6">
               {selectedDate ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h3 className="font-semibold text-xl mb-6 text-gray-800">Set availability</h3>
+                  <h3 className="font-semibold text-xl mb-6 text-gray-800">Availability Details</h3>
                   
-                  {/* Day Display */}
+                  {/* Date Display */}
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
-                    <div className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 font-medium">
-                      {selectedDate.toLocaleDateString("en-GB", { 
-                        day: "2-digit", 
-                        month: "2-digit", 
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {selectedDate.toLocaleDateString("en-US", { 
+                        month: "long",
+                        day: "numeric", 
                         year: "numeric" 
-                      }).replace(/\//g, '.')}
+                      })}
                     </div>
                   </div>
 
-                  {/* Time From and Time To */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Time-From</label>
-                      <input
-                        type="time"
-                        value={timeFrom}
-                        onChange={(e) => setTimeFrom(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Time-To</label>
-                      <input
-                        type="time"
-                        value={timeTo}
-                        onChange={(e) => setTimeTo(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Status Selection - Toggle Style */}
-                  <div className="mb-8">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Set availability</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => handleSetAvailability("blocked")}
-                        className="py-3 px-4 bg-white border-2 border-gray-300 hover:border-orange-500 hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-lg font-medium transition-all"
-                      >
-                        Block
-                      </button>
-                      
-                      <button
-                        onClick={() => handleSetAvailability("open")}
-                        className="py-3 px-4 bg-white border-2 border-gray-300 hover:border-green-500 hover:bg-green-50 text-gray-700 hover:text-green-600 rounded-lg font-medium transition-all"
-                      >
-                        Open
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={handleDeleteAvailability}
-                      className="py-3 px-4 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors"
-                    >
-                      Clear
-                    </button>
+                  {/* Status Display */}
+                  {(() => {
+                    const existingSlot = slots.find((slot) => {
+                      const slotDate = new Date(slot.start_ts).toDateString();
+                      return slotDate === selectedDate.toDateString();
+                    });
                     
-                    <button
-                      onClick={() => setSelectedDate(null)}
-                      className="py-3 px-4 bg-secondary hover:bg-opacity-90 text-white rounded-lg font-medium transition-colors"
-                    >
-                      Apply
-                    </button>
-                  </div>
+                    if (existingSlot) {
+                      let statusColor = "text-gray-700";
+                      let statusBg = "bg-gray-100";
+                      let statusText = "Not Set";
+                      
+                      if (existingSlot.status === "open") {
+                        statusColor = "text-green-700";
+                        statusBg = "bg-green-100";
+                        statusText = "Available";
+                      } else if (existingSlot.status === "blocked") {
+                        statusColor = "text-orange-700";
+                        statusBg = "bg-orange-100";
+                        statusText = "Blocked";
+                      } else if (existingSlot.status === "booked") {
+                        statusColor = "text-red-700";
+                        statusBg = "bg-red-100";
+                        statusText = "Booked";
+                      }
+                      
+                      return (
+                        <>
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <div className={`inline-block px-4 py-2 rounded-lg ${statusBg} ${statusColor} font-medium`}>
+                              {statusText}
+                            </div>
+                          </div>
+                          
+                          <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Time Range</label>
+                            <div className="text-gray-900">
+                              {new Date(existingSlot.start_ts).toLocaleTimeString("en-US", { 
+                                hour: "2-digit", 
+                                minute: "2-digit" 
+                              })} - {new Date(existingSlot.end_ts).toLocaleTimeString("en-US", { 
+                                hour: "2-digit", 
+                                minute: "2-digit" 
+                              })}
+                            </div>
+                          </div>
+
+                          {existingSlot.status === "booked" && (
+                            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg">
+                              <p className="text-sm text-red-700">
+                                ⚠️ This day is currently booked.
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      );
+                    } else {
+                      return (
+                        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                          <p className="text-sm text-gray-600">
+                            No availability set for this date.
+                          </p>
+                        </div>
+                      );
+                    }
+                  })()}
+
+                  {/* Edit Button */}
+                  <button
+                    onClick={handleEditClick}
+                    className="w-full py-3 px-4 bg-primary hover:bg-opacity-90 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Edit Availability
+                  </button>
                 </div>
               ) : (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -380,6 +424,121 @@ const MyAvailability = () => {
           </div>
         </div>
       </section>
+
+      {/* Edit Availability Modal */}
+      {showEditModal && selectedDate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-semibold text-xl text-gray-800">Edit Availability</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Show booked warning if applicable */}
+            {(() => {
+              const existingSlot = slots.find((slot) => {
+                const slotDate = new Date(slot.start_ts).toDateString();
+                return slotDate === selectedDate.toDateString();
+              });
+              
+              if (existingSlot && existingSlot.status === "booked") {
+                return (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-700">
+                      ⚠️ This day is currently booked. You can still update availability.
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Day Display */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
+              <div className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 font-medium">
+                {selectedDate.toLocaleDateString("en-US", { 
+                  month: "long",
+                  day: "numeric", 
+                  year: "numeric" 
+                })}
+              </div>
+            </div>
+
+            {/* Time From and Time To */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time-From</label>
+                <input
+                  type="time"
+                  value={timeFrom}
+                  onChange={(e) => setTimeFrom(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time-To</label>
+                <input
+                  type="time"
+                  value={timeTo}
+                  onChange={(e) => setTimeTo(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Status Selection - Toggle Style */}
+            <div className="mb-8">
+              <label className="block text-sm font-medium text-gray-700 mb-3">Set availability</label>
+              <div className="bg-gray-100 rounded-full p-1 grid grid-cols-2 gap-1">
+                <button
+                  onClick={() => setSelectedStatus("blocked")}
+                  className={`py-2.5 px-4 rounded-full font-medium transition-all ${
+                    selectedStatus === "blocked"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  Block
+                </button>
+                
+                <button
+                  onClick={() => setSelectedStatus("open")}
+                  className={`py-2.5 px-4 rounded-full font-medium transition-all ${
+                    selectedStatus === "open"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  Open
+                </button>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={handleDeleteAvailability}
+                className="py-3 px-4 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Clear
+              </button>
+              
+              <button
+                onClick={handleSetAvailability}
+                className="py-3 px-4 bg-primary hover:bg-opacity-90 text-white rounded-lg font-medium transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
