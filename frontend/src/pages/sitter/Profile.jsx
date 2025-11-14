@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMySitterProfile } from "../../api/api";
 // NOTE: utils is under owner/dashboard in your structure
-import { getSitterImage} from "../owner/dashboard/utils";
+import { getSitterImage, getPetImage } from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
 console.log("paw icon path:", pawIcon);
+import { FaPlus } from "react-icons/fa";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -15,6 +16,10 @@ const Profile = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [openPicker, setOpenPicker] = useState(false); // State for the picker
+  const [options, setOptions] = React.useState([]); // all predefined tags + specialties
+  const [selectedIds, setSelectedIds] = React.useState(new Set()); // ids to add
 
   // Close mobile menu on resize
   useEffect(() => {
@@ -111,6 +116,43 @@ const Profile = () => {
     };
     fetchProfile();
   }, []);
+
+  // Add the new useEffect for loading predefined tags & specialties
+  useEffect(() => {
+    if (!openPicker) return;
+
+    (async () => {
+      try {
+        const [tags, specs] = await Promise.all([
+          getTags(),        // ✅ our existing helper
+          getSpecialties(), // ✅ our existing helper
+        ]);
+
+        const normalized = [
+          ...tags.map(t => ({ id: `tag:${t.id}`, rawId: t.id, kind: "tag", name: t.name })),
+          ...specs.map(s => ({
+            id: `spec:${s.id}`,
+            rawId: s.id,
+            kind: "spec",
+            name: s.name ?? s.slug,
+          })),
+        ];
+
+        setOptions(normalized);
+
+        // preselect current sitter tags
+        const current = new Set(
+          (profile.tags ?? [])
+            .map(label => normalized.find(o => o.name === label)?.id)
+            .filter(Boolean)
+        );
+        setSelectedIds(current);
+      } catch (e) {
+        console.error("Failed to load tag/spec options", e);
+      }
+    })();
+  }, [openPicker]);
+
 
   const getProfilePictureUrl = (pictureUrl) => {
     if (!pictureUrl) return getSitterImage(null, 0);
@@ -212,21 +254,31 @@ const Profile = () => {
               {/* Header row: title + +Add button */}
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xl font-semibold text-primary">My Specialties</h3>
-                {!profile.tags?.length ? (
-                  <p className="text-gray-500 text-sm">No specialties listed yet.</p>
-                  ) : ( <div className="flex flex-wrap gap-2">
-                    {profile.tags.slice(0, 12).map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="bg-secondary/20 text-secondary text-sm font-semibold px-3 py-1 rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <button
+                  onClick={() => setOpenPicker(true)}
+                  className="inline-flex items-center gap-2 bg-secondary text-white text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-secondary/80 transition"
+                >
+                  <FaPlus className="text-xs" />
+                  Add
+                </button>
+              </div>
+
+              {/* Tags display */}
+              {!profile.tags?.length ? (
+                <p className="text-gray-500 text-sm">No specialties listed yet.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile.tags.slice(0, 12).map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-secondary/20 text-secondary text-sm font-semibold px-3 py-1 rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-              </div>  {/* This closes the “My Specialties” card */}
+              )}
+              </div>
             </div>
 
             {/* Right Column - My Services */}
