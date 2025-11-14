@@ -22,6 +22,7 @@ import EditProfile from "./pages/owner/EditProfile";
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
 import SitterProfile from "./pages/sitter/Profile";
 import AvailabilityPage from "./pages/sitter/AvailabilityPage";
+import Schedule from "./pages/sitter/Schedule";
 import EditProfileS from "./pages/sitter/EditProfileS"; 
 
 
@@ -114,6 +115,7 @@ const AppContent = () => {
         {/* Protected Routes to sitter/... */}
         <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />
         <Route path="/sitter/availability" element={Protected(<AvailabilityPage />)} />
+        <Route path="/sitter/schedule" element={Protected(<Schedule />)} />
         <Route path="/sitter/profile" element={Protected(<SitterProfile />)} />
         <Route path="/sitter/edit-profile" element={Protected(<EditProfileS />)} />
         

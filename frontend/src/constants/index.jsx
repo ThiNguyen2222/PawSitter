@@ -8,6 +8,7 @@ import { Turtle } from "lucide-react";
 import Testimony1 from "../assets/images/owner1.jpg";
 import Testimony2 from "../assets/images/owner2.jpg";
 import Testimony3 from "../assets/images/owner3.jpg";
+import Testimony4 from "../assets/images/owner4.jpg";
 
 import houseSitting from "../assets/images/house-sitting.png";
 import petBoarding from "../assets/images/pet-boarding.png";
@@ -100,9 +101,16 @@ export const testimonials = [
   {
     id: 3,
     message:
-      "The sitter kept me updated with photos every time I book a service on PawSitter. It feel reassuring to be updated when I'm away from home.",
-    name: " - Pinkity Drinkity",  
+      "The sitters at PawSitter were super friendly and professional! My cat Cinnamon warmed up to them fairly quickly :)) The sitters did everything I had asked them to take care of Cinnamon. It was an ease to schedule and communicate to the sitters. Would def recommend!!",
+    name: " - Momo Cinna",  
     image: Testimony3,
+  },
+  {
+    id: 4,
+    message:
+      "I wasn't sure at first if there would be sitters for pets like rats but I was glad petsitter had a range of sitters who were comfortable with my Ratatouille. They're very communicative and flexible with their scheduling. They genuinely seem to love their work ❤",
+    name: " - Momo Cinna",  
+    image: Testimony4,
   },
 ];
 
