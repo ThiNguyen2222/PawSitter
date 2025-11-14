@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMyOwnerProfile, updateOwnerProfile, createPet, updatePet, deletePet } from "../../api/api";
 import { getSitterImage, getPetImage } from "./dashboard/utils";
@@ -85,7 +86,7 @@ const EditProfile = () => {
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
-        setError("Failed to load profile.");
+        setError("Failed to load profile. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -116,10 +117,20 @@ const EditProfile = () => {
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Profile picture must be less than 5MB");
+        setTimeout(() => setError(""), 3000);
+        return;
+      }
       setProfilePicture(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePicturePreview(reader.result);
+      };
+      reader.onerror = () => {
+        setError("Failed to read image file");
+        setTimeout(() => setError(""), 3000);
       };
       reader.readAsDataURL(file);
     }
@@ -129,6 +140,12 @@ const EditProfile = () => {
   const handleBannerPictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Banner picture must be less than 5MB");
+        setTimeout(() => setError(""), 3000);
+        return;
+      }
       setBannerPicture(file);
     }
   };
@@ -137,10 +154,20 @@ const EditProfile = () => {
   const handlePetProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Pet picture must be less than 5MB");
+        setTimeout(() => setError(""), 3000);
+        return;
+      }
       setPetProfilePicture(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPetProfilePicturePreview(reader.result);
+      };
+      reader.onerror = () => {
+        setError("Failed to read image file");
+        setTimeout(() => setError(""), 3000);
       };
       reader.readAsDataURL(file);
     }
@@ -210,7 +237,7 @@ const EditProfile = () => {
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error deleting pet:", err);
-      setError("Failed to delete pet.");
+      setError(err.response?.data?.detail || "Failed to delete pet. Please try again.");
       setTimeout(() => setError(""), 3000);
     }
   };
@@ -222,13 +249,35 @@ const EditProfile = () => {
     setError("");
     setSuccessMessage("");
 
+    // Validate required fields
+    if (!petFormData.name.trim()) {
+      setError("Pet name is required");
+      setSaving(false);
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
+    if (!petFormData.species.trim()) {
+      setError("Pet species is required");
+      setSaving(false);
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
+    if (!petFormData.age || petFormData.age < 0) {
+      setError("Please enter a valid age");
+      setSaving(false);
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", petFormData.name);
-      formDataToSend.append("species", petFormData.species);
-      formDataToSend.append("breed", petFormData.breed);
+      formDataToSend.append("name", petFormData.name.trim());
+      formDataToSend.append("species", petFormData.species.trim());
+      formDataToSend.append("breed", petFormData.breed.trim());
       formDataToSend.append("age", petFormData.age);
-      formDataToSend.append("notes", petFormData.notes);
+      formDataToSend.append("notes", petFormData.notes.trim());
 
       if (petProfilePicture) {
         formDataToSend.append("profile_picture", petProfilePicture);
@@ -248,7 +297,8 @@ const EditProfile = () => {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to update pet");
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Failed to update pet");
         }
 
         const updatedPet = await response.json();
@@ -268,7 +318,8 @@ const EditProfile = () => {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to create pet");
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Failed to create pet");
         }
 
         const newPet = await response.json();
@@ -280,7 +331,7 @@ const EditProfile = () => {
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error saving pet:", err);
-      setError("Failed to save pet. Please try again.");
+      setError(err.message || "Failed to save pet. Please try again.");
       setTimeout(() => setError(""), 3000);
     } finally {
       setSaving(false);
@@ -294,11 +345,26 @@ const EditProfile = () => {
     setError("");
     setSuccessMessage("");
 
+    // Validate required fields
+    if (!formData.name.trim()) {
+      setError("Name is required");
+      setSaving(false);
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      setError("Phone number is required");
+      setSaving(false);
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("phone", formData.phone);
-      formDataToSend.append("notes", formData.notes);
+      formDataToSend.append("name", formData.name.trim());
+      formDataToSend.append("phone", formData.phone.trim());
+      formDataToSend.append("notes", formData.notes.trim());
 
       if (profilePicture) {
         formDataToSend.append("profile_picture", profilePicture);
@@ -317,17 +383,16 @@ const EditProfile = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update profile");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to update profile");
       }
 
       setSuccessMessage("Profile updated successfully!");
-      
-      setTimeout(() => {
-        navigate("/owner/profile");
-      }, 1500);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error updating profile:", err);
-      setError("Failed to update profile. Please try again.");
+      setError(err.message || "Failed to update profile. Please try again.");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setSaving(false);
     }
@@ -345,16 +410,32 @@ const EditProfile = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-10 text-gray-600">Loading profile...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center py-10 text-gray-600">Loading profile...</div>
+      </div>
+    );
   }
 
   return (
     <>
       <ResponsiveMenu open={open} />
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 pt-24">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-[#f0e6e4] to-white pt-24 pb-12">        
+          <div className="container mx-auto px-6">
+          {/* Back Button */}
+          <div className="w-[90%] mx-auto">
+          <button
+            onClick={() => navigate("/owner/profile")}
+            className="flex items-center gap-2 text-primary hover:text-primary/80 font-semibold mb-6 transition"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Profile
+          </button>
+          </div>
+
+            {/* <div className="flex flex-col lg:flex-row gap-5 max-w-7xl mx-auto ml-20"> */}
+            <div className="flex flex-col lg:flex-row gap-5 w-[90%] mx-auto">
             {/* Left Sidebar */}
             <div className="lg:w-64 flex-shrink-0">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -410,13 +491,19 @@ const EditProfile = () => {
             <div className="flex-1">
               {/* Success/Error Messages */}
               {successMessage && (
-                <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                  {successMessage}
+                <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-start">
+                  <svg className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>{successMessage}</span>
                 </div>
               )}
               {error && (
-                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                  {error}
+                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-start">
+                  <svg className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <span>{error}</span>
                 </div>
               )}
 
@@ -479,7 +566,7 @@ const EditProfile = () => {
                       {/* Full Name */}
                       <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                          Full name
+                          Full name *
                         </label>
                         <input
                           type="text"
@@ -526,7 +613,7 @@ const EditProfile = () => {
                       {/* Phone */}
                       <div>
                         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                          Phone number
+                          Phone number *
                           <span className="ml-2 text-xs text-green-600 font-semibold">✓ Verified</span>
                         </label>
                         <input
