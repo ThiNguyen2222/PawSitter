@@ -25,6 +25,7 @@ const Booking = () => {
     selectedPets: [],
     serviceType: "house_sitting",
     sitterId: "",
+    sitterName: "", // Added for displaying sitter name
     startDate: "",
     startTime: "",
     endDate: "",
@@ -103,43 +104,69 @@ const Booking = () => {
   const prevStep = () => setStep((s) => s - 1);
 
   // Create booking
-  const handleSubmit = async () => {
-    if (!validateStep()) return;
-    setLoading(true);
-    setError("");
+  // Update handleSubmit in Booking.jsx
+const handleSubmit = async () => {
+  if (!validateStep()) return;
+  setLoading(true);
+  setError("");
 
-    try {
-      const newBooking = await createBooking({
-        sitter: parseInt(formData.sitterId),
-        pets: formData.selectedPets.map(id => parseInt(id)),
-        service_type: formData.serviceType,
-        start_ts: `${formData.startDate}T${formData.startTime}:00`,
-        end_ts: `${formData.endDate}T${formData.endTime}:00`,
-        price_quote: formData.priceQuote,
-      });
+  try {
+    const bookingData = {
+      sitter: parseInt(formData.sitterId),
+      pets: formData.selectedPets.map(id => parseInt(id)),
+      service_type: formData.serviceType,
+      start_ts: `${formData.startDate}T${formData.startTime}:00`,
+      end_ts: `${formData.endDate}T${formData.endTime}:00`,
+      price_quote: parseFloat(formData.priceQuote),
+    };
+    
+    // Debug: Log what we're sending
+    console.log("Sending booking data:", bookingData);
+    
+    const newBooking = await createBooking(bookingData);
 
-      setBookings([...bookings, newBooking]);
-      setSuccessMessage("Booking created successfully!");
-      setFormData({
-        selectedPets: [],
-        serviceType: "house_sitting",
-        sitterId: "",
-        startDate: "",
-        startTime: "",
-        endDate: "",
-        endTime: "",
-        priceQuote: "",
-        specialNotes: "",
-      });
-      setStep(1);
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to create booking. Please try again.");
-    } finally {
-      setLoading(false);
+    setBookings([...bookings, newBooking]);
+    setSuccessMessage("Booking created successfully!");
+    setFormData({
+      selectedPets: [],
+      serviceType: "house_sitting",
+      sitterId: "",
+      sitterName: "",
+      startDate: "",
+      startTime: "",
+      endDate: "",
+      endTime: "",
+      priceQuote: "",
+      specialNotes: "",
+    });
+    setStep(1);
+    setTimeout(() => setSuccessMessage(""), 3000);
+  } catch (err) {
+    console.error("Booking error:", err);
+    console.error("Error response:", err.response?.data);
+    
+    // Display detailed error message
+    let errorMessage = "Failed to create booking. ";
+    if (err.response?.data) {
+      // Handle different error formats
+      if (typeof err.response.data === 'string') {
+        errorMessage += err.response.data;
+      } else if (err.response.data.detail) {
+        errorMessage += err.response.data.detail;
+      } else if (err.response.data.non_field_errors) {
+        errorMessage += err.response.data.non_field_errors.join(', ');
+      } else {
+        errorMessage += JSON.stringify(err.response.data);
+      }
+    } else {
+      errorMessage += "Please try again.";
     }
-  };
+    
+    setError(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <section className="container flex justify-between items-center py-8 pt-32">
@@ -193,7 +220,13 @@ const Booking = () => {
               sitters={sitters}
             />
           )}
-          {step === 3 && <BookingReview formData={formData} pets={pets} />}
+          {step === 3 && (
+            <BookingReview 
+              formData={formData} 
+              pets={pets} 
+              sitters={sitters}  // Make sure this is here!
+            />
+          )}
 
           {error && (
             <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
