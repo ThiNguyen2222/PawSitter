@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
-import { getMySitterProfile } from "../../api/api";
+import { getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy } from "../../api/api";
 // NOTE: utils is under owner/dashboard in your structure
-import { getSitterImage, getPetImage } from "../owner/dashboard/utils";
+import { getSitterImage } from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
 console.log("paw icon path:", pawIcon);
 import { FaPlus } from "react-icons/fa";
@@ -20,6 +20,48 @@ const Profile = () => {
   const [openPicker, setOpenPicker] = useState(false); // State for the picker
   const [options, setOptions] = React.useState([]); // all predefined tags + specialties
   const [selectedIds, setSelectedIds] = React.useState(new Set()); // ids to add
+
+  const handleToggleOption = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSaveSpecialties = async () => {
+    try {
+      // Split back into tags vs specialties using the `kind` field
+      const chosen = options.filter((opt) => selectedIds.has(opt.id));
+
+      const tagIds = chosen
+        .filter((opt) => opt.kind === "tag")
+        .map((opt) => opt.rawId);
+
+      const specIds = chosen
+        .filter((opt) => opt.kind === "spec")
+        .map((opt) => opt.rawId);
+
+      // Call backend to save taxonomy for this sitter
+      await setSitterTaxonomy({
+        tags: tagIds,
+        specialties: specIds,
+      });
+
+      // Update UI tags shown in "My Specialties"
+      const labels = chosen.map((opt) => opt.name);
+      setProfile((prev) => ({ ...prev, tags: labels }));
+
+      setOpenPicker(false);
+    } catch (err) {
+      console.error("Failed to save specialties", err);
+      alert("Sorry, something went wrong saving your specialties.");
+    }
+  };
 
   // Close mobile menu on resize
   useEffect(() => {
@@ -216,8 +258,6 @@ const Profile = () => {
                   <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
                     {profile.name || "Pet Sitter's Name"}
                   </h1>
-                  {/* <p className="text-gray-600 mt-1">{profile.email || "email@example.com"}</p> */}
-                  {/* <p className="text-gray-500 text-sm mt-0.5">{profile.phone || "phone number"}</p> */}
                   {/* ⭐️ Add rate & rating here */}
                   <p className="text-gray-600 mt-1">{profile.rate_hourly ? `$${profile.rate_hourly}/night` : "Hourly rate not set"}</p>
                   <p className="text-gray-600 mt-1">⭐ {profile.avg_rating ? profile.avg_rating.toFixed(1) : "No ratings yet"}</p>
@@ -309,6 +349,66 @@ const Profile = () => {
           </div>
         </div>
       </section>
+
+      {/* === Specialties Modal === */}
+      {openPicker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b">
+              <h3 className="text-lg font-semibold text-primary">Choose your specialties</h3>
+              <button
+                onClick={() => setOpenPicker(false)}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Options list */}
+            <div className="px-5 py-4 space-y-2 overflow-y-auto">
+              {options.length === 0 ? (
+                <p className="text-sm text-gray-500">Loading options…</p>
+              ) : (
+                options.map((opt) => {
+                  const isSelected = selectedIds.has(opt.id);
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleToggleOption(opt.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm
+                        ${isSelected ? "bg-secondary/10 border-secondary" : "bg-white border-gray-200"}`}
+                    >
+                      <span>{opt.name}</span>
+                      {isSelected && <span className="text-xs font-semibold text-secondary">Selected</span>}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Footer buttons */}
+            <div className="flex justify-end gap-3 px-5 py-3 border-t">
+              <button
+                onClick={() => setOpenPicker(false)}
+                className="px-4 py-1.5 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSpecialties}
+                className="px-4 py-1.5 text-sm rounded-lg bg-secondary text-white font-semibold hover:bg-secondary/80"
+              >
+                Save
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+      
     </>
   );
 };

@@ -82,6 +82,41 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
                 {"detail": "Sitter profile not found for this user."},
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+    @action(detail=False, methods=["patch"], permission_classes=[IsAuthenticated])
+    def update_taxonomy(self, request):
+        """
+        Update sitter tags + specialties.
+        Example payload:
+        {
+          "tags": [1, 2, 3],
+          "specialties": [5, 7]
+        }
+        """
+        try:
+            sitter = SitterProfile.objects.get(user=request.user)
+        except SitterProfile.DoesNotExist:
+            return Response({"detail": "Sitter profile not found."}, status=404)
+
+        tag_ids = request.data.get("tags", [])
+        spec_ids = request.data.get("specialties", [])
+
+        # NEW: Validate incoming types
+        if not isinstance(tag_ids, list) or not isinstance(spec_ids, list):
+            return Response(
+                {"detail": "Both 'tags' and 'specialties' must be lists of IDs."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        # Update relations (same logic)
+        sitter.tags.set(Tag.objects.filter(id__in=tag_ids))
+        sitter.specialties.set(Specialty.objects.filter(id__in=spec_ids))
+        sitter.save()
+
+        # NEW: Return updated sitter profile
+        serializer = SitterProfileSerializer(sitter)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -122,19 +157,6 @@ class SitterProfileViewSet(viewsets.ModelViewSet):  # <-- was ReadOnlyModelViewS
                 qs = qs.filter(tags__slug=slug)
             qs = qs.distinct()
         # ---------- SPECIALTY FILTER (optional) ----------
-
-        """ (older version)
-        if self.action == "list":
-            # Keep list lean and fast
-            qs = qs.only("id", "display_name", "rate_hourly", "avg_rating", "home_zip")
-            # Optional filters
-            q = self.request.query_params
-            if "min_rating" in q:
-                qs = qs.filter(avg_rating__gte=q["min_rating"])
-            if "max_rate" in q:
-                qs = qs.filter(rate_hourly__lte=q["max_rate"])
-            if "zip" in q:
-                qs = qs.filter(home_zip=q["zip"])"""
         return qs
 
 

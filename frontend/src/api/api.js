@@ -156,6 +156,15 @@ export const getSpecialties = async () => {
   return res.data;
 };
 
+// ===== Update sitter taxonomy (tags + specialties) =====
+export const setSitterTaxonomy = async ({ tags, specialties }) => {
+  const res = await API.patch("profiles/sitters/update_taxonomy/", {
+    tags,
+    specialties,
+  });
+  return res.data;
+};
+
 // ===== Bookings =====
 export const getBookings = async () => {
   const res = await API.get("bookings/");
