@@ -41,28 +41,50 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
     setFilteringAvailability(false);
   };
 
+
   const checkSitterAvailability = async (sitterId, requestStart, requestEnd) => {
     try {
       const response = await API.get("availability/", { params: { sitter: sitterId } });
       const availabilitySlots = response.data;
       
+      console.log(`=== Checking Sitter ${sitterId} ===`);
+      console.log('Request Start (Local):', requestStart.toString());
+      console.log('Request Start (UTC):', requestStart.toISOString());
+      console.log('Request End (Local):', requestEnd.toString());
+      console.log('Request End (UTC):', requestEnd.toISOString());
+      
       if (!availabilitySlots || availabilitySlots.length === 0) {
+        console.log('❌ No slots found');
         return false;
       }
 
+      const requestStartTime = requestStart.getTime();
+      const requestEndTime = requestEnd.getTime();
+
       const hasAvailability = availabilitySlots.some(slot => {
-        if (slot.status !== 'open') return false;
+        if (slot.status !== 'open') {
+          return false;
+        }
         
         const slotStart = new Date(slot.start_ts);
         const slotEnd = new Date(slot.end_ts);
+        const slotStartTime = slotStart.getTime();
+        const slotEndTime = slotEnd.getTime();
         
-        return slotStart <= requestStart && slotEnd >= requestEnd;
+        console.log(`Checking slot ${slot.id}:`);
+        console.log('  Slot Start (UTC):', slotStart.toISOString(), '→ Local:', slotStart.toString());
+        console.log('  Slot End (UTC):', slotEnd.toISOString(), '→ Local:', slotEnd.toString());
+        console.log('  Covers request?', slotStartTime <= requestStartTime && slotEndTime >= requestEndTime);
+        
+        // Check if the slot completely covers the requested time range
+        return slotStartTime <= requestStartTime && slotEndTime >= requestEndTime;
       });
 
+      console.log(`Result for sitter ${sitterId}:`, hasAvailability ? '✅ AVAILABLE' : '❌ NOT AVAILABLE');
       return hasAvailability;
     } catch (error) {
       console.error(`Error checking availability for sitter ${sitterId}:`, error);
-      return true;
+      return false;
     }
   };
 
