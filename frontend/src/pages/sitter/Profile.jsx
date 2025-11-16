@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
-import { getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy } from "../../api/api";
+import { getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy, getSitterReviews } from "../../api/api";
 // NOTE: utils is under owner/dashboard in your structure
 import { getSitterImage } from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
@@ -16,6 +16,7 @@ const Profile = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reviews, setReviews] = useState([]);
 
   const [openPicker, setOpenPicker] = useState(false); // State for the picker
   const [options, setOptions] = React.useState([]); // all predefined tags + specialties
@@ -97,6 +98,7 @@ const Profile = () => {
 
         // Normalize sitter core fields
         const normalized = {
+          id: data?.id,
           name:
             data?.display_name ||
             [data?.user?.first_name, data?.user?.last_name].filter(Boolean).join(" ") ||
@@ -113,6 +115,16 @@ const Profile = () => {
           banner_picture_url: normalizeUrl(banner),
         };
         setProfile(normalized);
+
+        // Load reviews for this sitter
+        try {
+          if (data?.id) {
+            const reviewData = await getSitterReviews(data.id);
+            setReviews(reviewData);
+          }
+        } catch (reviewErr) {
+          console.error("Error fetching sitter reviews:", reviewErr);
+        }
 
         // Prefer pre-flattened names from serializer; fall back to objects
         const tagsRaw  = Array.isArray(data?.tag_names) ? data.tag_names
@@ -218,16 +230,6 @@ const Profile = () => {
     };
   };
 
-  const getServiceThumb = (service) => {
-    // Prefer explicit image; otherwise species/pet_type-based fallback
-    if (service?.image_url) {
-      return service.image_url.startsWith("http")
-        ? service.image_url
-        : `http://127.0.0.1:8000${service.image_url}`;
-    }
-    const species = service?.species || service?.pet_type || "default";
-    return getPetImage(species);
-  };
 
   if (loading) return <div className="text-center py-10 pt-32 text-gray-600">Loading profile...</div>;
   if (error) return <div className="text-center py-10 pt-32 text-red-500">{error}</div>;
@@ -321,31 +323,35 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Right Column - My Services */}
+            {/* Right Column - Reviews & Ratings */}
             <div className="bg-white border border-gray-200 rounded-lg p-5">
-              <h3 className="text-xl font-semibold text-primary mb-5">My Services</h3>
+              <h3 className="text-xl font-semibold text-primary mb-5">
+                Reviews & Ratings
+              </h3>
 
-              {services.length === 0 ? (
-                <p className="text-gray-600 text-sm">No services listed yet.</p>
+              {!reviews || reviews.length === 0 ? (
+                <p className="text-gray-600 text-sm">No reviews yet.</p>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {services.map((svc) => (
+                  {reviews.map((review) => (
                     <div
-                      key={svc.id || `${svc.name}`}
+                      key={review.id}
                       className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-none"
                     >
-                      {/* paw icon next to sitter tags & specialties  */}
+                      {/* paw icon next to review */}
                       <img src={pawIcon} alt="paw" style={{ width: 30, height: 30 }} />
                       <div>
                         <h4 className="text-lg font-semibold text-gray-800">
-                          {svc.name || "Service"}
+                          {review.rating} ★
                         </h4>
+                        <p className="text-gray-700 text-sm">{review.comment}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </div> {/* END of Right Column - Reviews & Ratings */}
+
           </div>
         </div>
       </section>
