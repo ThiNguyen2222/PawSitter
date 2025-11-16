@@ -33,6 +33,16 @@ const StarRating = ({ rating }) => {
   );
 };
 
+const getReviewerAvatar = (review) => {
+  if (review.owner_profile_picture_url) {
+    return review.owner_profile_picture_url.startsWith("http")
+      ? review.owner_profile_picture_url
+      : `http://127.0.0.1:8000${review.owner_profile_picture_url}`;
+  }
+  return pawIcon;
+};
+
+
 const Profile = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -144,6 +154,7 @@ const Profile = () => {
         try {
           if (data?.id) {
             const reviewData = await getSitterReviews(data.id);
+            console.log("Review payload →", reviewData);
             setReviews(reviewData);
           }
         } catch (reviewErr) {
@@ -362,8 +373,8 @@ const Profile = () => {
                       key={review.id}
                       className="flex items-center gap-4 border-b border-gray-100 pb-3 last:border-none"
                     >
-                      {/* paw icon next to review */}
-                      <img src={pawIcon} alt="paw" style={{ width: 30, height: 30 }} />
+                      {/* paw icon next to review change to owner profile image */}
+                      <img src={getReviewerAvatar(review)} alt={review.owner_name} className="w-8 h-8 rounded-full object-cover" />
                       <div>
                         <div className="mb-1">
                         <StarRating rating={review.rating} />

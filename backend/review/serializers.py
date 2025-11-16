@@ -7,6 +7,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     sitter_name = serializers.CharField(source='sitter.display_name', read_only=True)
     owner_id = serializers.IntegerField(source='owner.id', read_only=True)
     sitter_id = serializers.IntegerField(source='sitter.id', read_only=True)
+    owner_profile_picture_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
@@ -19,7 +20,8 @@ class ReviewSerializer(serializers.ModelSerializer):
             'sitter_name',
             'rating', 
             'comment', 
-            'created_at'
+            'created_at',
+            'owner_profile_picture_url'
         ]
         read_only_fields = ['id', 'owner_id', 'owner_name', 'sitter_id', 'sitter_name', 'created_at']
 
@@ -65,3 +67,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return super().create(validated_data)
+    
+    def get_owner_profile_picture_url(self, obj):
+        try:
+            profile = obj.owner  # OwnerProfile instance
+            if profile.profile_picture:
+                return profile.profile_picture.url
+        except:
+            pass
+        return None
