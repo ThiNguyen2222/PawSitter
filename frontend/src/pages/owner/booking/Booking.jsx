@@ -25,7 +25,7 @@ const Booking = () => {
     selectedPets: [],
     serviceType: "house_sitting",
     sitterId: "",
-    sitterName: "", // Added for displaying sitter name
+    sitterName: "",
     startDate: "",
     startTime: "",
     endDate: "",
@@ -103,70 +103,99 @@ const Booking = () => {
   };
   const prevStep = () => setStep((s) => s - 1);
 
-  // Create booking
-  // Update handleSubmit in Booking.jsx
-const handleSubmit = async () => {
-  if (!validateStep()) return;
-  setLoading(true);
-  setError("");
+  // Create booking with enhanced error handling
+  const handleSubmit = async () => {
+    if (!validateStep()) return;
+    setLoading(true);
+    setError("");
 
-  try {
-    const bookingData = {
-      sitter: parseInt(formData.sitterId),
-      pets: formData.selectedPets.map(id => parseInt(id)),
-      service_type: formData.serviceType,
-      start_ts: `${formData.startDate}T${formData.startTime}:00`,
-      end_ts: `${formData.endDate}T${formData.endTime}:00`,
-      price_quote: parseFloat(formData.priceQuote),
-    };
-    
-    // Debug: Log what we're sending
-    console.log("Sending booking data:", bookingData);
-    
-    const newBooking = await createBooking(bookingData);
+    try {
+      // Format timestamps - ensure they're in ISO format with timezone
+      const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`);
+      const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`);
+      
+      const bookingData = {
+        sitter: parseInt(formData.sitterId),
+        pets: formData.selectedPets.map(id => parseInt(id)),
+        service_type: formData.serviceType,
+        start_ts: startDateTime.toISOString(),
+        end_ts: endDateTime.toISOString(),
+        price_quote: parseFloat(formData.priceQuote),
+      };
+      
+      // Debug: Log what we're sending
+      console.log("=== BOOKING DATA ===");
+      console.log("Sitter ID:", bookingData.sitter);
+      console.log("Pet IDs:", bookingData.pets);
+      console.log("Service Type:", bookingData.service_type);
+      console.log("Start (Local):", startDateTime.toString());
+      console.log("Start (ISO):", bookingData.start_ts);
+      console.log("End (Local):", endDateTime.toString());
+      console.log("End (ISO):", bookingData.end_ts);
+      console.log("Price Quote:", bookingData.price_quote);
+      console.log("Full payload:", JSON.stringify(bookingData, null, 2));
+      
+      const newBooking = await createBooking(bookingData);
 
-    setBookings([...bookings, newBooking]);
-    setSuccessMessage("Booking created successfully!");
-    setFormData({
-      selectedPets: [],
-      serviceType: "house_sitting",
-      sitterId: "",
-      sitterName: "",
-      startDate: "",
-      startTime: "",
-      endDate: "",
-      endTime: "",
-      priceQuote: "",
-      specialNotes: "",
-    });
-    setStep(1);
-    setTimeout(() => setSuccessMessage(""), 3000);
-  } catch (err) {
-    console.error("Booking error:", err);
-    console.error("Error response:", err.response?.data);
-    
-    // Display detailed error message
-    let errorMessage = "Failed to create booking. ";
-    if (err.response?.data) {
-      // Handle different error formats
-      if (typeof err.response.data === 'string') {
-        errorMessage += err.response.data;
-      } else if (err.response.data.detail) {
-        errorMessage += err.response.data.detail;
-      } else if (err.response.data.non_field_errors) {
-        errorMessage += err.response.data.non_field_errors.join(', ');
+      setBookings([...bookings, newBooking]);
+      setSuccessMessage("Booking created successfully!");
+      setFormData({
+        selectedPets: [],
+        serviceType: "house_sitting",
+        sitterId: "",
+        sitterName: "",
+        startDate: "",
+        startTime: "",
+        endDate: "",
+        endTime: "",
+        priceQuote: "",
+        specialNotes: "",
+      });
+      setStep(1);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("=== BOOKING ERROR ===");
+      console.error("Full error:", err);
+      console.error("Response status:", err.response?.status);
+      console.error("Response data:", err.response?.data);
+      console.error("Response headers:", err.response?.headers);
+      
+      // Display detailed error message
+      let errorMessage = "Failed to create booking: ";
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        console.log("Error data type:", typeof errorData);
+        console.log("Error data:", errorData);
+        
+        // Handle different error formats
+        if (typeof errorData === 'string') {
+          errorMessage += errorData;
+        } else if (errorData.detail) {
+          errorMessage += errorData.detail;
+        } else if (errorData.non_field_errors) {
+          errorMessage += errorData.non_field_errors.join(', ');
+        } else {
+          // Show all field errors
+          const fieldErrors = [];
+          for (const [field, errors] of Object.entries(errorData)) {
+            if (Array.isArray(errors)) {
+              fieldErrors.push(`${field}: ${errors.join(', ')}`);
+            } else {
+              fieldErrors.push(`${field}: ${errors}`);
+            }
+          }
+          errorMessage += fieldErrors.join(' | ');
+        }
       } else {
-        errorMessage += JSON.stringify(err.response.data);
+        errorMessage += "Unknown error. Please check console for details.";
       }
-    } else {
-      errorMessage += "Please try again.";
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    
-    setError(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <section className="container flex justify-between items-center py-8 pt-32">
@@ -224,14 +253,17 @@ const handleSubmit = async () => {
             <BookingReview 
               formData={formData} 
               pets={pets} 
-              sitters={sitters}  // Make sure this is here!
+              sitters={sitters}
             />
           )}
 
           {error && (
-            <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-              <AlertCircle className="mr-2 flex-shrink-0" size={20} />
-              <span>{error}</span>
+            <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start">
+              <AlertCircle className="mr-2 flex-shrink-0 mt-0.5" size={20} />
+              <div className="flex-1">
+                <p className="font-semibold mb-1">Booking Error</p>
+                <p className="text-sm">{error}</p>
+              </div>
             </div>
           )}
 

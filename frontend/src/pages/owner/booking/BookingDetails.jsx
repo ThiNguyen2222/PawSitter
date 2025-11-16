@@ -1,3 +1,4 @@
+// owner/booking/BookingDetails.jsx
 import React, { useState, useEffect } from "react";
 import { Star, Calendar, Clock, X, AlertCircle, Award, PawPrint } from "lucide-react";
 import API from "../../../api/api";
@@ -8,6 +9,8 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
   const [sitterSchedules, setSitterSchedules] = useState({});
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [filteringAvailability, setFilteringAvailability] = useState(false);
+  const [selectedDaySlots, setSelectedDaySlots] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
   // Filter sitters based on date availability
   useEffect(() => {
@@ -41,20 +44,12 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
     setFilteringAvailability(false);
   };
 
-
   const checkSitterAvailability = async (sitterId, requestStart, requestEnd) => {
     try {
       const response = await API.get("availability/", { params: { sitter: sitterId } });
       const availabilitySlots = response.data;
       
-      console.log(`=== Checking Sitter ${sitterId} ===`);
-      console.log('Request Start (Local):', requestStart.toString());
-      console.log('Request Start (UTC):', requestStart.toISOString());
-      console.log('Request End (Local):', requestEnd.toString());
-      console.log('Request End (UTC):', requestEnd.toISOString());
-      
       if (!availabilitySlots || availabilitySlots.length === 0) {
-        console.log('❌ No slots found');
         return false;
       }
 
@@ -71,16 +66,9 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
         const slotStartTime = slotStart.getTime();
         const slotEndTime = slotEnd.getTime();
         
-        console.log(`Checking slot ${slot.id}:`);
-        console.log('  Slot Start (UTC):', slotStart.toISOString(), '→ Local:', slotStart.toString());
-        console.log('  Slot End (UTC):', slotEnd.toISOString(), '→ Local:', slotEnd.toString());
-        console.log('  Covers request?', slotStartTime <= requestStartTime && slotEndTime >= requestEndTime);
-        
-        // Check if the slot completely covers the requested time range
         return slotStartTime <= requestStartTime && slotEndTime >= requestEndTime;
       });
 
-      console.log(`Result for sitter ${sitterId}:`, hasAvailability ? '✅ AVAILABLE' : '❌ NOT AVAILABLE');
       return hasAvailability;
     } catch (error) {
       console.error(`Error checking availability for sitter ${sitterId}:`, error);
@@ -113,6 +101,14 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
     } finally {
       setLoadingSchedule(false);
     }
+  };
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
   };
 
   const getScheduleForWeek = (sitter) => {
@@ -160,6 +156,45 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
     return days;
   };
 
+  const showDaySlots = (day) => {
+    if (!day.isAvailable) return;
+    setSelectedDaySlots(day);
+    setSelectedTimeSlot(null);
+  };
+
+  const handleTimeSlotClick = (slot, day) => {
+    setSelectedTimeSlot(slot);
+  };
+
+  const applySelectedTime = () => {
+    if (!selectedTimeSlot) return;
+    
+    const startTime = new Date(selectedTimeSlot.start_ts);
+    const endTime = new Date(selectedTimeSlot.end_ts);
+    
+    const startDate = startTime.toISOString().split('T')[0];
+    const startTimeStr = startTime.toTimeString().slice(0, 5);
+    const endDate = endTime.toISOString().split('T')[0];
+    const endTimeStr = endTime.toTimeString().slice(0, 5);
+    
+    // Update form data with times AND keep the sitter selected
+    handleInputChange("startDate", startDate);
+    handleInputChange("startTime", startTimeStr);
+    handleInputChange("endDate", endDate);
+    handleInputChange("endTime", endTimeStr);
+    
+    // Keep the sitter selected (schedulePopup contains the sitter info)
+    if (schedulePopup) {
+      handleInputChange("sitterId", schedulePopup.id);
+      handleInputChange("sitterName", schedulePopup.display_name);
+    }
+    
+    // Close the modal
+    setSchedulePopup(null);
+    setSelectedDaySlots(null);
+    setSelectedTimeSlot(null);
+  };
+
   const getPetTypes = (sitter) => {
     if (!sitter.tags || sitter.tags.length === 0) return [];
     return sitter.tags.filter(tag => 
@@ -169,7 +204,6 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h2 className="text-2xl font-semibold text-primary mb-2">
           Booking Details
@@ -179,7 +213,6 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
         </p>
       </div>
 
-      {/* Date and Time Grid */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
         <h3 className="text-lg font-semibold text-primary mb-4 flex items-center">
           <Calendar className="mr-2" size={20} />
@@ -243,7 +276,6 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
         )}
       </div>
 
-      {/* Sitters */}
       <div>
         <h3 className="text-xl font-semibold text-primary mb-3 flex items-center justify-between">
           <span>
@@ -284,7 +316,6 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
                       : "border-gray-200 hover:border-secondary/50 hover:shadow-md"
                   }`}
                 >
-                  {/* Header with Name and Rating */}
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-lg font-semibold text-gray-800">
                       {sitter.display_name}
@@ -297,12 +328,10 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
                     </div>
                   </div>
 
-                  {/* Bio */}
                   <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                     {sitter.bio || 'No bio provided'}
                   </p>
 
-                  {/* Pet Types */}
                   {petTypes.length > 0 && (
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
                       <PawPrint size={14} className="text-primary" />
@@ -319,7 +348,6 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
                     </div>
                   )}
 
-                  {/* Specialties */}
                   {sitter.specialties && sitter.specialties.length > 0 && (
                     <div className="flex items-start gap-2 mb-3">
                       <Award size={14} className="text-secondary mt-0.5 flex-shrink-0" />
@@ -341,7 +369,6 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
                     </div>
                   )}
 
-                  {/* Price and Status Row */}
                   <div className="flex justify-between items-center mb-3 pt-2 border-t border-gray-200">
                     <p className="text-primary font-semibold text-lg">
                       ${sitter.rate_hourly}/hr
@@ -357,7 +384,6 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
                     </span>
                   </div>
 
-                  {/* View Schedule Button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -404,109 +430,153 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
         )}
       </div>
 
-      {/* Schedule Popup Modal */}
       {schedulePopup && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-primary">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-h-[85vh] overflow-hidden flex flex-col max-w-6xl">
+            <div className="px-8 py-5 border-b border-gray-200 flex items-center justify-between bg-white">
               <div>
-                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <Calendar size={24} />
+                <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <Calendar size={24} className="text-primary" />
                   {schedulePopup.display_name}'s Schedule
                 </h3>
-                <p className="text-white/90 text-sm mt-1">
-                  Weekly availability overview
-                </p>
               </div>
               <button
-                onClick={() => setSchedulePopup(null)}
-                className="text-white hover:bg-white/20 rounded-full p-2 transition"
+                onClick={() => {
+                  setSchedulePopup(null);
+                  setSelectedDaySlots(null);
+                  setSelectedTimeSlot(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition"
               >
                 <X size={24} />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 overflow-y-auto flex-1">
-              {sitterSchedules[schedulePopup.id]?.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-xl">
-                  <AlertCircle className="mx-auto mb-3 text-gray-400" size={48} />
-                  <p className="text-gray-700 font-semibold text-lg">No availability set</p>
-                  <p className="text-gray-500 text-sm mt-2">
-                    This sitter hasn't added their schedule yet
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {getScheduleForWeek(schedulePopup).map((day, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition shadow-sm ${
-                        day.isToday
-                          ? 'bg-blue-50 border-blue-400 shadow-md'
-                          : day.isAvailable
-                          ? 'bg-green-50 border-green-300'
-                          : 'bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="text-center min-w-[60px] bg-white rounded-lg p-2 shadow-sm">
-                          <div className="text-xs text-gray-600 font-semibold uppercase">
-                            {day.dayName}
-                          </div>
-                          <div className="text-2xl font-bold text-gray-800">
-                            {day.dayNumber}
-                          </div>
-                          <div className="text-xs text-gray-500 font-medium">
-                            {day.month}
-                          </div>
-                        </div>
-                        <div>
-                          {day.isAvailable ? (
-                            <div>
-                              <div className="text-green-700 font-bold text-lg">
-                                Available
-                              </div>
-                              <div className="text-sm text-gray-600 mt-1 flex items-center gap-3">
-                                <span className="flex items-center gap-1">
-                                  <Clock size={14} />
-                                  {day.totalHours}h
-                                </span>
-                                <span className="text-gray-400">•</span>
-                                <span>{day.openSlots.length} slot{day.openSlots.length > 1 ? 's' : ''}</span>
-                              </div>
+            <div className="flex-1 overflow-hidden flex">
+              <div className="flex-1 p-8 overflow-y-auto bg-gray-50">
+                <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                  Daily Schedule
+                </h4>
+                {sitterSchedules[schedulePopup.id]?.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                    <AlertCircle className="mx-auto mb-3 text-gray-400" size={48} />
+                    <p className="text-gray-700 font-semibold text-lg">No availability set</p>
+                    <p className="text-gray-500 text-sm mt-2">
+                      This sitter hasn't added their schedule yet
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {getScheduleForWeek(schedulePopup).map((day, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => showDaySlots(day)}
+                        className={`bg-white rounded-xl border border-gray-200 p-5 transition cursor-pointer hover:shadow-md ${
+                          selectedDaySlots?.date.getTime() === day.date.getTime() 
+                            ? 'ring-2 ring-primary shadow-md' 
+                            : 'hover:border-gray-300'
+                        } ${!day.isAvailable ? 'opacity-60 cursor-default' : ''}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <div className="text-gray-400 text-xs font-medium mb-1">
+                              {day.dayName.toUpperCase()}
                             </div>
-                          ) : (
-                            <div className="text-gray-500 font-semibold">
-                              Not available
-                            </div>
-                          )}
+                            <h5 className="text-gray-800 font-semibold text-base mb-2">
+                              {day.isAvailable ? 'Available' : 'Not available'}
+                            </h5>
+                            {day.isAvailable && (
+                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                <Clock size={14} className="text-gray-400" />
+                                <span>{day.totalHours}h open</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right text-gray-400 text-sm">
+                            {idx === 0 ? 'Today' : `${idx}d`}
+                          </div>
                         </div>
                       </div>
-                      <div className={`w-4 h-4 rounded-full ${
-                        day.isAvailable ? 'bg-green-500' : 'bg-gray-300'
-                      }`} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-            {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={() => setSchedulePopup(null)}
-                className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:opacity-90 transition"
-              >
-                Close
-              </button>
+              <div className="w-96 border-l border-gray-200 flex flex-col bg-white">
+                <div className="px-8 py-5 border-b border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                    Available times
+                  </h4>
+                </div>
+                <div className="flex-1 p-8 overflow-y-auto">
+                  {selectedDaySlots ? (
+                    <div className="space-y-3">
+                      {selectedDaySlots.openSlots.map((slot, idx) => {
+                        const startTime = new Date(slot.start_ts);
+                        const endTime = new Date(slot.end_ts);
+                        const duration = (endTime - startTime) / (1000 * 60 * 60);
+                        const isSelected = selectedTimeSlot?.id === slot.id;
+                        
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => handleTimeSlotClick(slot, selectedDaySlots)}
+                            className={`bg-white rounded-xl border p-5 transition cursor-pointer ${
+                              isSelected 
+                                ? 'border-primary ring-2 ring-primary shadow-md' 
+                                : 'border-gray-200 hover:border-primary hover:shadow-md'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="text-gray-400 text-xs font-medium">
+                                {selectedDaySlots.dayName.toUpperCase()}
+                              </div>
+                              <div className="text-right text-gray-400 text-sm">
+                                {duration.toFixed(0)}h
+                              </div>
+                            </div>
+                            <h5 className="text-gray-800 font-semibold text-base mb-2">
+                              {formatTime(startTime)} - {formatTime(endTime)}
+                            </h5>
+                            <div className="flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-primary' : 'bg-green-500'}`}></span>
+                              <span className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-green-600'}`}>
+                                {isSelected ? 'Selected' : 'Available'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <Calendar className="mx-auto mb-3 text-gray-300" size={48} />
+                        <p className="text-gray-400 text-sm">
+                          Select a day to view<br />available time slots
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {selectedTimeSlot && (
+                  <div className="px-8 py-5 border-t border-gray-200 bg-gray-50">
+                    <button
+                      onClick={applySelectedTime}
+                      className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center gap-2"
+                    >
+                      <Clock size={18} />
+                      Apply Selected Time
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Price Quote */}
       <div>
         <label className="block text-sm font-medium text-primary mb-2">
           Price Quote ($)
@@ -514,14 +584,25 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
         <input
           type="number"
           step="0.01"
+          min="0"
           value={formData.priceQuote}
-          onChange={(e) => handleInputChange("priceQuote", e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === '' || parseFloat(value) >= 0) {
+              handleInputChange("priceQuote", value);
+            }
+          }}
+          onBlur={(e) => {
+            const value = parseFloat(e.target.value);
+            if (value < 0 || isNaN(value)) {
+              handleInputChange("priceQuote", "0");
+            }
+          }}
           className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg outline-none focus:border-secondary placeholder-gray-400"
           placeholder="0.00"
         />
       </div>
 
-      {/* Special Notes */}
       <div>
         <label className="block text-sm font-medium text-primary mb-2">
           Special Notes (Optional)
