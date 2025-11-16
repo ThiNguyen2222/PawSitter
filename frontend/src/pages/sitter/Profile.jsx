@@ -7,7 +7,31 @@ import { getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy, getSitt
 import { getSitterImage } from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
 console.log("paw icon path:", pawIcon);
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaStar } from "react-icons/fa";
+
+const StarRating = ({ rating }) => {
+  const max = 5;
+  const value = typeof rating === "number" ? rating : 0;
+
+  return (
+    <div className="flex items-center gap-1">
+      {Array.from({ length: max }).map((_, idx) => (
+        <FaStar
+          key={idx}
+          className={
+            idx < Math.round(value)
+              ? "text-yellow-400"
+              : "text-gray-300"
+          }
+          size={16}
+        />
+      ))}
+      <span className="ml-1 text-sm text-gray-700">
+        {value.toFixed(1)}
+      </span>
+    </div>
+  );
+};
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -341,10 +365,10 @@ const Profile = () => {
                       {/* paw icon next to review */}
                       <img src={pawIcon} alt="paw" style={{ width: 30, height: 30 }} />
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-800">
-                          {review.rating} ★
-                        </h4>
-                        <p className="text-gray-700 text-sm">{review.comment}</p>
+                        <div className="mb-1">
+                        <StarRating rating={review.rating} />
+                      </div>
+                      <p className="text-gray-700 text-sm">{review.comment}</p>
                       </div>
                     </div>
                   ))}
