@@ -84,7 +84,7 @@ const LoginNavbar = () => {
       ) : (
         <>
           <nav className="absolute top-0 left-0 right-0 z-50 bg-transparent">
-            <div className="container flex justify-between items-center py-8">
+            <div className="w-[80%] mx-auto flex justify-between items-center py-8">
               {/* Logo → goes to the correct dashboard */}
               <div className="text-2xl flex items-center gap-2 font-bold uppercase">
                 <Link

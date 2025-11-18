@@ -239,11 +239,11 @@ const MyAvailability = () => {
     return (
       <>
         <div className="fixed inset-0 bg-gradient-to-b from-[#f0e6e4] to-white -z-10" />
-        <section className="container flex justify-between items-center py-8 pt-32">
-          <div className="container mx-auto px-6">
-            <h2 className="text-3xl text-primary font-semibold mb-8">
+        <section className="w-[80%] mx-auto py-8 pt-32">
+          <div>
+            {/* <h2 className="text-3xl text-primary font-semibold mb-8">
               Your Availability
-            </h2>
+            </h2> */}
             <p>Loading availability...</p>
           </div>
         </section>
@@ -254,13 +254,13 @@ const MyAvailability = () => {
   return (
     <>
       <div className="fixed inset-0 bg-gradient-to-b from-[#f0e6e4] to-white -z-10" />
-      <section className="container flex justify-between items-center py-8 pt-32">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl text-primary font-semibold mb-8">
+        <section className="w-[80%] mx-auto py-8 pt-24">
+        <div>
+          {/* <h2 className="text-3xl text-primary font-semibold mb-8">
             Your Availability
-          </h2>
+          </h2> */}
 
-          <div className="grid lg:grid-cols-[2fr_1fr] gap-8">
+          <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
             {/* Calendar Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
               {/* Month Navigation */}
