@@ -59,7 +59,7 @@ function HeroSection({
           <img
             src={wool}
             alt="wool"
-            className="absolute right-[35%] top-[14%] w-20 h-20 rotate-[20deg]"
+            className="absolute right-[39%] top-[17%] w-20 h-20 rotate-[20deg] opacity-90"
           />
 
           {/* RIGHT BOWL */}
@@ -69,12 +69,12 @@ function HeroSection({
             className="absolute right-[7%] top-[45%] w-20 h-20 rotate-[20deg] opacity-90"
           />
 
-          {/* LEFT FOOD */}
+          {/* LEFT FOOD
           <img
             src={food}
             alt="food"
             className="absolute left-[10%] top-[37%] w-20 h-20 rotate-[320deg] opacity-70"
-          />
+          /> */}
 
           {/* RIGHT TOP FISH */}
           <img
@@ -108,10 +108,11 @@ function HeroSection({
           className="absolute top-16 left-10 w-10 h-10 rotate-12 opacity-60"
         />
         {/* RIGHT PAWS*/}
-        <img src={PawBg} alt="paw" className="absolute right-[24%] top-[45%] w-11 h-11 rotate-[345deg] opacity-70"/>
-        <img src={PawBg} alt="paw" className="absolute right-[28%] top-[38%] w-10 h-10 rotate-[5deg] opacity-65"/>
-        <img src={PawBg} alt="paw" className="absolute right-[27%] top-[29%] w-10 h-10 rotate-[345deg] opacity-60"/>
-        <img src={PawBg} alt="paw" className="absolute right-[31%] top-[25%] w-9 h-9 rotate-[350deg] opacity-55"/>
+        <img src={PawBg} alt="paw" className="absolute right-[24%] top-[45%] w-11 h-11 rotate-[310deg] opacity-70"/>
+        <img src={PawBg} alt="paw" className="absolute right-[29%] top-[41%] w-10 h-10 rotate-[330deg] opacity-65"/>
+        <img src={PawBg} alt="paw" className="absolute right-[29%] top-[32%] w-10 h-10 rotate-[330deg] opacity-60"/>
+        <img src={PawBg} alt="paw" className="absolute right-[33%] top-[31%] w-9 h-9 rotate-[320deg] opacity-55"/>
+        <img src={PawBg} alt="paw" className="absolute right-[34%] top-[23%] w-9 h-9 rotate-[290deg] opacity-50"/>
 
         {/* LEFT PAWS */}
         <img src={PawBg} alt="paw" className="absolute left-[39%] top-[63%] w-10 h-10 rotate-[320deg] opacity-80"/>
