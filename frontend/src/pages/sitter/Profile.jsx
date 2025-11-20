@@ -46,6 +46,7 @@ const getReviewerAvatar = (review) => {
 const Profile = () => {
   const { id } = useParams()
   const navigate = useNavigate();
+  const isPublicView = !!id;   // owner viewing a sitter profile
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [services, setServices] = useState([]);
@@ -297,12 +298,14 @@ const Profile = () => {
                 </div>
               </div>
 
-              <button
-                onClick={() => navigate("/sitter/edit-profile")}
-                className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2"
-              >
-                Edit profile
-              </button>
+              {!isPublicView && (
+                <button
+                  onClick={() => navigate("/sitter/edit-profile")}
+                  className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2"
+                >
+                  Edit profile
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -326,14 +329,16 @@ const Profile = () => {
               <div className="bg-white border border-gray-200 rounded-lg p-5">
               {/* Header row: title + +Add button */}
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xl font-semibold text-primary">My Specialties</h3>
-                <button
-                  onClick={() => setOpenPicker(true)}
-                  className="inline-flex items-center gap-2 bg-secondary text-white text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-secondary/80 transition"
-                >
-                  <FaPlus className="text-xs" />
-                  Add
-                </button>
+                <h3 className="text-xl font-semibold text-primary">Specialties</h3>
+                {!isPublicView && (
+                  <button
+                    onClick={() => setOpenPicker(true)}
+                    className="inline-flex items-center gap-2 bg-secondary text-white text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-secondary/80 transition"
+                  >
+                    <FaPlus className="text-xs" />
+                    Add
+                  </button>
+                )}
               </div>
 
               {/* Tags display */}
