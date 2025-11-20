@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ResponsiveMenu from "../../../components/ResponsiveMenu";
-import HeroSection from "../../../components/HeroSection";
+import HeroSection from "../../../components/LoginHero";
 import { useNavigate } from "react-router-dom";
 import PetsSection from "./MyPets";
 import SittersSection from "./TrustedSitters";

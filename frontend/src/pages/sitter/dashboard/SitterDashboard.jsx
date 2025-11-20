@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../../components/ResponsiveMenu";
-import HeroSection from "../../../components/HeroSection";
+import HeroSection from "../../../components/LoginHero";
 
 // Dashboard widgets
 import AvailabilitySection from "./MyAvailability";
