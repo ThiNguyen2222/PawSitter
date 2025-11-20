@@ -18,6 +18,7 @@ import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import OwnerBooking from "./pages/owner/booking/Booking";
 import OwnerProfile from "./pages/owner/Profile";
 import EditProfile from "./pages/owner/EditProfile";
+import FindSitters from "./pages/owner/FindSitters";
 
 import SitterDashboard from "./pages/sitter/dashboard/SitterDashboard";
 import SitterProfile from "./pages/sitter/Profile";
@@ -111,6 +112,7 @@ const AppContent = () => {
         <Route path="/owner/dashboard" element={Protected(<OwnerDashboard />)} />
         <Route path="/owner/profile" element={Protected(<OwnerProfile />)} />
         <Route path="/owner/edit-profile" element={Protected(<EditProfile />)} />
+        <Route path="/owner/find-sitters" element={Protected(<FindSitters />)} />
         
         {/* Protected Routes to sitter/... */}
         <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />

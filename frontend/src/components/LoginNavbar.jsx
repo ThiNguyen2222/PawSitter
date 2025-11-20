@@ -29,15 +29,13 @@ const LoginNavbar = () => {
   const getNavLinks = () => {
     if (userRole === "SITTER") {
       return [
-        // { path: `${basePath}/messages`, label: "Messages" },
         { path: `${basePath}/availability`, label: "Availability" },
         { path: `${basePath}/schedule`, label: "Schedule" },
         { path: `${basePath}/profile`, label: "Profile" },
       ];
     } else if (userRole === "OWNER") {
       return [
-        { path: `${basePath}/dashboard`, label: "Search" },
-        // { path: `${basePath}/messages`, label: "Messages" },
+        { path: `${basePath}/find-sitters`, label: "Search" },
         { path: `${basePath}/booking`, label: "Bookings" },
         { path: `${basePath}/profile`, label: "Profile" },
       ];

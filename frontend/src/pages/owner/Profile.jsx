@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMyOwnerProfile } from "../../api/api";
-import { getSitterImage, getPetImage } from "./dashboard/utils";
 
 const Profile = () => {
   const navigate = useNavigate();

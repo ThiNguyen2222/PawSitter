@@ -1,11 +1,9 @@
 // src/pages/owner/EditProfile.jsx
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMyOwnerProfile, updateOwnerProfile, createPet, updatePet, deletePet } from "../../api/api";
-import { getSitterImage, getPetImage } from "./dashboard/utils";
 
 const EditProfile = () => {
   const navigate = useNavigate();

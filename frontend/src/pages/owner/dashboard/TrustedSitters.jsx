@@ -1,7 +1,7 @@
+// src/pages/owner/dashboard/TrustedSitters.jsx
 import React, { useEffect, useState } from "react";
 import { getSitters } from "../../../api/api";
 import { useNavigate } from "react-router-dom";
-import { getSitterImage } from "./utils";
 
 const SittersSection = () => {
   const [sitters, setSitters] = useState([]);
@@ -20,17 +20,19 @@ const SittersSection = () => {
     fetchSitters();
   }, []);
 
-  const getSitterImageUrl = (sitter, index) => {
-    // If profile_picture_url exists and is a full URL, use it
+  const getSitterImageUrl = (sitter) => {
     if (sitter.profile_picture_url) {
       if (sitter.profile_picture_url.startsWith("http")) {
         return sitter.profile_picture_url;
       }
-      // If it's a relative path from backend, prepend domain
-      return `http://127.0.0.1:8000${sitter.profile_picture_url}`;
+      // Ensure the path starts with a forward slash
+      const path = sitter.profile_picture_url.startsWith('/') 
+        ? sitter.profile_picture_url 
+        : `/${sitter.profile_picture_url}`;
+      return `http://127.0.0.1:8000${path}`;
     }
-    // Otherwise use local fallback based on gender
-    return getSitterImage(sitter.gender, index);
+    // Default placeholder image
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(sitter.display_name || 'Sitter')}&background=5d4233&color=fff&size=128`;
   };
 
   return (
@@ -50,10 +52,12 @@ const SittersSection = () => {
                 className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center transition-shadow duration-300 hover:shadow-xl"
               >
                 <img
-                  src={getSitterImageUrl(sitter, index)}
-                  onError={(e) => (e.target.src = getSitterImage(null, 0))}
+                  src={getSitterImageUrl(sitter)}
+                  onError={(e) => {
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(sitter.display_name || 'Sitter')}&background=5d4233&color=fff&size=128`;
+                  }}
                   alt={sitter.display_name || "Pet sitter"}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-secondary mb-4"
+                  className="w-24 h-24 rounded-full object-cover border-2 border-white mb-4"
                 />
 
                 <h3 className="text-xl font-semibold text-gray-800">
@@ -100,13 +104,14 @@ const SittersSection = () => {
         {visibleCount < sitters.length && (
           <div className="text-center mt-10">
             <button
-              onClick={() => setVisibleCount((prev) => prev + 5)}
+              onClick={() => navigate("/owner/find-sitters")}
               className="mt-6 bg-secondary text-white px-6 py-3 rounded-lg shadow-md hover:bg-secondary/80 transition font-bold"
             >
               View More Caregivers
             </button>
           </div>
         )}
+
       </div>
     </section>
   );

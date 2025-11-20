@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import API from "../../../api/api";
-import { getPetImage } from "./utils";
 
 const PetsSection = () => {
   const [pets, setPets] = useState([]);

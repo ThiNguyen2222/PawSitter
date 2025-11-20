@@ -69,12 +69,12 @@ function HeroSection({
             className="absolute right-[7%] top-[45%] w-20 h-20 rotate-[20deg] opacity-90"
           />
 
-          {/* LEFT FOOD
+          {/* LEFT FOOD */}
           <img
             src={food}
             alt="food"
             className="absolute left-[10%] top-[37%] w-20 h-20 rotate-[320deg] opacity-70"
-          /> */}
+          />
 
           {/* RIGHT TOP FISH */}
           <img
