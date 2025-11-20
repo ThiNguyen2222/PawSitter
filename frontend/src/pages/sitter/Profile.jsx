@@ -1,8 +1,8 @@
 // src/pages/sitter/Profile.jsx
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
-import { getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy, getSitterReviews } from "../../api/api";
+import API,{ getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy, getSitterReviews } from "../../api/api";
 // NOTE: utils is under owner/dashboard in your structure
 // import { getSitterImage } from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
@@ -44,7 +44,9 @@ const getReviewerAvatar = (review) => {
 
 
 const Profile = () => {
+  const { id } = useParams()
   const navigate = useNavigate();
+  const isPublicView = !!id;   // owner viewing a sitter profile
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [services, setServices] = useState([]);
@@ -111,7 +113,9 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await getMySitterProfile();
+        const data = id
+        ? (await API.get(`profiles/sitters/${id}/`)).data
+        : await getMySitterProfile();
 
         // Normalize image URLs (serializer may return field name or *_url)
         const pic =
@@ -204,7 +208,7 @@ const Profile = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [id]);
 
   // Add the new useEffect for loading predefined tags & specialties
   useEffect(() => {
@@ -241,13 +245,6 @@ const Profile = () => {
       }
     })();
   }, [openPicker]);
-
-
-  const getProfilePictureUrl = (pictureUrl) => {
-    if (!pictureUrl) return getSitterImage(null, 0);
-    if (pictureUrl.startsWith("http")) return pictureUrl;
-    return `http://127.0.0.1:8000${pictureUrl}`;
-  };
 
   const getBannerStyle = (bannerUrl) => {
     if (!bannerUrl) return { backgroundColor: "#dbeafe" };
@@ -301,12 +298,14 @@ const Profile = () => {
                 </div>
               </div>
 
-              <button
-                onClick={() => navigate("/sitter/edit-profile")}
-                className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2"
-              >
-                Edit profile
-              </button>
+              {!isPublicView && (
+                <button
+                  onClick={() => navigate("/sitter/edit-profile")}
+                  className="w-full md:w-auto md:-mt-12 md:mr-10 bg-secondary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-secondary/80 transition flex items-center justify-center gap-2"
+                >
+                  Edit profile
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -330,14 +329,16 @@ const Profile = () => {
               <div className="bg-white border border-gray-200 rounded-lg p-5">
               {/* Header row: title + +Add button */}
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xl font-semibold text-primary">My Specialties</h3>
-                <button
-                  onClick={() => setOpenPicker(true)}
-                  className="inline-flex items-center gap-2 bg-secondary text-white text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-secondary/80 transition"
-                >
-                  <FaPlus className="text-xs" />
-                  Add
-                </button>
+                <h3 className="text-xl font-semibold text-primary">Specialties</h3>
+                {!isPublicView && (
+                  <button
+                    onClick={() => setOpenPicker(true)}
+                    className="inline-flex items-center gap-2 bg-secondary text-white text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-secondary/80 transition"
+                  >
+                    <FaPlus className="text-xs" />
+                    Add
+                  </button>
+                )}
               </div>
 
               {/* Tags display */}

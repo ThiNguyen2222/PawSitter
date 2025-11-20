@@ -49,7 +49,10 @@ const SittersSection = () => {
             {sitters.slice(0, visibleCount).map((sitter, index) => (
               <div
                 key={sitter.id}
-                className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center text-center transition-shadow duration-300 hover:shadow-xl"
+                onClick={() => navigate(`/sitter/${sitter.id}`)} //click to view
+                className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center 
+               text-center transition-shadow duration-300 hover:shadow-xl 
+               cursor-pointer"
               >
                 <img
                   src={getSitterImageUrl(sitter)}
@@ -91,7 +94,10 @@ const SittersSection = () => {
                   from ${sitter.rate_hourly || "?"}/night
                 </p>
                 <button
-                  onClick={() => navigate(`/sitter/${sitter.id}`)}
+                  onClick={(e) => {
+                    e.stopPropagation();                  // optional: so clicking button doesn’t double-fire
+                    navigate(`/sitter/${sitter.id}`);
+                  }}
                   className="bg-secondary text-white px-5 py-2 rounded-full hover:bg-secondary/80 transition"
                 >
                   Contact

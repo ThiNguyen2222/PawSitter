@@ -120,6 +120,9 @@ const AppContent = () => {
         <Route path="/sitter/schedule" element={Protected(<Schedule />)} />
         <Route path="/sitter/profile" element={Protected(<SitterProfile />)} />
         <Route path="/sitter/edit-profile" element={Protected(<EditProfileS />)} />
+
+        {/* Owner viewing a specific sitter */}
+        <Route path="/sitter/:id" element={Protected(<SitterProfile />)} /> {/* later make a dedicated comp for public sitter */}
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
