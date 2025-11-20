@@ -1,8 +1,8 @@
 // src/pages/sitter/Profile.jsx
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
-import { getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy, getSitterReviews } from "../../api/api";
+import API,{ getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy, getSitterReviews } from "../../api/api";
 // NOTE: utils is under owner/dashboard in your structure
 import { getSitterImage } from "../owner/dashboard/utils";
 import pawIcon from "../../assets/images/paw.png";
@@ -44,6 +44,7 @@ const getReviewerAvatar = (review) => {
 
 
 const Profile = () => {
+  const { id } = useParams()
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -111,7 +112,9 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await getMySitterProfile();
+        const data = id
+        ? (await API.get(`profiles/sitters/${id}/`)).data
+        : await getMySitterProfile();
 
         // Normalize image URLs (serializer may return field name or *_url)
         const pic =
@@ -204,7 +207,7 @@ const Profile = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [id]);
 
   // Add the new useEffect for loading predefined tags & specialties
   useEffect(() => {
@@ -241,13 +244,6 @@ const Profile = () => {
       }
     })();
   }, [openPicker]);
-
-
-  const getProfilePictureUrl = (pictureUrl) => {
-    if (!pictureUrl) return getSitterImage(null, 0);
-    if (pictureUrl.startsWith("http")) return pictureUrl;
-    return `http://127.0.0.1:8000${pictureUrl}`;
-  };
 
   const getBannerStyle = (bannerUrl) => {
     if (!bannerUrl) return { backgroundColor: "#dbeafe" };
