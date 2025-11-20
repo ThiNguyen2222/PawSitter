@@ -5,7 +5,7 @@ import ResponsiveMenu from "../../../components/ResponsiveMenu";
 import HeroSection from "../../../components/LoginHero";
 
 // Dashboard widgets
-import AvailabilitySection from "./MyAvailability";
+import AvailabilitySection from "./WeekAvailability";
 //do this later 
 //import JobsSection from "./UpcomingJobs";
 //import ReviewsSection from "./MyReviews";
