@@ -205,8 +205,8 @@ const MyAvailability = () => {
   return (
     <>
       {/* MAIN CONTAINER — aligned with navbar */}
-      <section className="container flex justify-between items-center py-8">
-        <div className="container mx-auto px-6">
+      <div className="w-[80%] mx-auto mt-10 space-y-10">
+        <div>
           <h2 className="text-2xl font-semibold text-primary mb-8">
             Your Availability
           </h2>
@@ -312,7 +312,7 @@ const MyAvailability = () => {
           </p>
         </div>
       </div>
-      </section>
+      </div>
 
       {/* ALL MODALS BELOW */}
       {/* VIEW MODAL */}
