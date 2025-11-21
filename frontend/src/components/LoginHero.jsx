@@ -5,44 +5,34 @@ const LoginHero = ({
   title, 
   subtitle, 
   buttonText, 
-  onButtonClick
+  onButtonClick,
+  showCalendar = false,
+  calendarWidget = null
 }) => {
   return (
-    <section className="relative overflow-visible bg-white">
-      <div className="container mx-auto px-6">
-        <div className="relative flex items-center h-[600px]">
-
-          {/* Background Rectangle */}
-          <div className="absolute left-[10%] top-[10%] w-[100%] h-[600px] bg-[#f0e6e4] rounded-2xl z-0" />
-
-          {/* Dog Image with overlay text */}
-            <div className="absolute -left-[8%] top-[0%] w-[103%] z-10">
-            <img
-                src={heroImage}
-                alt="Cute dog"
-                className="w-full h-auto object-contain rounded-3xl"
-            />
-
-            {/* TEXT OVER IMAGE */}
-            <div className="absolute right-60 top-[35%] -translate-y-1/2 
-                            flex flex-col items-center text-center max-w-md">
-            <h1 className="text-5xl font-bold text-secondary mb-6">
-                {title}
-            </h1>
-
-            <p className="text-gray-700 text-lg mb-6 drop-shadow">
-                {subtitle}
-            </p>
-
-            <button
-                onClick={onButtonClick}
-                className="bg-secondary text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-secondary/90 transition shadow-lg"
-            >
-                {buttonText}
-            </button>
-            </div>
-
-            </div>
+    <section className="relative w-full overflow-visible bg-white">
+      <div className="relative w-full">
+        {/* Dog Image - Full width */}
+        <img
+          src={heroImage}
+          alt="Cute dog"
+          className="w-full h-[600px] object-cover"
+        />
+        
+        {/* Text Content */}
+        <div className="absolute top-1/2 right-[20%] -translate-y-1/2 text-center z-20">
+          <h1 className="text-5xl font-bold text-secondary mb-4 drop-shadow-lg">
+            {title}
+          </h1>
+          <p className="text-lg text-gray-700 mb-6 drop-shadow-lg">
+            {subtitle}
+          </p>
+          <button
+            onClick={onButtonClick}
+            className="bg-secondary text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-secondary/90 transition shadow-lg"
+          >
+            {buttonText}
+          </button>
         </div>
       </div>
     </section>
