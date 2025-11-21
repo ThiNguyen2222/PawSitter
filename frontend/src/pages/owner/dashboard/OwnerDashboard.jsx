@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import ResponsiveMenu from "../../../components/ResponsiveMenu";
 import HeroSection from "../../../components/LoginHero";
+import ContactUs from "../../../components/ContactUs";
+import ResponsiveMenu from "../../../components/ResponsiveMenu";
 import { useNavigate } from "react-router-dom";
 import PetsSection from "./MyPets";
 import SittersSection from "./TrustedSitters";
@@ -30,9 +31,9 @@ const Dashboard = () => {
           onButtonClick={() => navigate("/owner/booking")}
         />
       </div>
-
       <PetsSection />
       <SittersSection />
+      <ContactUs />
     </>
   );
 };

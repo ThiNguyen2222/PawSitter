@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../../components/ResponsiveMenu";
 import LoginHero from "../../../components/LoginHero";
+import ContactUs from "../../../components/ContactUs";
 import WeekAvailability from "./WeekAvailability";
 
 import { getBookings, confirmBooking, cancelBooking, completeBooking } from "../../../api/api";
@@ -149,8 +150,8 @@ const SitterDashboard = () => {
         />
       )}
 
-      {/* FLOATING WEEK AVAILABILITY */}
       <WeekAvailability />
+      <ContactUs />
     </>
   );
 };
