@@ -23,6 +23,7 @@ function HeroSection({
     <section id="home" className="relative w-full scroll-mt-28 -mt-10">
       <div className="home-banner-container relative z-0">
 
+        {/* HERO BACKGROUND */}
         <img
           src={BannerBackground}
           alt="Hero background shape"
@@ -31,113 +32,122 @@ function HeroSection({
 
         <div className="absolute inset-0 w-full h-full pointer-events-none">
 
-          {/* LEFT TOP BUNNY */}
-          <div className="absolute left-[11%] top-[10%]">
-            <div className="w-28 h-28 bg-secondary bg-opacity-50  rounded-full absolute -left-4 -top-4"></div>
+          {/* MOBILE-ONLY PAW PRINTS */}
+          <div className="absolute inset-0 md:hidden">
+            <img src={PawBg} className="absolute top-[12%] left-[8%] w-7 h-7 opacity-70 rotate-[20deg]" />
+            <img src={PawBg} className="absolute top-[28%] left-[70%] w-6 h-6 opacity-75 rotate-[330deg]" />
+            <img src={PawBg} className="absolute top-[45%] left-[18%] w-8 h-8 opacity-65 rotate-[10deg]" />
+            <img src={PawBg} className="absolute top-[62%] left-[70%] w-7 h-7 opacity-80 rotate-[300deg]" />
+            <img src={PawBg} className="absolute top-[78%] left-[35%] w-6 h-6 opacity-60 rotate-[15deg]" />
+          </div>
+
+          {/*  DESKTOP-ONLY ANIMALS + OBJECTS */}
+          <div className="hidden md:block">
+
+            {/* LEFT TOP BUNNY */}
+            <div className="absolute left-[11%] top-[10%]">
+              <div className="w-28 h-28 bg-secondary bg-opacity-50 rounded-full absolute -left-4 -top-4"></div>
+              <img
+                src={bunny}
+                alt="bunny"
+                className="relative w-36 h-36 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            </div>
+
+            {/* LEFT BOTTOM CAT */}
             <img
-              src={bunny}
-              alt="bunny"
-              className="relative w-36 h-36 rounded-full object-cover border-4 border-white shadow-lg"
+              src={cat}
+              alt="cat"
+              className="absolute left-[5%] top-[53%] w-44 h-44 rounded-full object-cover border-4 border-white shadow-lg"
+            />
+
+            {/* CENTER SAMOYED */}
+            <img
+              src={samoyed}
+              alt="samoyed"
+              className="absolute left-[27%] top-[28%] -translate-x-1/2 w-60 h-60 rounded-full object-cover border-4 border-white shadow-xl"
+            />
+
+            {/* RIGHT TOP WOOL */}
+            <img
+              src={wool}
+              alt="wool"
+              className="absolute right-[39%] top-[17%] w-20 h-20 rotate-[20deg] opacity-90"
+            />
+
+            {/* RIGHT MIDDLE BOWL */}
+            <img
+              src={bowl}
+              alt="bowl"
+              className="absolute right-[7%] top-[45%] w-20 h-20 rotate-[20deg] opacity-90"
+            />
+
+            {/* LEFT FOOD */}
+            <img
+              src={food}
+              alt="food"
+              className="absolute left-[10%] top-[37%] w-20 h-20 rotate-[320deg] opacity-70"
+            />
+
+            {/* RIGHT TOP FISH */}
+            <img
+              src={fish}
+              alt="fish"
+              className="absolute right-[15%] top-[20%] w-[140px] h-[140px] rounded-full object-cover border-4 border-white shadow-lg"
+            />
+
+            {/* RIGHT LARGE KID + BLUE BLOB */}
+            <div className="absolute right-[26%] top-[47%]">
+              <div className="w-40 h-40 bg-secondary bg-opacity-50 rounded-full absolute -right-12 top-14"></div>
+              <img
+                src={kid}
+                alt="kid with rabbit"
+                className="relative w-64 h-64 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            </div>
+
+            {/* RIGHT BOTTOM HAMSTER */}
+            <img
+              src={hamster}
+              alt="hamster"
+              className="absolute right-[10%] top-[72%] w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
             />
           </div>
 
-          {/* LEFT BOTTOM CAT */}
-          <img
-            src={cat}
-            alt="cat"
-            className="absolute left-[5%] top-[53%] w-44 h-44 rounded-full object-cover border-4 border-white shadow-lg"
-          />
+          {/* DESKTOP-ONLY PAW PRINTS  */}
+          <div className="hidden md:block">
+            <img src={PawBg} className="absolute top-16 left-10 w-10 h-10 rotate-12 opacity-60"/>
+            <img src={PawBg} className="absolute right-[24%] top-[45%] w-11 h-11 rotate-[310deg] opacity-70"/>
+            <img src={PawBg} className="absolute right-[29%] top-[41%] w-10 h-10 rotate-[330deg] opacity-65"/>
+            <img src={PawBg} className="absolute right-[29%] top-[32%] w-10 h-10 rotate-[330deg] opacity-60"/>
+            <img src={PawBg} className="absolute right-[33%] top-[31%] w-9 h-9 rotate-[320deg] opacity-55"/>
+            <img src={PawBg} className="absolute right-[34%] top-[23%] w-9 h-9 rotate-[290deg] opacity-50"/>
 
-          {/* CENTER SAMOYED */}
-          <img
-            src={samoyed}
-            alt="samoyed"
-            className="absolute left-[27%] top-[28%] -translate-x-1/2 w-60 h-60 rounded-full object-cover border-4 border-white shadow-xl"
-          />
-
-          {/* RIGHT TOP WOOL */}
-          <img
-            src={wool}
-            alt="wool"
-            className="absolute right-[39%] top-[17%] w-20 h-20 rotate-[20deg] opacity-90"
-          />
-
-          {/* RIGHT BOWL */}
-          <img
-            src={bowl}
-            alt="bowl"
-            className="absolute right-[7%] top-[45%] w-20 h-20 rotate-[20deg] opacity-90"
-          />
-
-          {/* LEFT FOOD */}
-          <img
-            src={food}
-            alt="food"
-            className="absolute left-[10%] top-[37%] w-20 h-20 rotate-[320deg] opacity-70"
-          />
-
-          {/* RIGHT TOP FISH */}
-          <img
-            src={fish}
-            alt="fish"
-            className="absolute right-[15%] top-[20%] w-[140px] h-[140px] rounded-full object-cover border-4 border-white shadow-lg"
-          />
-
-          {/* RIGHT LARGE KID + BLUE BLOB */}
-          <div className="absolute right-[26%] top-[47%]">
-            <div className="w-40 h-40 bg-secondary bg-opacity-50 rounded-full absolute -right-12 top-14"></div>
-            <img
-              src={kid}
-              alt="kid with rabbit"
-              className="relative w-64 h-64 rounded-full object-cover border-4 border-white shadow-lg"
-            />
+            <img src={PawBg} className="absolute left-[39%] top-[63%] w-10 h-10 rotate-[320deg] opacity-80"/>
+            <img src={PawBg} className="absolute left-[36%] top-[58%] w-9 h-9 rotate-[5deg] opacity-75"/>
+            <img src={PawBg} className="absolute left-[37%] top-[50%] w-8 h-8 rotate-[330deg] opacity-70"/>
+            <img src={PawBg} className="absolute left-[35%] top-[42%] w-8 h-8 rotate-[15deg] opacity-65"/>
+            <img src={PawBg} className="absolute left-[37%] top-[36%] w-7 h-7 rotate-[340deg] opacity-60"/>
           </div>
 
-          {/* RIGHT BOTTOM HAMSTER */}
-          <img
-            src={hamster}
-            alt="hamster"
-            className="absolute right-[10%] top-[72%] w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-          />
         </div>
 
-        {/* PAW PRINTS */}
-        <img
-          src={PawBg}
-          alt="paw"
-          className="absolute top-16 left-10 w-10 h-10 rotate-12 opacity-60"
-        />
-        {/* RIGHT PAWS*/}
-        <img src={PawBg} alt="paw" className="absolute right-[24%] top-[45%] w-11 h-11 rotate-[310deg] opacity-70"/>
-        <img src={PawBg} alt="paw" className="absolute right-[29%] top-[41%] w-10 h-10 rotate-[330deg] opacity-65"/>
-        <img src={PawBg} alt="paw" className="absolute right-[29%] top-[32%] w-10 h-10 rotate-[330deg] opacity-60"/>
-        <img src={PawBg} alt="paw" className="absolute right-[33%] top-[31%] w-9 h-9 rotate-[320deg] opacity-55"/>
-        <img src={PawBg} alt="paw" className="absolute right-[34%] top-[23%] w-9 h-9 rotate-[290deg] opacity-50"/>
-
-        {/* LEFT PAWS */}
-        <img src={PawBg} alt="paw" className="absolute left-[39%] top-[63%] w-10 h-10 rotate-[320deg] opacity-80"/>
-        <img src={PawBg} alt="paw" className="absolute left-[36%] top-[58%] w-9 h-9 rotate-[5deg] opacity-75"/>
-        <img src={PawBg} alt="paw" className="absolute left-[37%] top-[50%] w-8 h-8 rotate-[330deg] opacity-70"/>
-        <img src={PawBg} alt="paw" className="absolute left-[35%] top-[42%] w-8 h-8 rotate-[15deg] opacity-65"/>
-        <img src={PawBg} alt="paw" className="absolute left-[37%] top-[36%] w-7 h-7 rotate-[340deg] opacity-60"/>
-
         {/* CENTER TEXT */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20 pointer-events-auto">
-            <h1 className="lg:text-4xl font-bold text-secondary leading-tight max-w-3xl">
-              Book a Service <br /> or Become a Pet Sitter!
-            </h1>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20 pointer-events-auto">
+          <h1 className="lg:text-4xl font-bold text-secondary leading-tight max-w-3xl">
+            Book a Service <br /> or Become a Pet Sitter!
+          </h1>
 
-            {buttonText && (
-              <button
-                className="mt-8 bg-secondary text-white px-8 py-3 rounded-lg shadow-lg 
-                          hover:bg-secondary/80 transition-all duration-200 font-bold text-lg flex items-center gap-2"
-                onClick={onButtonClick}
-              >
-                {buttonText}
-                <span className="text-xl">→</span>
-              </button>
-            )}
-          </div>
+          {buttonText && (
+            <button
+              className="mt-8 bg-secondary text-white px-8 py-3 rounded-lg shadow-lg hover:bg-secondary/80 transition-all duration-200 font-bold text-lg flex items-center gap-2"
+              onClick={onButtonClick}
+            >
+              {buttonText}
+              <span className="text-xl">→</span>
+            </button>
+          )}
+        </div>
 
       </div>
     </section>
