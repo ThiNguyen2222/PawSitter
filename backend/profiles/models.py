@@ -55,8 +55,8 @@ def pet_profile_picture_path(instance, filename):
 # -----------------------------
 class OwnerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owner_profile")
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20)
+    name = models.CharField(max_length=100, blank=True, default='')
+    phone = models.CharField(max_length=20, blank=True, default='')
     default_location = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to=owner_profile_picture_path, blank=True, null=True)
@@ -136,14 +136,14 @@ class Specialty(models.Model):
 # -----------------------------
 class SitterProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sitter_profile")
-    display_name = models.CharField(max_length=100)
+    display_name = models.CharField(max_length=100, blank=True, default='')
     bio = models.TextField(blank=True)
-    rate_hourly = models.DecimalField(max_digits=6, decimal_places=2)
+    rate_hourly = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     service_radius_km = models.IntegerField(default=5)
-    home_zip = models.CharField(max_length=20)
+    home_zip = models.CharField(max_length=20, blank=True, default='')
     avg_rating = models.FloatField(default=0.0)
     verification_status = models.CharField(max_length=20, default="PENDING")
-    phone = models.CharField(max_length=20, blank=True, null=True)  # 👈 added phone num field for sitter
+    phone = models.CharField(max_length=20, blank=True, null=True)
 
     profile_picture = models.ImageField(upload_to=sitter_profile_picture_path, blank=True, null=True)
     banner_picture = models.ImageField(upload_to=sitter_banner_picture_path, blank=True, null=True)
