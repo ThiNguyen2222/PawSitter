@@ -1,13 +1,6 @@
-from django.contrib import admin
-from django.utils.html import format_html
-from django.urls import reverse
-from django.utils import timezone
-from decimal import Decimal
-from .models import Booking
-
-
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
+    # Columns displayed in the list view
     list_display = (
         'id',
         'owner_link',
@@ -21,6 +14,7 @@ class BookingAdmin(admin.ModelAdmin):
         'time_status'
     )
     
+    # Filters in the sidebar
     list_filter = (
         'status',
         'service_type',
@@ -30,6 +24,7 @@ class BookingAdmin(admin.ModelAdmin):
         ('sitter', admin.RelatedOnlyFieldListFilter)
     )
     
+    # Searchable fields
     search_fields = (
         'owner__name',
         'owner__user__username',
@@ -38,9 +33,11 @@ class BookingAdmin(admin.ModelAdmin):
         'id'
     )
     
+    # Default ordering
     ordering = ['-created_at']
-    date_hierarchy = 'start_ts'
-    
+    date_hierarchy = 'start_ts'  # Adds a date drill-down navigation
+
+    # Fieldsets for the edit page
     fieldsets = (
         ('Booking Details', {
             'fields': ('owner', 'sitter', 'service_type', 'status')
@@ -56,23 +53,30 @@ class BookingAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
+    # Fields that are read-only in the admin
     readonly_fields = ('created_at', 'updated_at', 'duration_display', 'hourly_rate_display')
     
+    # Custom actions
     actions = ['mark_confirmed', 'mark_completed', 'mark_canceled']
 
+    # ---------- List Display Methods ----------
+    
+    # Owner column with clickable link to OwnerProfile admin
     def owner_link(self, obj):
         url = reverse("admin:profiles_ownerprofile_change", args=[obj.owner.id])
         return format_html('<a href="{}">{}</a>', url, obj.owner.name)
     owner_link.short_description = "Owner"
     owner_link.admin_order_field = "owner__name"
 
+    # Sitter column with clickable link to SitterProfile admin
     def sitter_link(self, obj):
         url = reverse("admin:profiles_sitterprofile_change", args=[obj.sitter.id])
         return format_html('<a href="{}">{}</a>', url, obj.sitter.display_name)
     sitter_link.short_description = "Sitter"
     sitter_link.admin_order_field = "sitter__display_name"
 
+    # Display service type with an emoji icon
     def service_type_display(self, obj):
         icons = {
             'house_sitting': '🏠',
@@ -86,16 +90,19 @@ class BookingAdmin(admin.ModelAdmin):
     service_type_display.short_description = "Service"
     service_type_display.admin_order_field = "service_type"
 
+    # Formatted start time
     def formatted_start(self, obj):
         return obj.start_ts.strftime('%b %d, %Y %I:%M %p')
     formatted_start.short_description = "Start"
     formatted_start.admin_order_field = "start_ts"
 
+    # Formatted end time
     def formatted_end(self, obj):
         return obj.end_ts.strftime('%b %d, %Y %I:%M %p')
     formatted_end.short_description = "End"
     formatted_end.admin_order_field = "end_ts"
 
+    # Duration in human-readable format
     def duration(self, obj):
         delta = obj.end_ts - obj.start_ts
         hours = delta.total_seconds() / 3600
@@ -109,6 +116,7 @@ class BookingAdmin(admin.ModelAdmin):
             return f"{days:.1f} days"
     duration.short_description = "Duration"
 
+    # Detailed duration display for edit page
     def duration_display(self, obj):
         if obj.pk:
             delta = obj.end_ts - obj.start_ts
@@ -120,6 +128,7 @@ class BookingAdmin(admin.ModelAdmin):
         return "-"
     duration_display.short_description = "Duration"
 
+    # Show effective hourly rate
     def hourly_rate_display(self, obj):
         if obj.pk:
             delta = obj.end_ts - obj.start_ts
@@ -130,9 +139,10 @@ class BookingAdmin(admin.ModelAdmin):
         return "-"
     hourly_rate_display.short_description = "Effective Hourly Rate"
 
+    # Display status with colored badge
     def status_badge(self, obj):
         colors = {
-            'requested': '#ffc107',   # yellow/warning
+            'requested': '#ffc107',   # yellow
             'confirmed': '#007bff',   # blue
             'completed': '#28a745',   # green
             'canceled': '#dc3545'     # red
@@ -146,6 +156,7 @@ class BookingAdmin(admin.ModelAdmin):
     status_badge.short_description = "Status"
     status_badge.admin_order_field = "status"
 
+    # Show if booking is past, active, or upcoming
     def time_status(self, obj):
         now = timezone.now()
         if obj.end_ts < now:
@@ -153,7 +164,7 @@ class BookingAdmin(admin.ModelAdmin):
         elif obj.start_ts <= now <= obj.end_ts:
             return format_html('<span style="color: #ffc107; font-weight: bold;">● Active</span>')
         else:
-            days_until = (obj.start_ts - now).days
+            days_until = (obj.start_ts.date() - now.date()).days
             if days_until == 0:
                 return format_html('<span style="color: #007bff; font-weight: bold;">→ Today</span>')
             elif days_until == 1:
@@ -163,23 +174,30 @@ class BookingAdmin(admin.ModelAdmin):
     time_status.short_description = "Time"
     time_status.admin_order_field = "start_ts"
 
+    # ---------- Admin Actions ----------
+    
+    # Mark selected bookings as confirmed
     def mark_confirmed(self, request, queryset):
         updated = queryset.filter(status='requested').update(status='confirmed')
         self.message_user(request, f"{updated} booking(s) marked as confirmed.")
     mark_confirmed.short_description = "Mark selected bookings as CONFIRMED"
 
+    # Mark selected bookings as completed
     def mark_completed(self, request, queryset):
         updated = queryset.filter(status='confirmed').update(status='completed')
         self.message_user(request, f"{updated} booking(s) marked as completed.")
     mark_completed.short_description = "Mark selected bookings as COMPLETED"
 
+    # Mark selected bookings as canceled
     def mark_canceled(self, request, queryset):
         updated = queryset.exclude(status__in=['completed', 'canceled']).update(status='canceled')
         self.message_user(request, f"{updated} booking(s) marked as canceled.")
     mark_canceled.short_description = "Mark selected bookings as CANCELED"
 
+    # Optimize queryset for performance (reduce DB queries)
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.select_related('owner', 'owner__user', 'sitter', 'sitter__user')
 
+    # Pagination
     list_per_page = 25

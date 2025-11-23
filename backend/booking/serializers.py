@@ -7,18 +7,24 @@ from availability.models import AvailabilitySlot
 
 
 class BookingSerializer(serializers.ModelSerializer):
+    # Read-only fields for owner and sitter IDs
     owner_id = serializers.IntegerField(source="owner.id", read_only=True)
     sitter_id = serializers.IntegerField(source="sitter.id", read_only=True)
+
+    # Write-only sitter selection
     sitter = serializers.PrimaryKeyRelatedField(
         queryset=SitterProfile.objects.all(),
         write_only=True
     )
-    # NEW: Accept list of pet IDs for write, return pet details for read
+
+    # Write-only pet IDs for assignment
     pets = serializers.PrimaryKeyRelatedField(
         queryset=Pet.objects.all(),
         many=True,
         write_only=True
     )
+
+    # Read-only pet info for display
     pet_ids = serializers.SerializerMethodField(read_only=True)
     pet_details = serializers.SerializerMethodField(read_only=True)
 
@@ -29,9 +35,9 @@ class BookingSerializer(serializers.ModelSerializer):
             "owner_id",
             "sitter_id",
             "sitter",
-            "pets",  # Write only
-            "pet_ids",  # Read only - just IDs
-            "pet_details",  # Read only - full pet info
+            "pets",       # Write only
+            "pet_ids",    # Read only - just IDs
+            "pet_details",# Read only - full pet info
             "service_type",
             "start_ts",
             "end_ts",
@@ -42,12 +48,13 @@ class BookingSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ("id", "created_at", "updated_at", "pet_ids", "pet_details")
 
+    # Methods to retrieve pet info
     def get_pet_ids(self, obj):
-        """Return list of pet IDs"""
+        # Return list of pet IDs
         return [pet.id for pet in obj.pets.all()]
     
     def get_pet_details(self, obj):
-        """Return list of pet details"""
+        # Return detailed info for each pet
         return [
             {
                 "id": pet.id,
@@ -58,8 +65,8 @@ class BookingSerializer(serializers.ModelSerializer):
             for pet in obj.pets.all()
         ]
 
+    # Validate pets belong to the booking owner
     def validate_pets(self, pets):
-        """Validate that pets belong to the owner"""
         user = self.context["request"].user
         try:
             owner_profile = user.owner_profile
@@ -69,13 +76,13 @@ class BookingSerializer(serializers.ModelSerializer):
         if not pets:
             raise ValidationError("At least one pet is required for booking.")
         
-        # Check all pets belong to this owner
         for pet in pets:
             if pet.owner != owner_profile:
                 raise ValidationError(f"Pet '{pet.name}' does not belong to you.")
         
         return pets
 
+    # Validate booking times and sitter availability
     def validate(self, attrs):
         sitter = attrs.get("sitter")
         start = attrs.get("start_ts")
@@ -86,6 +93,7 @@ class BookingSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("End time must be after start time.")
 
             if sitter:
+                # Check for blocked or booked slots
                 blocked_or_booked_slots = AvailabilitySlot.objects.filter(
                     sitter=sitter,
                     status__in=['blocked', 'booked'],
@@ -97,6 +105,7 @@ class BookingSerializer(serializers.ModelSerializer):
                         "Sitter has blocked time or existing bookings during the requested period."
                     )
 
+                # Check for open slots covering the booking period
                 open_slots = AvailabilitySlot.objects.filter(
                     sitter=sitter,
                     status='open',
@@ -117,6 +126,7 @@ class BookingSerializer(serializers.ModelSerializer):
                         "Sitter's available time slots don't fully cover the requested booking period."
                     )
 
+                # Check overlapping bookings
                 overlapping = Booking.objects.filter(
                     sitter=sitter,
                     status__in=["requested", "confirmed"],
@@ -133,6 +143,7 @@ class BookingSerializer(serializers.ModelSerializer):
 
         return attrs
 
+    # Create booking and assign pets
     def create(self, validated_data):
         user = self.context["request"].user
         try:
@@ -141,18 +152,15 @@ class BookingSerializer(serializers.ModelSerializer):
             raise ValidationError("Authenticated user must have an owner profile.")
         
         pets = validated_data.pop('pets')
-        
         validated_data["owner"] = owner_profile
         booking = super().create(validated_data)
-        
         booking.pets.set(pets)
         
         return booking
     
+    # Update booking and handle pets assignment
     def update(self, instance, validated_data):
-        # Handle pets separately if included in update
         pets = validated_data.pop('pets', None)
-        
         booking = super().update(instance, validated_data)
         
         if pets is not None:
