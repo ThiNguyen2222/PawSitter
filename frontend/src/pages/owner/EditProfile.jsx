@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
+import PasswordChangeModal from './PasswordModal';
 import { getMyOwnerProfile, updateOwnerProfile, createPet, updatePet, deletePet } from "../../api/api";
 
 const EditProfile = () => {
@@ -18,6 +19,7 @@ const EditProfile = () => {
   const [pets, setPets] = useState([]);
   const [showPetForm, setShowPetForm] = useState(false);
   const [editingPet, setEditingPet] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -874,21 +876,26 @@ const EditProfile = () => {
                     <div className="p-4 border border-gray-200 rounded-lg">
                       <h3 className="font-semibold text-gray-800 mb-2">Change Password</h3>
                       <p className="text-sm text-gray-600 mb-3">Update your password to keep your account secure</p>
-                      <button className="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition">
+                      <button 
+                        onClick={() => setShowPasswordModal(true)}
+                        className="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition"
+                      >
                         Change Password
-                      </button>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <h3 className="font-semibold text-gray-800 mb-2">Two-Factor Authentication</h3>
-                      <p className="text-sm text-gray-600 mb-3">Add an extra layer of security to your account</p>
-                      <button className="bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-300 transition">
-                        Enable 2FA
                       </button>
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* Add the modal component before the closing tags */}
+              <PasswordChangeModal
+                isOpen={showPasswordModal}
+                onClose={() => setShowPasswordModal(false)}
+                onSuccess={() => {
+                  setSuccessMessage("Password changed successfully!");
+                  setTimeout(() => setSuccessMessage(""), 3000);
+                }}
+              />
             </div>
           </div>
         </div>

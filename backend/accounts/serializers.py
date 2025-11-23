@@ -23,3 +23,34 @@ class RegisterSerializer(serializers.ModelSerializer):
             role=validated_data["role"],
         )
         return user
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(
+        required=True, 
+        write_only=True,
+        validators=[validate_password]
+    )
+
+    def validate_current_password(self, value):
+        """Verify that the current password is correct"""
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect")
+        return value
+
+    def validate(self, attrs):
+        """Ensure new password is different from current password"""
+        if attrs['current_password'] == attrs['new_password']:
+            raise serializers.ValidationError({
+                "new_password": "New password must be different from current password"
+            })
+        return attrs
+
+    def save(self):
+        """Update the user's password"""
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user

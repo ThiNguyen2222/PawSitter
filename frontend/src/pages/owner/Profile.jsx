@@ -147,19 +147,6 @@ const Profile = () => {
                   {profile.notes || "No bio available yet."}
                 </p>
               </div>
-
-              {/* Photos */}
-              <div className="bg-white border border-gray-200 rounded-lg p-5">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-xl font-semibold text-primary">Photos</h3>
-                  <button className="text-blue-600 text-md hover:underline">
-                    See all photos
-                  </button>
-                </div>
-                <div className="w-full h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                  No photos uploaded
-                </div>
-              </div>
             </div>
 
             {/* Right Column - Vertical My Pets */}
