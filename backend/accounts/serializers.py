@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import User
+from profiles.models import OwnerProfile, SitterProfile
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
@@ -22,8 +23,13 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
             role=validated_data["role"],
         )
-        return user
 
+        if user.role == "OWNER":
+            OwnerProfile.objects.create(user=user)
+        elif user.role == "SITTER":
+            SitterProfile.objects.create(user=user)
+
+        return user
 
 class ChangePasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=True, write_only=True)
