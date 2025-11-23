@@ -4,6 +4,47 @@ import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMyOwnerProfile } from "../../api/api";
 
+// Helper to get profile picture URL
+const getProfilePictureUrl = (pictureUrl) => {
+  if (!pictureUrl) {
+    return 'https://ui-avatars.com/api/?name=User&background=random&size=200';
+  }
+  if (pictureUrl.startsWith("http")) {
+    return pictureUrl;
+  }
+  return `http://127.0.0.1:8000${pictureUrl}`;
+};
+
+// Helper to get pet image URL
+const getPetImageUrl = (pet) => {
+  if (!pet?.profile_picture_url) {
+    return 'https://via.placeholder.com/200/D3D3D3/000000?text=Pet';
+  }
+  if (pet.profile_picture_url.startsWith("http")) {
+    return pet.profile_picture_url;
+  }
+  return `http://127.0.0.1:8000${pet.profile_picture_url}`;
+};
+
+// Helper to get banner picture URL or background color
+const getBannerStyle = (bannerUrl) => {
+  if (!bannerUrl) {
+    return { backgroundColor: "#dbeafe" }; // Light blue default
+  }
+  if (bannerUrl.startsWith("http")) {
+    return {
+      backgroundImage: `url(${bannerUrl})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
+  }
+  return {
+    backgroundImage: `url(http://127.0.0.1:8000${bannerUrl})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -39,47 +80,6 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  // Helper to get profile picture URL
-  const getProfilePictureUrl = (pictureUrl) => {
-    if (!pictureUrl) {
-      return getSitterImage(null, 0); // Use local fallback
-    }
-    if (pictureUrl.startsWith("http")) {
-      return pictureUrl;
-    }
-    return `http://127.0.0.1:8000${pictureUrl}`;
-  };
-
-  // Helper to get banner picture URL or background color
-  const getBannerStyle = (bannerUrl) => {
-    if (!bannerUrl) {
-      return { backgroundColor: "#dbeafe" }; // Light blue default
-    }
-    if (bannerUrl.startsWith("http")) {
-      return {
-        backgroundImage: `url(${bannerUrl})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      };
-    }
-    return {
-      backgroundImage: `url(http://127.0.0.1:8000${bannerUrl})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    };
-  };
-
-  // Helper to get pet image URL
-  const getPetImageUrl = (pet) => {
-    if (pet.profile_picture_url) {
-      if (pet.profile_picture_url.startsWith("http")) {
-        return pet.profile_picture_url;
-      }
-      return `http://127.0.0.1:8000${pet.profile_picture_url}`;
-    }
-    return getPetImage(pet.species); // Use local fallback
-  };
-
   if (loading)
     return <div className="text-center py-10 pt-32 text-gray-600">Loading profile...</div>;
   if (error)
@@ -107,7 +107,6 @@ const Profile = () => {
             <div className="flex items-center gap-6 -mt-8 md:-mt-12 w-full md:w-auto justify-between md:justify-start md:mr-auto">
               <img
                 src={getProfilePictureUrl(profile.profile_picture_url)}
-                onError={(e) => (e.target.src = getSitterImage(null, 0))}
                 alt={profile.name || "Pet Owner"}
                 className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-white object-cover bg-gray-100 shadow-lg"
               />
@@ -164,7 +163,6 @@ const Profile = () => {
                     >
                       <img
                         src={getPetImageUrl(pet)}
-                        onError={(e) => (e.target.src = getPetImage("default"))}
                         alt={pet.name}
                         className="w-20 h-20 rounded-lg object-cover bg-gray-100"
                       />
