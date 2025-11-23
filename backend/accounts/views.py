@@ -9,10 +9,8 @@ from .serializers import RegisterSerializer, ChangePasswordSerializer
 
 
 class RegisterView(generics.CreateAPIView):
-    """
-    API endpoint for user registration.
-    Allows anyone to create a new account (OWNER or SITTER).
-    """
+    # API endpoint for user registration
+    # Allows anyone to create a new account (OWNER or SITTER)
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
@@ -21,10 +19,8 @@ class RegisterView(generics.CreateAPIView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
-    """
-    API endpoint for user login.
-    Authenticates user and returns an auth token.
-    """
+    # API endpoint for user login
+    # Authenticates user and returns an auth token
     username = request.data.get('username')
     password = request.data.get('password')
     
@@ -45,20 +41,18 @@ def login_view(request):
             }
         })
     
+    # Invalid credentials
     return Response({'error': 'Invalid credentials'}, status=400)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_password_view(request):
-    """
-    API endpoint for changing user password.
-    Requires authentication. Validates current password before allowing change.
-    """
-    # Pass request in context so serializer can access request.user
+    # API endpoint for changing user password
+    # Requires authentication and validates current password
     serializer = ChangePasswordSerializer(
         data=request.data,
-        context={'request': request}
+        context={'request': request}  # Pass request for access to request.user
     )
     
     if serializer.is_valid():
@@ -68,5 +62,5 @@ def change_password_view(request):
             'message': 'Password changed successfully'
         }, status=200)
     
-    # Return validation errors
+    # Return validation errors if any
     return Response(serializer.errors, status=400)

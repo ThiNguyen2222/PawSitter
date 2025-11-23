@@ -11,9 +11,9 @@ User = get_user_model()
 
 
 class AvailabilitySlotModelTests(TestCase):
-    """Test AvailabilitySlot model"""
-    
+    # Tests for AvailabilitySlot model
     def setUp(self):
+        # Create a sitter user and profile
         self.sitter_user = User.objects.create_user(
             username='testsitter',
             password='testpass123',
@@ -28,8 +28,8 @@ class AvailabilitySlotModelTests(TestCase):
         self.start_time = timezone.now() + timedelta(days=1)
         self.end_time = self.start_time + timedelta(hours=8)
     
+    # Test creating an availability slot
     def test_create_availability_slot(self):
-        """Test creating an availability slot"""
         slot = AvailabilitySlot.objects.create(
             sitter=self.sitter_profile,
             start_ts=self.start_time,
@@ -40,8 +40,8 @@ class AvailabilitySlotModelTests(TestCase):
         self.assertEqual(slot.status, 'open')
         self.assertEqual(str(slot), f"{self.sitter_profile} | {self.start_time} → {self.end_time} (open)")
     
+    # Test that slots are ordered by start_ts
     def test_availability_slot_ordering(self):
-        """Test that slots are ordered by start_ts"""
         slot1 = AvailabilitySlot.objects.create(
             sitter=self.sitter_profile,
             start_ts=self.start_time + timedelta(days=2),
@@ -60,8 +60,7 @@ class AvailabilitySlotModelTests(TestCase):
 
 
 class AvailabilitySlotAPITests(TestCase):
-    """Test AvailabilitySlot API endpoints"""
-    
+    # Tests for AvailabilitySlot API endpoints
     def setUp(self):
         self.client = APIClient()
         
@@ -78,7 +77,7 @@ class AvailabilitySlotAPITests(TestCase):
             home_zip='12345'
         )
         
-        # Create owner user (should not be able to create availability)
+        # Create owner user
         self.owner_user = User.objects.create_user(
             username='testowner',
             password='testpass123',
@@ -88,52 +87,45 @@ class AvailabilitySlotAPITests(TestCase):
         self.start_time = timezone.now() + timedelta(days=1)
         self.end_time = self.start_time + timedelta(hours=8)
     
+    # Test that sitters can create availability slots
     def test_sitter_can_create_availability(self):
-        """Test that sitters can create availability slots"""
         self.client.force_authenticate(user=self.sitter_user)
-        
         data = {
             'start_ts': self.start_time.isoformat(),
             'end_ts': self.end_time.isoformat(),
             'status': 'open'
         }
-        
         response = self.client.post('/api/availability/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(AvailabilitySlot.objects.count(), 1)
-        
         slot = AvailabilitySlot.objects.first()
         self.assertEqual(slot.sitter, self.sitter_profile)
         self.assertEqual(slot.status, 'open')
     
+    # Test that owners cannot create availability
     def test_owner_cannot_create_availability(self):
-        """Test that owners cannot create availability slots"""
         self.client.force_authenticate(user=self.owner_user)
-        
         data = {
             'start_ts': self.start_time.isoformat(),
             'end_ts': self.end_time.isoformat(),
             'status': 'open'
         }
-        
         response = self.client.post('/api/availability/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(AvailabilitySlot.objects.count(), 0)
     
+    # Test unauthenticated users cannot create availability
     def test_unauthenticated_cannot_create_availability(self):
-        """Test that unauthenticated users cannot create availability"""
         data = {
             'start_ts': self.start_time.isoformat(),
             'end_ts': self.end_time.isoformat(),
             'status': 'open'
         }
-        
         response = self.client.post('/api/availability/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     
+    # Test that sitters only see their own availability slots
     def test_sitter_can_only_see_own_availability(self):
-        """Test that sitters only see their own availability slots"""
-        # Create another sitter
         other_sitter_user = User.objects.create_user(
             username='othersitter',
             password='testpass123',
@@ -145,8 +137,6 @@ class AvailabilitySlotAPITests(TestCase):
             rate_hourly=30.00,
             home_zip='54321'
         )
-        
-        # Create slots for both sitters
         AvailabilitySlot.objects.create(
             sitter=self.sitter_profile,
             start_ts=self.start_time,
@@ -159,33 +149,26 @@ class AvailabilitySlotAPITests(TestCase):
             end_ts=self.end_time,
             status='open'
         )
-        
-        # Authenticate as first sitter
         self.client.force_authenticate(user=self.sitter_user)
-        
         response = self.client.get('/api/availability/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['sitter_id'], self.sitter_profile.id)
     
+    # Test that end time must be after start time
     def test_validate_end_time_after_start_time(self):
-        """Test that end time must be after start time"""
         self.client.force_authenticate(user=self.sitter_user)
-        
         data = {
             'start_ts': self.end_time.isoformat(),
             'end_ts': self.start_time.isoformat(),
             'status': 'open'
         }
-        
         response = self.client.post('/api/availability/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     
+    # Test that overlapping slots are not allowed
     def test_validate_no_overlapping_slots(self):
-        """Test that overlapping slots are not allowed"""
         self.client.force_authenticate(user=self.sitter_user)
-        
-        # Create first slot
         data1 = {
             'start_ts': self.start_time.isoformat(),
             'end_ts': self.end_time.isoformat(),
@@ -194,7 +177,6 @@ class AvailabilitySlotAPITests(TestCase):
         response1 = self.client.post('/api/availability/', data1, format='json')
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
         
-        # Try to create overlapping slot
         data2 = {
             'start_ts': (self.start_time + timedelta(hours=2)).isoformat(),
             'end_ts': (self.end_time + timedelta(hours=2)).isoformat(),
@@ -203,32 +185,28 @@ class AvailabilitySlotAPITests(TestCase):
         response2 = self.client.post('/api/availability/', data2, format='json')
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
     
+    # Test that sitter can update their own slot
     def test_sitter_can_update_own_slot(self):
-        """Test that sitter can update their own availability slot"""
         slot = AvailabilitySlot.objects.create(
             sitter=self.sitter_profile,
             start_ts=self.start_time,
             end_ts=self.end_time,
             status='open'
         )
-        
         self.client.force_authenticate(user=self.sitter_user)
-        
         new_end_time = self.end_time + timedelta(hours=2)
         data = {
             'start_ts': self.start_time.isoformat(),
             'end_ts': new_end_time.isoformat(),
             'status': 'open'
         }
-        
         response = self.client.put(f'/api/availability/{slot.id}/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
         slot.refresh_from_db()
         self.assertEqual(slot.end_ts.replace(microsecond=0), new_end_time.replace(microsecond=0))
     
+    # Test that sitter cannot update another sitter's slot
     def test_sitter_cannot_update_other_sitters_slot(self):
-        """Test that sitter cannot update another sitter's slot"""
         other_sitter_user = User.objects.create_user(
             username='othersitter',
             password='testpass123',
@@ -240,52 +218,44 @@ class AvailabilitySlotAPITests(TestCase):
             rate_hourly=30.00,
             home_zip='54321'
         )
-        
         slot = AvailabilitySlot.objects.create(
             sitter=other_sitter_profile,
             start_ts=self.start_time,
             end_ts=self.end_time,
             status='open'
         )
-        
         self.client.force_authenticate(user=self.sitter_user)
-        
         data = {
             'start_ts': self.start_time.isoformat(),
             'end_ts': (self.end_time + timedelta(hours=2)).isoformat(),
             'status': 'open'
         }
-        
         response = self.client.put(f'/api/availability/{slot.id}/', data, format='json')
         # Should get 404 because queryset filters to own slots only
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
+    # Test that sitter can delete their own slot
     def test_sitter_can_delete_own_slot(self):
-        """Test that sitter can delete their own slot"""
         slot = AvailabilitySlot.objects.create(
             sitter=self.sitter_profile,
             start_ts=self.start_time,
             end_ts=self.end_time,
             status='open'
         )
-        
         self.client.force_authenticate(user=self.sitter_user)
-        
         response = self.client.delete(f'/api/availability/{slot.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(AvailabilitySlot.objects.count(), 0)
     
+    # Test that owners see no availability
     def test_owner_sees_no_availability(self):
-        """Test that owners get empty queryset"""
         AvailabilitySlot.objects.create(
             sitter=self.sitter_profile,
             start_ts=self.start_time,
             end_ts=self.end_time,
             status='open'
         )
-        
         self.client.force_authenticate(user=self.owner_user)
-        
         response = self.client.get('/api/availability/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)

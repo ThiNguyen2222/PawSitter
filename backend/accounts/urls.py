@@ -12,6 +12,6 @@ urlpatterns = [
     # Change password endpoint - requires authentication
     path("change-password/", change_password_view, name="change-password"),
     
-    # JWT token refresh endpoint (if you're using JWT)
+    # JWT token refresh endpoint
     path("refresh/", TokenRefreshView.as_view(), name="refresh"),
 ]

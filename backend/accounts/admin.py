@@ -7,11 +7,19 @@ User = get_user_model()
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
+    # Fields to display in the user list
     list_display = ("username", "email", "role", "is_verified", "is_active", "is_staff")
+    
+    # Filters available in the admin sidebar
     list_filter  = ("role", "is_verified", "is_staff", "is_superuser", "is_active", "groups")
+    
+    # Fields to search by in admin
     search_fields = ("username", "email", "first_name", "last_name")
+    
+    # Default ordering of users
     ordering = ("username",)
 
+    # Organize fields in user detail/edit view
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (_("Personal info"), {"fields": ("first_name", "last_name", "email")}),
@@ -20,6 +28,7 @@ class UserAdmin(DjangoUserAdmin):
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
 
+    # Fields shown when adding a new user in admin
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
