@@ -5,7 +5,6 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from .models import MessageThread, Message
-""" These cover: listing & creating threads, permissions, listing & sending messages, and model behaviors. """
 User = get_user_model()
 
 class MessagingAPITests(TestCase):
@@ -22,11 +21,7 @@ class MessagingAPITests(TestCase):
         self.client.force_authenticate(user=user)
 
     # ---------------------------------------------------------------------
-    """
-    Purpose: 
-        Verify that the "GET /api/messaging/threads/" endpoint only returns
-        message threads that the authenticated user participates in. 
-    """
+
     def test_threads_list_returns_only_participant_threads(self):
        # Create an extra thread that does NOT involve user_a
         MessageThread.objects.create(user_a=self.user_b, user_b=self.user_c)

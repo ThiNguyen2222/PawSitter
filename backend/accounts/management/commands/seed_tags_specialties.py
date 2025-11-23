@@ -2,11 +2,11 @@
 from django.core.management.base import BaseCommand
 from profiles.models import Tag, Specialty
 
-
 class Command(BaseCommand):
     help = 'Seeds tags and specialties for production use'
 
     def add_arguments(self, parser):
+        # Optional flag to clear existing tags and specialties
         parser.add_argument(
             '--clear',
             action='store_true',
@@ -14,18 +14,22 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        # Clear existing records if requested
         if options['clear']:
             self.stdout.write('Clearing existing tags and specialties...')
             Tag.objects.all().delete()
             Specialty.objects.all().delete()
             self.stdout.write(self.style.WARNING('Cleared!'))
 
+        # Seed tags
         self.stdout.write('Seeding tags...')
         tags = self.create_tags()
         
+        # Seed specialties
         self.stdout.write('Seeding specialties...')
         specialties = self.create_specialties()
         
+        # Summary
         self.stdout.write(
             self.style.SUCCESS(
                 f'Successfully created {len(tags)} tags and {len(specialties)} specialties'
@@ -33,7 +37,7 @@ class Command(BaseCommand):
         )
 
     def create_tags(self):
-        """Create or get all tags"""
+        # Create or get all tags
         tag_names = [
             # Experience & Certifications
             'Experienced',
@@ -41,13 +45,13 @@ class Command(BaseCommand):
             'First Aid Certified',
             'Insured & Bonded',
             'Background Checked',
-            
+
             # Specializations
             'Dog Trainer',
             'Cat Specialist',
             'Bird Expert',
             'Exotic Pet Handler',
-            
+
             # Services
             'Flexible Schedule',
             'House Sitting',
@@ -55,7 +59,7 @@ class Command(BaseCommand):
             'Daily Walks',
             'Pet Grooming',
             'Medication Administration',
-            
+
             # Pet Types
             'Large Dogs OK',
             'Small Dogs Only',
@@ -63,7 +67,7 @@ class Command(BaseCommand):
             'Senior Pets',
             'Special Needs',
             'Multi-Pet Household',
-            
+
             # Additional
             'Pet Transportation',
             'Emergency Available',
@@ -83,35 +87,35 @@ class Command(BaseCommand):
         return tags
 
     def create_specialties(self):
-        """Create or get all specialties"""
+        # Create or get all specialties
         specialty_names = [
             # Common Pets
             'Dogs',
             'Cats',
             'Birds',
-            
+
             # Small Mammals
             'Rabbits',
             'Guinea Pigs',
             'Hamsters',
             'Ferrets',
             'Chinchillas',
-            
+
             # Reptiles & Amphibians
             'Reptiles',
             'Turtles',
             'Snakes',
             'Lizards',
-            
+
             # Aquatic
             'Fish',
             'Aquatic Animals',
-            
+
             # Large/Farm
             'Horses',
             'Farm Animals',
             'Livestock',
-            
+
             # Exotic
             'Exotic Pets',
             'Pocket Pets',

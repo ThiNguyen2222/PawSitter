@@ -2,27 +2,21 @@ from django.urls import path
 from .views import (
     ThreadListCreateView, 
     ThreadMessagesListCreateView,
-    mark_thread_as_read  # NEW
+    mark_thread_as_read  # endpoint to mark all messages in a thread as read
 )
 
 urlpatterns = [
-    # GET /api/messaging/threads  | POST /api/messaging/threads
+    # List all threads for the authenticated user or create a new thread
+    # GET  /api/messaging/threads/
+    # POST /api/messaging/threads/
     path("threads/", ThreadListCreateView.as_view(), name="thread-list-create"),
 
-    # GET /api/messaging/threads/<id>/messages  | POST /api/messaging/threads/<id>/messages
+    # List messages in a specific thread or send a message to the thread
+    # GET  /api/messaging/threads/<id>/messages/
+    # POST /api/messaging/threads/<id>/messages/
     path("threads/<int:pk>/messages/", ThreadMessagesListCreateView.as_view(), name="thread-messages"),
     
-    # NEW: POST /api/messaging/threads/<id>/mark-read
+    # Mark all unread messages in a thread as read for the current user
+    # POST /api/messaging/threads/<id>/mark-read/
     path("threads/<int:pk>/mark-read/", mark_thread_as_read, name="thread-mark-read"),
 ]
-
-"""
-with nested router: just cleaner, auto-generated nested routes
-    router = DefaultRouter()
-    router.register(r"threads", ThreadViewSet, basename="thread")
-
-    threads_router = NestedDefaultRouter(router, r"threads", lookup="thread")
-    threads_router.register(r"messages", MessageViewSet, basename="thread-messages")
-
-    urlpatterns = router.urls + threads_router.urls
-"""
