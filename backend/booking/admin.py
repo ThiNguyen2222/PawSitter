@@ -1,3 +1,11 @@
+from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils import timezone
+from decimal import Decimal
+
+from .models import Booking
+
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     # Columns displayed in the list view
