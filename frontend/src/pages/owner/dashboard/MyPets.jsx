@@ -1,6 +1,20 @@
 import React, { useEffect, useState } from "react";
 import API from "../../../api/api";
 
+// Fallback image function
+const getPetImage = (species) => {
+  switch (species?.toLowerCase()) {
+    case "dog":
+      return "/images/dog.png";
+    case "cat":
+      return "/images/cat.png";
+    case "rabbit":
+      return "/images/rabbit.png";
+    default:
+      return "/images/default.png"; // fallback image
+  }
+};
+
 const PetsSection = () => {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,15 +36,15 @@ const PetsSection = () => {
   }, []);
 
   const getPetImageUrl = (pet) => {
-    // If profile_picture_url exists and is a full URL, use it
+    if (!pet) return getPetImage("default"); // fallback if pet object is missing
+
     if (pet.profile_picture_url) {
       if (pet.profile_picture_url.startsWith("http")) {
         return pet.profile_picture_url;
       }
-      // If it's a relative path from backend, prepend domain
       return `http://127.0.0.1:8000${pet.profile_picture_url}`;
     }
-    // Otherwise use local fallback based on species
+
     return getPetImage(pet.species);
   };
 
@@ -47,7 +61,7 @@ const PetsSection = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {pets.map((pet) => (
               <div
-                key={pet.id}
+                key={pet.id || Math.random()} // fallback key
                 className="bg-white rounded-2xl shadow-md overflow-hidden transition-shadow duration-300 hover:shadow-xl"
               >
                 <img
