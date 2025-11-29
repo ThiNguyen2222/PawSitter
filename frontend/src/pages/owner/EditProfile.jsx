@@ -69,6 +69,7 @@ const EditProfile = () => {
         setFormData({
           name: data.name || "",
           email: data.email || user.email || "",
+          username: data.username || "",
           phone: data.phone || "",
           notes: data.notes || "",
         });
@@ -596,7 +597,7 @@ const EditProfile = () => {
                         />
                       </div>
 
-                      {/* Username - Disabled (derived from email) */}
+                      {/* Username */}
                       <div>
                         <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
                           Username
@@ -604,7 +605,7 @@ const EditProfile = () => {
                         <input
                           type="text"
                           id="username"
-                          value={formData.email.split("@")[0] || ""}
+                          value={formData.username}
                           disabled
                           className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
                         />
