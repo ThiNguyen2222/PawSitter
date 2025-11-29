@@ -6,6 +6,7 @@ from booking.models import Booking
 from availability.models import AvailabilitySlot
 from review.models import Review
 from datetime import timedelta
+from django.utils import timezone
 from decimal import Decimal
 import random
 
