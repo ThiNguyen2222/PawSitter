@@ -5,6 +5,8 @@ import { ArrowLeft } from "lucide-react";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import PasswordChangeModal from './PasswordModal';
 import { getMyOwnerProfile, updateOwnerProfile, createPet, updatePet, deletePet } from "../../api/api";
+import defaultPetImg from "../../assets/logo.png";                 // pets fallback
+import defaultProfileImg from "../../assets/dummy/profile0.png";   // owner fallback
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -83,7 +85,7 @@ const EditProfile = () => {
             : `http://127.0.0.1:8000${data.profile_picture_url}`;
           setProfilePicturePreview(picUrl);
         } else {
-          setProfilePicturePreview(getSitterImage(null, 0));
+          setProfilePicturePreview(defaultProfileImg);
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -177,7 +179,7 @@ const EditProfile = () => {
   // Remove profile picture
   const handleRemoveProfilePicture = () => {
     setProfilePicture(null);
-    setProfilePicturePreview(getSitterImage(null, 0));
+    setProfilePicturePreview(defaultProfileImg);
   };
 
   // Reset pet form
@@ -219,7 +221,7 @@ const EditProfile = () => {
         : `http://127.0.0.1:8000${pet.profile_picture_url}`;
       setPetProfilePicturePreview(picUrl);
     } else {
-      setPetProfilePicturePreview(getPetImage(pet.species));
+      setPetProfilePicturePreview(defaultPetImg);
     }
     
     setShowPetForm(true);
@@ -407,7 +409,7 @@ const EditProfile = () => {
       }
       return `http://127.0.0.1:8000${pet.profile_picture_url}`;
     }
-    return getPetImage(pet.species);
+    return defaultPetImg;
   };
 
   if (loading) {
@@ -831,7 +833,7 @@ const EditProfile = () => {
                           <div className="flex gap-4">
                             <img
                               src={getPetImageUrl(pet)}
-                              onError={(e) => (e.target.src = getPetImage("default"))}
+                              onError={(e) => (e.target.src = defaultPetImg)}
                               alt={pet.name}
                               className="w-20 h-20 rounded-lg object-cover bg-gray-100"
                             />
