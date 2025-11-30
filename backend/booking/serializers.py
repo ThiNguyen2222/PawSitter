@@ -1,12 +1,30 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q
+from django.contrib.auth import get_user_model
+
 from .models import Booking
-from profiles.models import SitterProfile, Pet
+from profiles.models import SitterProfile, Pet, OwnerProfile
 from availability.models import AvailabilitySlot
 
+User = get_user_model()
+
+class OwnerUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "username"]
+
+
+class OwnerProfileSerializer(serializers.ModelSerializer):
+    user = OwnerUserSerializer(read_only=True)
+
+    class Meta:
+        model = OwnerProfile
+        fields = ["id", "user"]
 
 class BookingSerializer(serializers.ModelSerializer):
+    owner = OwnerProfileSerializer(read_only=True)
+
     # Read-only fields for owner and sitter IDs
     owner_id = serializers.IntegerField(source="owner.id", read_only=True)
     sitter_id = serializers.IntegerField(source="sitter.id", read_only=True)
@@ -32,6 +50,7 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = [
             "id",
+            "owner",
             "owner_id",
             "sitter_id",
             "sitter",
@@ -46,7 +65,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ("id", "created_at", "updated_at", "pet_ids", "pet_details")
+        read_only_fields = ("id", "created_at", "updated_at", "pet_ids", "pet_details", "owner")
 
     # Methods to retrieve pet info
     def get_pet_ids(self, obj):
