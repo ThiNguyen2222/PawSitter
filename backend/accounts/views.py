@@ -5,8 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from .models import User
-from .serializers import RegisterSerializer, ChangePasswordSerializer
-
+from .serializers import RegisterSerializer, ChangePasswordSerializer, ResetPasswordByEmailSerializer
 
 class RegisterView(generics.CreateAPIView):
     # API endpoint for user registration
@@ -63,4 +62,24 @@ def change_password_view(request):
         }, status=200)
     
     # Return validation errors if any
+    return Response(serializer.errors, status=400)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password_by_email_view(request):
+    # API endpoint for resetting password with just email (no token needed)
+    serializer = ResetPasswordByEmailSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        new_password = serializer.validated_data['new_password']
+        
+        user = User.objects.get(email=email)
+        user.set_password(new_password)
+        user.save()
+        
+        return Response({
+            'message': 'Password has been reset successfully'
+        }, status=200)
+    
     return Response(serializer.errors, status=400)

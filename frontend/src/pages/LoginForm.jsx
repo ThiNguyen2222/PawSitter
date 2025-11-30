@@ -122,9 +122,9 @@ function LoginForm({ onLogin }) {
 
             {/* Forgot Password */}
             <div className="text-right">
-              <a href="#" className="text-secondary hover:underline">
+              <Link to="/forgot-password" className="text-secondary hover:underline">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             {/* Submit Button */}

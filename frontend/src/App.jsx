@@ -13,6 +13,7 @@ import LoginNavbar from "./components/LoginNavbar";
 import Home from "./pages/Landing";
 import LoginForm from "./pages/LoginForm";
 import CreateAccount from "./pages/CreateAccount";
+import ForgotPasswordForm from "./pages/ForgotPasswordForm";
 
 import OwnerDashboard from "./pages/owner/dashboard/OwnerDashboard";
 import OwnerBooking from "./pages/owner/booking/Booking";
@@ -83,7 +84,7 @@ const AppContent = () => {
   const showDashboardNav =
     pathname.startsWith("/owner") || pathname.startsWith("/sitter");
 
-  const hideNavbar = ["/login", "/create-account"].includes(pathname);
+  const hideNavbar = ["/login", "/create-account", "/forgot-password"].includes(pathname);
 
   const Protected = (element) =>
     isAuthenticated ? element : <Navigate to="/login" replace />;
@@ -106,6 +107,7 @@ const AppContent = () => {
           }
         />
         <Route path="/create-account" element={<CreateAccount />} />
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
 
         {/* Protected Routes to owner/... */}
         <Route path="/owner/booking" element={Protected(<OwnerBooking />)} />

@@ -41,6 +41,15 @@ export const loginUser = async (credentials) => {
   return res.data;
 };
 
+// ===== Password Reset (No Email) =====
+export const resetPasswordByEmail = async (email, newPassword) => {
+  const res = await API.post("accounts/reset-password/", {
+    email,
+    new_password: newPassword,
+  });
+  return res.data;
+};
+
 // ===== Sitters =====
 export const getSitters = async (queryParams = {}) => {
   const res = await API.get("profiles/sitters/", { params: queryParams });
