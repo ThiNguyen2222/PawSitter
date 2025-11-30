@@ -1,8 +1,10 @@
 // owner/booking/BookingsTable.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getSitterProfile } from "../../../api/api";
 
 const BookingsTable = ({ bookings }) => {
+  const navigate = useNavigate();
   const [sitterNames, setSitterNames] = useState({});
 
   // Fetch sitter names for all bookings
@@ -27,6 +29,11 @@ const BookingsTable = ({ bookings }) => {
       fetchSitterNames();
     }
   }, [bookings]);
+
+  // Handle sitter name click
+  const handleSitterClick = (sitterId) => {
+    navigate(`/sitter/${sitterId}`);
+  };
 
   return (
     <div className="mt-8 bg-white rounded-2xl shadow-lg p-8">
@@ -65,8 +72,17 @@ const BookingsTable = ({ bookings }) => {
                   <td className="py-3 px-4 capitalize text-gray-700">
                     {b.service_type?.replace("_", " ")}
                   </td>
-                  <td className="py-3 px-4 text-gray-700">
-                    {sitterNames[b.sitter_id] || `Loading...`}
+                  <td className="py-3 px-4">
+                    {sitterNames[b.sitter_id] ? (
+                      <button
+                        onClick={() => handleSitterClick(b.sitter_id)}
+                        className="text-primary font-medium hover:text-secondary hover:underline transition-colors cursor-pointer"
+                      >
+                        {sitterNames[b.sitter_id]}
+                      </button>
+                    ) : (
+                      <span className="text-gray-500">Loading...</span>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-gray-700">
                     {new Date(b.start_ts).toLocaleDateString()}

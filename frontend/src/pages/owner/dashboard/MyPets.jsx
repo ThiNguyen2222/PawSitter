@@ -1,24 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../../../api/api";
-
-import dogImg from "../../../assets/dummy/dog1.jpg";
-import catImg from "../../../assets/dummy/cat1.jpg";
-import rabbitImg from "../../../assets/dummy/rabbit.jpg";
-import defaultImg from "../../../assets/dummy/pet-default.png";
-
-// Fallback image function
-const getPetImage = (species) => {
-  switch (species?.toLowerCase()) {
-    case "dog":
-      return dogImg;
-    case "cat":
-      return catImg;
-    case "rabbit":
-      return rabbitImg;
-    default:
-      return defaultImg;
-  }
-};
+import defaultPetImg from "../../../assets/logo.png";
 
 const PetsSection = () => {
   const [pets, setPets] = useState([]);
@@ -40,17 +22,15 @@ const PetsSection = () => {
     fetchPets();
   }, []);
 
+  // Use the exact same logic as in EditProfile.jsx
   const getPetImageUrl = (pet) => {
-    if (!pet) return getPetImage("default");
-
     if (pet.profile_picture_url) {
       if (pet.profile_picture_url.startsWith("http")) {
         return pet.profile_picture_url;
       }
       return `http://127.0.0.1:8000${pet.profile_picture_url}`;
     }
-
-    return getPetImage(pet.species);
+    return defaultPetImg;
   };
 
   return (
@@ -74,10 +54,9 @@ const PetsSection = () => {
                   alt={pet.name || "Pet"}
                   className="w-full h-52 object-cover"
                   onError={(e) => {
-                    // Prevent infinite loop
                     if (!e.target.dataset.fallback) {
                       e.target.dataset.fallback = "true";
-                      e.target.src = defaultImg; 
+                      e.target.src = defaultPetImg;
                     }
                   }}
                 />
@@ -95,6 +74,7 @@ const PetsSection = () => {
                   <div className="mt-4 space-y-1 text-gray-700 text-sm">
                     <p>❤️ {pet.notes || "Loves belly rubs and walks"}</p>
                     <p>🐾 {pet.species || "Unknown species"} – {pet.breed || "Unknown breed"}</p>
+                    {pet.age && <p>🎂 {pet.age} years old</p>}
                   </div>
                 </div>
               </div>

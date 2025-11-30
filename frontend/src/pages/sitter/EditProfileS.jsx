@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import PasswordChangeModal from '../owner/PasswordModal';
 import { getMySitterProfile, updateSitterProfile } from "../../api/api";
+import defaultProfileImg from "../../assets/dummy/profile0.png";
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const EditProfile = () => {
   });
 
   const [profilePicture, setProfilePicture] = useState(null);
-  const [profilePicturePreview, setProfilePicturePreview] = useState("");
+  const [profilePicturePreview, setProfilePicturePreview] = useState(defaultProfileImg);
   const [bannerPicture, setBannerPicture] = useState(null);
 
   // Handle responsive menu
@@ -69,7 +70,7 @@ const EditProfile = () => {
             : `http://127.0.0.1:8000${data.profile_picture_url}`;
           setProfilePicturePreview(picUrl);
         } else {
-          setProfilePicturePreview(getSitterImage(null, 0));
+          setProfilePicturePreview(defaultProfileImg);
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -131,7 +132,7 @@ const EditProfile = () => {
   // Remove profile picture
   const handleRemoveProfilePicture = () => {
     setProfilePicture(null);
-    setProfilePicturePreview(getSitterImage(null, 0));
+    setProfilePicturePreview(defaultProfileImg);
   };
 
   // Handle profile form submission

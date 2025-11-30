@@ -179,15 +179,31 @@ const ScheduleDetails = ({ booking, onClose, error, handleUpdateStatus }) => {
       minute: "2-digit",
     });
 
-  // const getOwnerName = () => {
-  //   const u = booking.owner?.user;
-  //   return `${u?.first_name || ""} ${u?.last_name || ""}`.trim() || u?.username;
-  // };
+  const serviceMap = {
+    house_sitting: "House Sitting",
+    pet_boarding: "Pet Boarding",
+    in_home_visit: "In-Home Visit",
+    pet_grooming: "Pet Grooming",
+    pet_walking: "Pet Walking",
+  };
+
+  const getPetsList = () => {
+    if (!booking.pet_details?.length) return "No pets specified";
+    return booking.pet_details.map((pet) => (
+      <div key={pet.id} className="flex items-center gap-2 py-1">
+        <span className="text-gray-700">🐾</span>
+        <span className="font-medium">{pet.name}</span>
+        <span className="text-gray-500 text-sm">
+          ({pet.species}{pet.breed ? `, ${pet.breed}` : ""})
+        </span>
+      </div>
+    ));
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-y-auto max-h-[90vh]">
-        <div className="p-5 border-b flex justify-between">
+        <div className="p-5 border-b flex justify-between items-center">
           <h3 className="text-xl font-bold text-primary">Booking Details</h3>
           <button className="text-gray-400 hover:text-gray-600" onClick={onClose}>
             <X className="w-6 h-6" />
@@ -204,36 +220,75 @@ const ScheduleDetails = ({ booking, onClose, error, handleUpdateStatus }) => {
 
           {/* Owner */}
           <div>
-            <div className="text-sm text-gray-500">Owner</div>
+            <div className="text-sm text-gray-500 mb-1">Owner</div>
             <div className="text-primary font-semibold text-lg">{getOwnerNameFromBooking(booking)}</div>
           </div>
 
-          {/* Dates */}
+          {/* Service Type */}
           <div>
-            <div className="text-sm text-gray-500">Check-in</div>
-            <div>
-              {formatDate(booking.start_ts)} at {formatTime(booking.start_ts)}
-            </div>
-
-            <div className="text-sm text-gray-500 mt-4">Check-out</div>
-            <div>
-              {formatDate(booking.end_ts)} at {formatTime(booking.end_ts)}
+            <div className="text-sm text-gray-500 mb-1">Service Type</div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg font-medium">
+              <span>{serviceMap[booking.service_type] || booking.service_type}</span>
             </div>
           </div>
 
-          {/* Price */}
+          {/* Pets */}
           <div>
-            <div className="text-sm text-gray-500">Payment</div>
-            <div className="text-primary font-bold text-2xl">
+            <div className="text-sm text-gray-500 mb-2">
+              Pet{booking.pet_details?.length !== 1 ? 's' : ''} ({booking.pet_details?.length || 0})
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 space-y-1">
+              {booking.pet_details?.length > 0 ? (
+                getPetsList()
+              ) : (
+                <div className="text-gray-500 text-sm">No pets specified</div>
+              )}
+            </div>
+          </div>
+
+          {/* Dates */}
+          <div className="border-t pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Check-in</div>
+                <div className="font-medium">{formatDate(booking.start_ts)}</div>
+                <div className="text-sm text-gray-600">{formatTime(booking.start_ts)}</div>
+              </div>
+
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Check-out</div>
+                <div className="font-medium">{formatDate(booking.end_ts)}</div>
+                <div className="text-sm text-gray-600">{formatTime(booking.end_ts)}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div>
+            <div className="text-sm text-gray-500 mb-1">Status</div>
+            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+              booking.status === 'completed' ? 'bg-green-100 text-green-700' :
+              booking.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+              booking.status === 'requested' ? 'bg-yellow-100 text-yellow-700' :
+              'bg-gray-100 text-gray-700'
+            }`}>
+              {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+            </span>
+          </div>
+
+          {/* Price */}
+          <div className="border-t pt-4">
+            <div className="text-sm text-gray-500 mb-1">Total Payment</div>
+            <div className="text-primary font-bold text-3xl">
               ${booking.price_quote}
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Action Buttons */}
           {booking.status === "requested" && (
             <button
               onClick={() => handleUpdateStatus(booking.id, "confirmed")}
-              className="w-full bg-secondary text-white py-3 rounded-lg mt-4"
+              className="w-full bg-secondary text-white py-3 rounded-lg font-semibold hover:bg-secondary/90 transition mt-4"
             >
               Accept Booking
             </button>
@@ -242,10 +297,16 @@ const ScheduleDetails = ({ booking, onClose, error, handleUpdateStatus }) => {
           {booking.status === "confirmed" && (
             <button
               onClick={() => handleUpdateStatus(booking.id, "completed")}
-              className="w-full bg-secondary text-white py-3 rounded-lg mt-4"
+              className="w-full bg-secondary text-white py-3 rounded-lg font-semibold hover:bg-secondary/90 transition mt-4"
             >
               Mark as Completed
             </button>
+          )}
+
+          {booking.status === "completed" && (
+            <div className="text-center text-gray-500 text-sm py-2">
+              This booking has been completed
+            </div>
           )}
         </div>
       </div>
