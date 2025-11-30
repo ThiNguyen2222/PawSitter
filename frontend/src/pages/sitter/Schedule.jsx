@@ -2,6 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Calendar, X, Check, Edit2, DollarSign, User } from "lucide-react";
 import { getBookings, confirmBooking, cancelBooking, completeBooking } from "../../api/api";
 
+// helper 
+const getOwnerNameFromBooking = (booking) => {
+  const owner = booking?.owner;
+  if (!owner) return "Unknown Owner";
+
+  // support both { owner: { user: {...} } } and { owner: {...} }
+  const u = owner.user || owner;
+
+  const fullName = `${u.first_name || ""} ${u.last_name || ""}`.trim();
+  return fullName || u.username || "Unknown Owner";
+};
+
 /* BOOKING ROW  */
 const BookingRow = ({ booking, showActions = false, setSelectedBooking, handleUpdateStatus }) => {
   const formatDateRange = (start, end) => {
@@ -18,10 +30,10 @@ const BookingRow = ({ booking, showActions = false, setSelectedBooking, handleUp
     pet_walking: "Pet Walking",
   };
 
-  const getOwnerName = () => {
-    const u = booking.owner?.user;
-    return `${u?.first_name || ""} ${u?.last_name || ""}`.trim() || u?.username || "Unknown Owner";
-  };
+  // const getOwnerName = () => {
+  //   const u = booking.owner?.user;
+  //   return `${u?.first_name || ""} ${u?.last_name || ""}`.trim() || u?.username || "Unknown Owner";
+  // };
 
   const getPetInfo = () => {
     if (!booking.pet_details?.length) return "No pets specified";
@@ -37,7 +49,7 @@ const BookingRow = ({ booking, showActions = false, setSelectedBooking, handleUp
 
       {/* Owner */}
       <div className="flex-1 min-w-0 px-4">
-        <div className="text-primary font-medium truncate">{getOwnerName()}</div>
+        <div className="text-primary font-medium truncate">{getOwnerNameFromBooking(booking)}</div>
         <div className="text-gray-500 text-sm">{serviceMap[booking.service_type]}</div>
       </div>
 
@@ -106,10 +118,10 @@ const BookingCard = ({ booking, setSelectedBooking }) => {
       hour12: true,
     });
 
-  const getOwnerName = () => {
-    const u = booking.owner?.user;
-    return `${u?.first_name || ""} ${u?.last_name || ""}`.trim() || u?.username;
-  };
+  // const getOwnerName = () => {
+  //   const u = booking.owner?.user;
+  //   return `${u?.first_name || ""} ${u?.last_name || ""}`.trim() || u?.username;
+  // };
 
   return (
     <div
@@ -118,7 +130,7 @@ const BookingCard = ({ booking, setSelectedBooking }) => {
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="text-primary font-semibold text-lg mb-1">{getOwnerName()}</div>
+          <div className="text-primary font-semibold text-lg mb-1">{getOwnerNameFromBooking(booking)}</div>
 
           <div className="text-sm text-gray-600 mb-1">
             {formatDate(booking.start_ts)} → {formatDate(booking.end_ts)}
@@ -165,10 +177,10 @@ const ScheduleDetails = ({ booking, onClose, error, handleUpdateStatus }) => {
       minute: "2-digit",
     });
 
-  const getOwnerName = () => {
-    const u = booking.owner?.user;
-    return `${u?.first_name || ""} ${u?.last_name || ""}`.trim() || u?.username;
-  };
+  // const getOwnerName = () => {
+  //   const u = booking.owner?.user;
+  //   return `${u?.first_name || ""} ${u?.last_name || ""}`.trim() || u?.username;
+  // };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -191,7 +203,7 @@ const ScheduleDetails = ({ booking, onClose, error, handleUpdateStatus }) => {
           {/* Owner */}
           <div>
             <div className="text-sm text-gray-500">Owner</div>
-            <div className="text-primary font-semibold text-lg">{getOwnerName()}</div>
+            <div className="text-primary font-semibold text-lg">{getOwnerNameFromBooking(booking)}</div>
           </div>
 
           {/* Dates */}
