@@ -164,6 +164,8 @@ const BookingCard = ({ booking, setSelectedBooking }) => {
 const ScheduleDetails = ({ booking, onClose, error, handleUpdateStatus }) => {
   if (!booking) return null;
 
+  //console.log("Sitter booking in ScheduleDetails:", booking);
+
   const formatDate = (d) =>
     new Date(d).toLocaleDateString("en-US", {
       year: "numeric",
