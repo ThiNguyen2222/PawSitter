@@ -102,14 +102,14 @@ export const testimonials = [
     id: 3,
     message:
       "The sitters at PawSitter were super friendly and professional! My cat Cinnamon warmed up to them fairly quickly :)) The sitters did everything I had asked them to take care of Cinnamon. It was an ease to schedule and communicate to the sitters. Would def recommend!!",
-    name: " - Momo Cinna",  
+    name: " - Cinna Momo",  
     image: Testimony3,
   },
   {
     id: 4,
     message:
       "I wasn't sure at first if there would be sitters for pets like rats but I was glad petsitter had a range of sitters who were comfortable with my Ratatouille. They're very communicative and flexible with their scheduling. They genuinely seem to love their work ❤",
-    name: " - Momo Cinna",  
+    name: " - Momo Mochi",  
     image: Testimony4,
   },
 ];

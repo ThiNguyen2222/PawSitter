@@ -7,7 +7,7 @@ const PetSection = () => {
       {/* Title */}
       <div className="w-full">
         <h2 className="text-3xl text-primary font-bold uppercase mb-6">
-          Choose Your Pet
+          Pets We Take Care Of
         </h2>
 
         {/* Grid */}
