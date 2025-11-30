@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
 import API from "../../../api/api";
 
+import dogImg from "../../../assets/dummy/dog1.jpg";
+import catImg from "../../../assets/dummy/cat1.jpg";
+import rabbitImg from "../../../assets/dummy/rabbit.jpg";
+import defaultImg from "../../../assets/dummy/pet-default.png";
+
 // Fallback image function
 const getPetImage = (species) => {
   switch (species?.toLowerCase()) {
     case "dog":
-      return "/images/dog.png";
+      return dogImg;
     case "cat":
-      return "/images/cat.png";
+      return catImg;
     case "rabbit":
-      return "/images/rabbit.png";
+      return rabbitImg;
     default:
-      return "/images/default.png"; // fallback image
+      return defaultImg;
   }
 };
 
@@ -36,7 +41,7 @@ const PetsSection = () => {
   }, []);
 
   const getPetImageUrl = (pet) => {
-    if (!pet) return getPetImage("default"); // fallback if pet object is missing
+    if (!pet) return getPetImage("default");
 
     if (pet.profile_picture_url) {
       if (pet.profile_picture_url.startsWith("http")) {
@@ -61,14 +66,20 @@ const PetsSection = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {pets.map((pet) => (
               <div
-                key={pet.id || Math.random()} // fallback key
+                key={pet.id || Math.random()}
                 className="bg-white rounded-2xl shadow-md overflow-hidden transition-shadow duration-300 hover:shadow-xl"
               >
                 <img
                   src={getPetImageUrl(pet)}
-                  onError={(e) => (e.target.src = getPetImage("default"))}
                   alt={pet.name || "Pet"}
                   className="w-full h-52 object-cover"
+                  onError={(e) => {
+                    // Prevent infinite loop
+                    if (!e.target.dataset.fallback) {
+                      e.target.dataset.fallback = "true";
+                      e.target.src = defaultImg; 
+                    }
+                  }}
                 />
 
                 <div className="p-5">
