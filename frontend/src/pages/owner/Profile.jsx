@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import { getMyOwnerProfile } from "../../api/api";
+import defaultPetImg from "../../assets/logo.png";
+
 
 // Helper to get profile picture URL
 const getProfilePictureUrl = (pictureUrl) => {
@@ -17,8 +19,10 @@ const getProfilePictureUrl = (pictureUrl) => {
 
 // Helper to get pet image URL
 const getPetImageUrl = (pet) => {
+  if (!pet) return defaultPetImg;
+
   if (!pet?.profile_picture_url) {
-    return 'https://via.placeholder.com/200/D3D3D3/000000?text=Pet';
+    return defaultPetImg;
   }
   if (pet.profile_picture_url.startsWith("http")) {
     return pet.profile_picture_url;
@@ -163,6 +167,7 @@ const Profile = () => {
                     >
                       <img
                         src={getPetImageUrl(pet)}
+                        onError={(e) => (e.currentTarget.src = defaultPetImg)}
                         alt={pet.name}
                         className="w-20 h-20 rounded-lg object-cover bg-gray-100"
                       />

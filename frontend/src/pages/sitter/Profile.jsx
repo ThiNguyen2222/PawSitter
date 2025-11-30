@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import API,{ getMySitterProfile, getTags, getSpecialties, setSitterTaxonomy, getSitterReviews } from "../../api/api";
-// NOTE: utils is under owner/dashboard in your structure
-// import { getSitterImage } from "../owner/dashboard/utils";
+import defaultProfile from "../../assets/dummy/profile0.png";
 import pawIcon from "../../assets/images/paw.png";
 console.log("paw icon path:", pawIcon);
 import { FaPlus, FaStar } from "react-icons/fa";
@@ -283,8 +282,8 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-6 md:px-20">
               <div className="flex items-center gap-6 -mt-8 md:-mt-12 w-full md:w-auto justify-between md:justify-start md:mr-auto">
                 <img
-                  src={profile.profile_picture_url || getSitterImage(null, 0)}
-                  onError={(e) => (e.target.src = getSitterImage(null, 0))}
+                  src={profile.profile_picture_url || defaultProfile}
+                  onError={(e) => (e.target.src = defaultProfile)}
                   alt={profile.name || "Pet Sitter"}
                   className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-white object-cover bg-gray-100 shadow-lg"
                 />
