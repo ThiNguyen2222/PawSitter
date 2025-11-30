@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import RegisterView, login_view, change_password_view
+from .views import RegisterView, login_view, change_password_view, reset_password_by_email_view 
 from rest_framework_simplejwt.views import TokenRefreshView
+
 
 urlpatterns = [
     # User registration endpoint
@@ -11,7 +12,8 @@ urlpatterns = [
     
     # Change password endpoint - requires authentication
     path("change-password/", change_password_view, name="change-password"),
-    
+    path("reset-password/", reset_password_by_email_view, name="reset-password"),
+
     # JWT token refresh endpoint
     path("refresh/", TokenRefreshView.as_view(), name="refresh"),
 ]
