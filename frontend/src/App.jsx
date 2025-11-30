@@ -26,6 +26,7 @@ import SitterProfile from "./pages/sitter/Profile";
 import AvailabilityPage from "./pages/sitter/AvailabilityPage";
 import Schedule from "./pages/sitter/Schedule";
 import EditProfileS from "./pages/sitter/EditProfileS"; 
+import WriteReview from "./pages/owner/WriteReview";
 
 
 import API from "./api/api";
@@ -115,6 +116,7 @@ const AppContent = () => {
         <Route path="/owner/profile" element={Protected(<OwnerProfile />)} />
         <Route path="/owner/edit-profile" element={Protected(<EditProfile />)} />
         <Route path="/owner/find-sitters" element={Protected(<FindSitters />)} />
+        <Route path="/owner/reviews/new" element={Protected(<WriteReview />)} />
         
         {/* Protected Routes to sitter/... */}
         <Route path="/sitter/dashboard" element={Protected(<SitterDashboard />)} />
