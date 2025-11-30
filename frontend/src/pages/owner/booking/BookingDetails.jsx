@@ -1,6 +1,6 @@
 // owner/booking/BookingDetails.jsx
 import React, { useState, useEffect } from "react";
-import { Star, Calendar, Clock, X, AlertCircle, Award, PawPrint } from "lucide-react";
+import { Star, Calendar, Clock, X, AlertCircle, Award, PawPrint, ExternalLink } from "lucide-react";
 import API from "../../../api/api";
 
 const BookingDetails = ({ formData, handleInputChange, sitters }) => {
@@ -317,9 +317,28 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-lg font-semibold text-gray-800">
-                      {sitter.display_name}
-                    </h4>
+                    {/* Name + popout icon */}
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-lg font-semibold text-gray-800">
+                        {sitter.display_name}
+                      </h4>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation(); // don’t trigger select-sitter click
+                          // 🔁 change this path to your actual sitter public profile route
+                          const url = `${window.location.origin}/sitter/${sitter.id}`;
+                          window.open(url, "_blank", "noopener,noreferrer");
+                        }}
+                        className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-primary transition"
+                        title="View sitter profile"
+                      >
+                        <ExternalLink size={16} />
+                      </button>
+                    </div>
+
+                    {/* Rating */}
                     <div className="flex items-center text-yellow-500">
                       <Star size={16} fill="currentColor" />
                       <span className="ml-1 text-sm text-gray-700 font-medium">
@@ -384,6 +403,7 @@ const BookingDetails = ({ formData, handleInputChange, sitters }) => {
                     </span>
                   </div>
 
+                  {/* NEW: View Sitter Profile button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
