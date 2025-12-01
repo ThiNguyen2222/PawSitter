@@ -3,6 +3,43 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ResponsiveMenu from "../../components/ResponsiveMenu";
 import API, { getBookings } from "../../api/api";
+import { FaStar } from "react-icons/fa";
+
+const StarRatingInput = ({ value, onChange }) => {
+  const handleClick = (ratingValue) => {
+    onChange(ratingValue);
+  };
+  return (
+    <div className="flex items-center gap-2">
+      {[1, 2, 3, 4, 5].map((num) => (
+        <button
+          key={num}
+          type="button"
+          onClick={() => handleClick(num)}
+          className="focus:outline-none"
+        >
+          <FaStar
+            size={28}
+            className={
+              num <= value
+                ? "text-orange-500"   // filled stars
+                : "text-gray-300"     // empty stars
+            }
+          />
+        </button>
+      ))}
+
+      {/* Optional text label */}
+      <span className="ml-2 text-gray-700">
+        {value === 5 && "Excellent"}
+        {value === 4 && "Good"}
+        {value === 3 && "Average"}
+        {value === 2 && "Poor"}
+        {value === 1 && "Terrible"}
+      </span>
+    </div>
+  );
+};
 
 const WriteReview = () => {
   const [open, setOpen] = useState(false);
@@ -19,7 +56,7 @@ const WriteReview = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // close mobile menu on resize
+  // close mobile menu on resize.
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) setOpen(false);
@@ -147,12 +184,12 @@ const sitterOptions = React.useMemo(() => {
       </>
     );
   }
-
+  
   return (
     <>
       <ResponsiveMenu open={open} />
 
-      <div className="pt-24 max-w-2xl mx-auto px-4 pb-16">
+      <div className="pt-24 max-w-4xl mx-auto px-4 pb-16">
         <button
           onClick={() => navigate(-1)}
           className="text-sm text-primary mb-4 hover:underline"
@@ -163,9 +200,6 @@ const sitterOptions = React.useMemo(() => {
         <h1 className="text-2xl font-semibold text-primary mb-2">
           Write a Review
         </h1>
-        <p className="text-gray-600 mb-6">
-          You can review sitters for <span className="font-semibold">completed bookings</span>.
-        </p>
 
         {bookings.length === 0 && (
           <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-4 mb-6">
@@ -189,7 +223,7 @@ const sitterOptions = React.useMemo(() => {
           <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-xl shadow-sm p-6">
             {/* Booking selector */}
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-base font-bold text-gray-700 mb-1">
                     Write the review for:
                 </label>
                 <select
@@ -208,26 +242,17 @@ const sitterOptions = React.useMemo(() => {
 
             {/* Rating */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-base font-bold text-gray-700 mb-1">
                 Rating
               </label>
-              <select
-                value={rating}
-                onChange={(e) => setRating(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                {[5, 4, 3, 2, 1].map((r) => (
-                  <option key={r} value={r}>
-                    {r} star{r > 1 ? "s" : ""}
-                  </option>
-                ))}
-              </select>
+
+              <StarRatingInput value={rating} onChange={setRating} />
             </div>
 
             {/* Comment */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Comments
+              <label className="block text-base font-bold text-gray-700 mb-1">
+                Tell us about your experience
               </label>
               <textarea
                 value={comment}
