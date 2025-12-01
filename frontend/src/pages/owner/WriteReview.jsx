@@ -189,13 +189,9 @@ const sitterOptions = React.useMemo(() => {
     <>
       <ResponsiveMenu open={open} />
 
+
       <div className="pt-24 max-w-4xl mx-auto px-4 pb-16">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-sm text-primary mb-4 hover:underline"
-        >
-          ← Back
-        </button>
+        
 
         <h1 className="text-2xl font-semibold text-primary mb-2">
           Write a Review
@@ -229,7 +225,14 @@ const sitterOptions = React.useMemo(() => {
                 <select
                     value={selectedSitterId}
                     onChange={(e) => setSelectedSitterId(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="
+                            w-full 
+                            border border-grey-300 
+                            rounded-lg px-3 py-2 text-sm
+                            focus:border-blue-500 
+                            focus:ring-blue-500 
+                            focus:ring-2
+                        "
                 >
                     <option value="">Select a sitter</option>
                     {sitterOptions.map((s) => (
