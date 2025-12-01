@@ -10,6 +10,7 @@ const WriteReview = () => {
   const navigate = useNavigate();
 
   const sitterId = searchParams.get("sitter"); // from ?sitter=...
+  const [selectedSitterId, setSelectedSitterId] = useState(sitterId || "");
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState([]);
   const [selectedBookingId, setSelectedBookingId] = useState("");
@@ -39,8 +40,7 @@ const WriteReview = () => {
         if (sitterId) {
           list = list.filter(
             (b) =>
-              String(b.sitter?.id || b.sitter_id) === String(sitterId) &&
-              b.status === "completed"
+              String(b.sitter_id) === String(sitterId) && b.status === "completed"
           );
         } else {
           // if no sitter given, still only show completed bookings
@@ -51,8 +51,14 @@ const WriteReview = () => {
 
         // if exactly one booking, pre-select it
         if (list.length === 1) {
-          setSelectedBookingId(list[0].id);
-        }
+            const only = list[0];
+            const onlySitterId = String(only.sitter?.id || only.sitter_id);
+            setSelectedSitterId(onlySitterId);
+            setSelectedBookingId(only.id);
+        } else if (sitterId) {
+            // if sitterId was passed in query, preselect that sitter
+            setSelectedSitterId(sitterId);
+            }
       } catch (err) {
         console.error("Error loading bookings for review:", err);
         setError("Failed to load your completed bookings.");
@@ -63,6 +69,45 @@ const WriteReview = () => {
 
     fetchBookings();
   }, [sitterId]);
+
+  useEffect(() => {
+  if (!selectedSitterId) {
+    setSelectedBookingId("");
+    return;
+  }
+
+  const candidates = bookings.filter(
+    (b) =>
+      String(b.sitter_id) === String(selectedSitterId) &&
+      b.status === "completed"
+  );
+
+  // pick the first matching completed booking
+  if (candidates.length > 0) {
+    setSelectedBookingId(candidates[0].id);
+  } else {
+    setSelectedBookingId("");
+  }
+}, [selectedSitterId, bookings]);
+
+const sitterOptions = React.useMemo(() => {
+  const map = new Map();
+
+  bookings.forEach((b) => {
+    const id = b.sitter_id;
+    if (!id) return;
+
+    const name = b.sitter_name || `Sitter #${id}`;
+
+    if (!map.has(id)) {
+      map.set(id, { id: String(id), name });
+    }
+  });
+
+  return Array.from(map.values());
+}, [bookings]);
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -144,24 +189,22 @@ const WriteReview = () => {
           <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-xl shadow-sm p-6">
             {/* Booking selector */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Booking
-              </label>
-              <select
-                value={selectedBookingId}
-                onChange={(e) => setSelectedBookingId(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="">Select a booking</option>
-                {bookings.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    #{b.id} · {b.service_type?.replace("_", " ")} ·{" "}
-                    {new Date(b.start).toLocaleDateString()} –{" "}
-                    {new Date(b.end).toLocaleDateString()}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Write the review for:
+                </label>
+                <select
+                    value={selectedSitterId}
+                    onChange={(e) => setSelectedSitterId(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                    <option value="">Select a sitter</option>
+                    {sitterOptions.map((s) => (
+                    <option key={s.id} value={s.id}>
+                        {s.name}
+                    </option>
+                    ))}
+                </select>
+                </div>
 
             {/* Rating */}
             <div>
