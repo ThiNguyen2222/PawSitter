@@ -360,9 +360,20 @@ const Profile = () => {
 
             {/* Right Column - Reviews & Ratings */}
             <div className="bg-white border border-gray-200 rounded-lg p-5">
-              <h3 className="text-xl font-semibold text-primary mb-5">
-                Reviews & Ratings
-              </h3>
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-xl font-semibold text-primary mb-5">
+                  Reviews & Ratings
+                </h3>
+
+                {isPublicView && (
+                  <button
+                    onClick={() => navigate(`/owner/reviews/new?sitter=${profile.id}`)}
+                    className="text-sm font-semibold px-3 py-1.5 rounded-lg border border-secondary text-secondary hover:bg-secondary hover:text-white transition"
+                  >
+                    Write a review
+                  </button>
+                )}
+              </div>
 
               {!reviews || reviews.length === 0 ? (
                 <p className="text-gray-600 text-sm">No reviews yet.</p>

@@ -28,6 +28,7 @@ class BookingSerializer(serializers.ModelSerializer):
     # Read-only fields for owner and sitter IDs
     owner_id = serializers.IntegerField(source="owner.id", read_only=True)
     sitter_id = serializers.IntegerField(source="sitter.id", read_only=True)
+    sitter_name = serializers.CharField(source="sitter.display_name", read_only=True)
 
     # Write-only sitter selection
     sitter = serializers.PrimaryKeyRelatedField(
@@ -54,6 +55,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "owner_id",
             "sitter_id",
             "sitter",
+            "sitter_name", # ✅ NEW field
             "pets",       # Write only
             "pet_ids",    # Read only - just IDs
             "pet_details",# Read only - full pet info
@@ -65,7 +67,7 @@ class BookingSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ("id", "created_at", "updated_at", "pet_ids", "pet_details", "owner")
+        read_only_fields = ("id", "created_at", "updated_at", "pet_ids", "pet_details", "owner", "sitter_name")
 
     # Methods to retrieve pet info
     def get_pet_ids(self, obj):
