@@ -87,7 +87,7 @@ export const testimonials = [
   {
     id: 1,
     message:
-      "PawSitter made finding a trustworthy sitter so easy! I love this picture of my cat that the pet sitter took during the house sitting and I'm sure Noog had a blast as well.",
+      "PawSitter made finding a trustworthy sitter so easy! Very friendly, great care of service and very nice. Well managed on everything, highly recommend. I love this picture of Mocha that the pet sitter took during the house sitting and I'm sure it had a blast as well.",
     name: " - Hazel McNut",
     image: Testimony1,
   },
